@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <link href="/css/stats.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
+    <title>SB Stats</title>
+  </head>
+  <body>
+    <!-- Header -->
+    <div id="header">
+      <link href="/css/header.css" rel="stylesheet" type="text/css" />
+      <a id="header-link" href="/">SB Stats</a>
+      <div id="header-search">
+        <input id="header-search-text" placeholder="Username" type="text">
+        <input id="header-search-button" type="button">
+        <span id="header-search-icon">&#9906;</span>
+      </div>
+      <span id="header-version">v0.1</span>
+      <script src="/js/header.js"></script>
+    </div>
+    <!-- End Header -->
+    <div id="loading" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    <div id="content" style="display:none">
+      <div id="stats" class="section">
+        <div class="section-label full"><span id="playerName"></span> - <span id="profileName"></span></div>
+      </div>
+      <div id="skills" class="section">
+        <div class="section-label">Skills</div>
+      </div>
+      <div id="armor" class="section">
+        <div class="section-label full">Armor</div>
+      </div>
+      <div id="wardrobe" class="section">
+        <div class="section-label">Wardrobe</div>
+      </div>
+      <div id="inventories" class="section">
+        <div class="section-label">Inventories</div>
+      </div>
+      <div id="pets" class="section">
+        <div class="section-label">Pets</div>
+      </div>
+    </div>
+    <script src="/js/stats.js"></script>
+  </body>
+</html>

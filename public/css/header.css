@@ -1,0 +1,75 @@
+/*
+Header CSS
+*/
+#header {
+  width: calc(100vw - (100vw - 100%));
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2.5vw;
+  background: var(--dark-blue);
+  z-index: 1;
+}
+#header-link {
+  text-decoration: none;
+  color: var(--white);
+  font-size: 1.5vw;
+  line-height: 2.5vw;
+  position: absolute;
+  left: 0.5vw
+}
+#header-search {
+  position: absolute;
+  left: 40vw;
+  top: 0.5vw;
+  width: 20vw;
+  height: 1.5vw;
+  background: var(--dark-gray);
+  border: 1px solid black;
+  border-radius: 0.5vw;
+}
+#header-search-text {
+  position: absolute;
+  left: 0;
+  width: 20vw;
+  background: inherit;
+  border: none;
+  height: 1.5vw;
+  border-radius: 0.5vw;
+  color: var(--white);
+  font-size: 0.75vw;
+  line-height: 1.5vw;
+  padding-left: 0.75vw
+}
+#header-search-text::placeholder {
+  color: var(--dark-white);
+}
+#header-search-button {
+  position: absolute;
+  right: 0;
+  width: 2vw;
+  height: 1.5vw;
+  border-top-right-radius: 0.5vw;
+  border-bottom-right-radius: 0.5vw;
+  background: inherit;
+  border: none;
+}
+#header-search-icon {
+  position: absolute;
+  right: 0.5vw;
+  color: var(--white);
+  pointer-events: none;
+  width: 1.5vw;
+  height: 1.5vw;
+  text-align: center;
+  font-size: 1.5vw;
+  line-height: 1.5vw;
+  transform: rotate(45deg)
+}
+#header-version {
+  position: absolute;
+  right: 0.5vw;
+  color: var(--dark-white);
+  font-size: 1vw;
+  line-height: 2.5vw;
+}
