@@ -16,6 +16,7 @@ function nbtToJson(base64) {
   return output;
 }
 exports.nbtToJson = nbtToJson;
+
 async function getSkinFace(skinUrl,i) {
   return new Promise(async (res, rej) => {
     let skinImg = await jimp.read(skinUrl);
@@ -47,3 +48,18 @@ async function getSkinFace(skinUrl,i) {
   });
 }
 exports.getSkinFace = getSkinFace;
+
+async function getColoredItem(item,color) {
+  return new Promise(async (res,rej) => {
+    let itemBase = await jimp.read(__dirname + "/public/img/" + item + ".png");
+    let itemOverlay = await jimp.read(__dirname + "/public/img/" + item + "_overlay.png");
+    itemBase.scan(0,0,itemBase.bitmap.width, itemBase.bitmap.height, (x,y,idx) => {
+      itemBase.bitmap.data[idx+0] = color[0] * itemBase.bitmap.data[idx + 0] / 255; //pixel[red] = color[red] * pixel[red] / 255
+      itemBase.bitmap.data[idx+1] = color[1] * itemBase.bitmap.data[idx + 1] / 255;
+      itemBase.bitmap.data[idx+2] = color[2] * itemBase.bitmap.data[idx + 2] / 255;
+    });
+    itemBase.composite(itemOverlay,0,0);
+    res((await itemBase.getBufferAsync(jimp.MIME_PNG)));
+  })
+}
+exports.getColoredItem = getColoredItem;

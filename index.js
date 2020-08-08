@@ -126,6 +126,9 @@ async function getProfileData(uuid, profile) {
                 top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
               }
             }
+            if(mcItem.name.includes("Leather")) {
+              out.icon = `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
+            }
             inventory.contents[j] = out;
           } else {
             inventory.contents[j] = {};
@@ -167,12 +170,16 @@ app.get("/api/exists/:player", async (req,res) => {
     res.send(false);
   }
 })
+
+/* Stats API */
 app.get("/stats/:player", (req,res) => {
   res.sendFile(__dirname + "/public/stats.html");
 })
 app.get("/stats/:player/:profile", (req,res) => {
   res.sendFile(__dirname + "/public/stats.html");
 })
+
+/* Images API */
 app.get("/img/head", async (req,res) => {
   let img = await util.getSkinFace(req.query.skin,req.query.i);
   res.writeHead(200, {
@@ -181,6 +188,18 @@ app.get("/img/head", async (req,res) => {
    });
    res.end(img);
 })
+
+app.get("/img/item", async (req,res) => {
+  let color = JSON.parse(req.query.color).map(x => Number(x))
+  let img = await util.getColoredItem(req.query.item, color);
+  res.writeHead(200, {
+     'Content-Type': 'image/png',
+     'Content-Length': img.length
+   });
+  res.end(img);
+})
+
+/* Normal Routes */
 app.get("/", (req,res) => {
   res.sendFile(__dirname + "/public/index.html");
 })

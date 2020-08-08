@@ -259,8 +259,10 @@ body {
 }
 .inv-view .item-cell .item-count {
   position: absolute;
-  right: 0;
-  bottom: 0;
+  right: 0.5vw;
+  bottom: 0.5vw;
+  font-size: 1.5vw;
+  z-index: 1;
 }
 .inv-view .item-cell .item-icon {
   image-rendering: pixelated;
@@ -269,7 +271,7 @@ body {
 }
 .inv-view .item-cell .item-head {
   position: relative;
-  --size: 3vw;
+  --size: 2.7vw;
   width: var(--size);
   height: var(--size);
   transform-style: preserve-3d;
