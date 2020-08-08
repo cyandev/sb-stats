@@ -54,7 +54,10 @@ async function getInventoryJSON(contents) {
     let item = contents[j];
     try {
       if (item.tag) {
-        var mcItem = minecraftItems.get(item.id + (item.Damage && item.id != 373 ? ":" + item.Damage : ""));
+        var mcItem = minecraftItems.get(item.id + ":" + item.Damage);
+        if (!mcItem) {
+          mcItem = minecraftItems.get(item.id);
+        }
         let out = {
           name: item.tag.display.Name,
           lore: item.tag.display.Lore,
