@@ -193,15 +193,16 @@ body {
   opacity: 0;
   height: 1vw;
 }
-#wardrobe .inv-view::-webkit-scrollbar:hover {
-  opacity: 1;
-}
 #wardrobe .inv-view::-webkit-scrollbar-button {
   display: none;
 }
 #wardrobe .inv-view::-webkit-scrollbar-thumb {
   border-radius: 0.5vw;
   background: var(--dark-white);
+  display: none;
+}
+#wardrobe .inv-view::-webkit-scrollbar-thumb:hover {
+  display: initial;
 }
 #inventories {
   height: auto;
@@ -286,14 +287,14 @@ body {
   image-rendering: pixelated;
 }
 .inv-view .item-cell .item-head .face {
-  transform: translateZ(calc((var(--size) / 2)  - 0.3px));
+  transform: translateZ(calc((var(--size) / 2)  - 0.5px));
 }
 .inv-view .item-cell .item-head .back {
-  transform: translateZ(calc((var(--size) / -2)  - 0.3px));
+  transform: translateZ(calc((var(--size) / -2)  + 0.5px));
 }
 .inv-view .item-cell .item-head .side {
-  transform: rotateY(-90deg) translateZ(calc((var(--size) / 2)  - 0.3px));
+  transform: rotateY(-90deg) translateZ(calc((var(--size) / 2)  - 0.5px));
 }
 .inv-view .item-cell .item-head .top {
-  transform: rotateX(90deg) translateZ(calc((var(--size) / 2) - 0.3px));
+  transform: rotateX(90deg) translateZ(calc((var(--size) / 2) - 0.5px));
 }

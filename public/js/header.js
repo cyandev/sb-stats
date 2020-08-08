@@ -5,7 +5,6 @@ document.getElementById("header-search-button").addEventListener("click", header
 document.getElementById("header-search-text").addEventListener("keyup", (k) => {if (k.key == "Enter") headerSearch()});
 async function headerSearch() {
   let username = document.getElementById("header-search-text").value;
-  alert(username)
   let exists = await (await fetch(window.location.origin + "/api/exists/" + username)).json();
   console.log(exists)
   if (exists) {

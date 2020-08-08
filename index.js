@@ -48,6 +48,46 @@ async function getPlayerDataFirstTime(name) {
   return playerData;
 }
 
+async function getInventoryJSON(contents) {
+  let output = [];
+  for (let j = 0; j < contents.length; j++) {
+    let item = contents[j];
+    try {
+      if (item.tag) {
+        var mcItem = minecraftItems.get(item.id + (item.Damage && item.id != 373 ? ":" + item.Damage : ""));
+        let out = {
+          name: item.tag.display.Name,
+          lore: item.tag.display.Lore,
+          id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
+          icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
+          count: item.Count
+        } 
+        if (item.tag.SkullOwner) {
+          out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
+          out.faces = {
+            face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`,
+            side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=1`,
+            top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
+          }
+        }
+        if(mcItem.name && mcItem.name.includes("Leather") && item.tag.ExtraAttributes.color) {
+          out.icon = `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
+        }
+        if (out.name.includes("Backpack")) {
+          let bpBuffer = Buffer.from(item.tag.ExtraAttributes[item.tag.ExtraAttributes.id.toLowerCase() + "_data"]);
+          let bp = await util.nbtBufToJson(bpBuffer);
+          out.contents = await getInventoryJSON(bp.i);
+        }
+        output[j] = out;
+      } else {
+        output[j] = {};
+      }
+    } catch (err) {
+      console.log("item caused error:", item,mcItem,err)
+    }
+  };
+  return output;
+}
 async function getProfileData(uuid, profile) {
   try {
     var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`)).data.profile;
@@ -105,39 +145,7 @@ async function getProfileData(uuid, profile) {
         clean_name: invCleanNames[i],
         contents: (await util.nbtToJson(profileAPI.members[uuid][label].data)).i
       } //represent the inventory
-      //if (profileData.cute_name == "Lime") console.log(label, i, inventory);
-      for (let j = 0; j < inventory.contents.length; j++) {
-        let item = inventory.contents[j];
-        try {
-          if (item.tag) {
-            var mcItem = minecraftItems.get(item.id + (item.Damage ? ":" + item.Damage : ""));
-            let out = {
-              name: item.tag.display.Name,
-              lore: item.tag.display.Lore,
-              id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
-              icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
-              count: item.Count
-            } 
-            if (item.tag.SkullOwner) {
-              out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
-              out.faces = {
-                face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`,
-                side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=1`,
-                top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
-              }
-            }
-            if(mcItem.name.includes("Leather")) {
-              out.icon = `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
-            }
-            inventory.contents[j] = out;
-          } else {
-            inventory.contents[j] = {};
-          }
-        } catch (err) {
-          console.log("item caused error:", item,mcItem,err)
-        }
-      };
-      //if (profileData.cute_name == "Lime") console.log(label, i, inventory);
+      inventory.contents = await getInventoryJSON(inventory.contents)
       profileData.inventories.push(inventory);
     }
   }
@@ -146,8 +154,6 @@ async function getProfileData(uuid, profile) {
   profileData.pets = profileAPI.members[uuid].pets;
   return profileData
 }
-
-
 
 //server go listen
 

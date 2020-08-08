@@ -2,20 +2,30 @@ let nbt = require("prismarine-nbt");
 let jimp = require("jimp")
 //head images stored as base64 encoded JSON object at item.SkullOwner.Properties.Textures.value
 function nbtToJson(base64) {
-  let resF;
-  let output = new Promise((res,rej) => {
-    resF = res;
+  return new Promise((res,rej) => {
+    nbt.parse(Buffer.from(base64, "base64"), (err,data) => {
+      if(err) {
+        console.log(err);
+        return null;
+      }
+      res(nbt.simplify(data));
+    })
   })
-  nbt.parse(Buffer.from(base64, "base64"), (err,data) => {
-    if(err) {
-      console.log(err);
-      return null;
-    }
-    resF(nbt.simplify(data));
-  })
-  return output;
 }
 exports.nbtToJson = nbtToJson;
+
+function nbtBufToJson(buf) {
+  return new Promise((res,rej) => {
+    nbt.parse(buf, (err,data) => {
+      if(err) {
+        console.log(err);
+        return null;
+      }
+      res(nbt.simplify(data));
+    })
+  })
+}
+exports.nbtBufToJson = nbtBufToJson;
 
 async function getSkinFace(skinUrl,i) {
   return new Promise(async (res, rej) => {
