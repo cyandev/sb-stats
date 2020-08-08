@@ -72,26 +72,16 @@ body {
   font-family: Quicksand;
   color: var(--white);
   margin: 3vw;
+  margin-top: max(3vw,6vh);
 }
 #content {
   --width: 94vw;
   flex-wrap: wrap;
 }
-#intro {
-  font-size: 1.5vw;
-  background: var(--gray);
-  text-align: center;
-  border-radius: 0.5vw;
-  width: 100%;
-}
-#stats {
-  height: 10vh;
-  width: 100%;
-}
 .section {
   margin-top: 1vw;
   padding: 1vw;
-  padding-top: 3vw;
+  padding-top: 3.6vw;
   background: var(--gray);
   border-radius: 0.5vw;
   position: relative;
@@ -118,6 +108,19 @@ body {
   padding-top: 0.3vw;
   padding-bottom: 0.3vw;
   text-align: center;
+}
+#stats {
+  height: auto;
+  width: 100%;
+}
+#stats-text {
+  font-size: 1.2vw;
+  width: 100%;
+  padding-left: 1vw;
+  padding-right: 1vw;
+  display: flex;
+  flex-wrap: warp;
+  justify-content: space-around;
 }
 #skills {
   display: flex;
@@ -171,21 +174,124 @@ body {
   text-align: center;
 }
 #armor {
-  float: left;
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2);
+  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 1vw);
   width: calc( var(--width) * 0.1 - 3vw);
   margin-right: 1vw;
 }
 #wardrobe {
-  float: left;
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2);
-  width: calc( var(--width) * 0.9 - 3.5vw);
+  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 1vw);
+  flex-grow: 1;
+  display: flex;
+}
+#wardrobe .inv-view {
+  width: 0;
+  flex-grow: 1;
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+#wardrobe .inv-view::-webkit-scrollbar {
+  opacity: 0;
+  height: 1vw;
+}
+#wardrobe .inv-view::-webkit-scrollbar:hover {
+  opacity: 1;
+}
+#wardrobe .inv-view::-webkit-scrollbar-button {
+  display: none;
+}
+#wardrobe .inv-view::-webkit-scrollbar-thumb {
+  border-radius: 0.5vw;
+  background: var(--dark-white);
 }
 #inventories {
-  height: 25vh;
+  height: auto;
+  padding-left: 5vw;
+  padding-right: 5vw;
   width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#inventories #labels {
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.5vw 1vw 0 1vw;
+  border-radius: 0.5vw 0.5vw 0 0;
+  background: rgba(43,43,43,0.5)
+}
+#inventories #labels .inv-label {
+  background: var(--dark-blue);
+  border-radius: 0.5vw 0.5vw 0 0;
+  font-family: Quicksand;
+  margin-right: 1vw;
+  font-size: 1.2vw;
+  color: var(--white);
+  line-height: 2vw;
+  height: 2vw;
+  border: none;
+}
+#inventories #inv-view-container {
+  display: inline-flex;
+  justify-content: space-around;
+  border-radius: 0.5vw;
+  padding: 0.5vw 1vw 1vw 1vw;
+  background: rgba(43,43,43,0.5)
 }
 #pets {
   height: 25vh;
   width: 100%;
+}
+
+/* inv-view */
+.inv-view {
+  grid-gap: 1vw;
+}
+.inv-view .item-cell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--dark-white);
+  background: var(--dark-gray);
+  border-radius: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.inv-view .item-cell .item-count {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+.inv-view .item-cell .item-icon {
+  image-rendering: pixelated;
+  width: 80%;
+  height: 80%;
+}
+.inv-view .item-cell .item-head {
+  position: relative;
+  --size: 3vw;
+  width: var(--size);
+  height: var(--size);
+  transform-style: preserve-3d;
+  transform: rotateY(45deg) rotateX(-15deg) rotateZ(-15deg)
+}
+.inv-view .item-cell .item-head > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  image-rendering: pixelated;
+}
+.inv-view .item-cell .item-head .face {
+  transform: translateZ(calc((var(--size) / 2)  - 0.3px));
+}
+.inv-view .item-cell .item-head .back {
+  transform: translateZ(calc((var(--size) / -2)  - 0.3px));
+}
+.inv-view .item-cell .item-head .side {
+  transform: rotateY(-90deg) translateZ(calc((var(--size) / 2)  - 0.3px));
+}
+.inv-view .item-cell .item-head .top {
+  transform: rotateX(90deg) translateZ(calc((var(--size) / 2) - 0.3px));
 }

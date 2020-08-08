@@ -15,31 +15,31 @@ body {
   top: 40vh;
   left: 30vw;
   width: 40vw;
-  height: 25vh;
+  height: auto;
   background: rgba(0,0,0,0.2);
   border-radius: 1vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+#search > * {
+  margin: 1vw;
 }
 #search-label {
-  position: absolute;
-  left: 0;
-  top: 1vw;
   width: inherit;
-  height: 5vh;
+  height: auto;
   color: var(--white);
   text-align: center;
   font-size: 4vh;
   line-height: 5vh;
 }
 #search-text {
-  position: absolute;
-  left: 0;
-  top: 7vh;
   width: inherit;
-  height: 10vh;
+  height: auto;
   background: none;
   border: none;
   font-size: 3.5vh;
-  line-height: 10vh;
+  line-height: 4vh;
   text-align: center;
   color: var(--white);
 }
@@ -47,9 +47,6 @@ body {
   color: var(--dark-white);
 }
 #search-button {
-  position: absolute;
-  top: 18vh;
-  left: 15vw;
   width: 10vw;
   height: 4vh;
   font-size: 2vh;
@@ -58,5 +55,5 @@ body {
   color: var(--white);
   border-radius: 0.5vw;
   background: var(--dark-blue);
-  border: 0.1vw solid var(--dark-gray)
+  border: 0.1vw solid var(--dark-gray);
 }

@@ -1,45 +1,51 @@
 /*
 Header CSS
 */
+* {
+  -webkit-appearance: none;
+}
 #header {
   width: calc(100vw - (100vw - 100%));
   position: fixed;
   top: 0;
   left: 0;
-  height: 2.5vw;
+  --height: max(2.5vw,5vh);
+  height: var(--height);
   background: var(--dark-blue);
   z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 #header-link {
   text-decoration: none;
   color: var(--white);
-  font-size: 1.5vw;
-  line-height: 2.5vw;
+  font-size: calc(var(--height) * 0.6);
+  line-height: var(--height);
   position: absolute;
   left: 0.5vw
 }
 #header-search {
-  position: absolute;
-  left: 40vw;
-  top: 0.5vw;
-  width: 20vw;
-  height: 1.5vw;
+  margin-top: calc(var(--height) * 0.2);
+  width: auto;
+  min-width: 20vw;
+  position: relative;
+  height: calc(var(--height) * 0.6);
   background: var(--dark-gray);
   border: 1px solid black;
   border-radius: 0.5vw;
 }
 #header-search-text {
-  position: absolute;
-  left: 0;
-  width: 20vw;
+  width: 100%;
+  min-width: 15ch;
   background: inherit;
   border: none;
-  height: 1.5vw;
+  height: calc(var(--height) * 0.6);
   border-radius: 0.5vw;
   color: var(--white);
-  font-size: 0.75vw;
-  line-height: 1.5vw;
-  padding-left: 0.75vw
+  font-size: calc(var(--height) * 0.3);
+  line-height: calc(var(--height) * 0.6);
+  padding-left: calc(var(--height) * 0.3);
 }
 #header-search-text::placeholder {
   color: var(--dark-white);
@@ -47,8 +53,8 @@ Header CSS
 #header-search-button {
   position: absolute;
   right: 0;
-  width: 2vw;
-  height: 1.5vw;
+  width: calc(var(--height) * 0.6 + 0.5vw);
+  height: calc(var(--height) * 0.6);
   border-top-right-radius: 0.5vw;
   border-bottom-right-radius: 0.5vw;
   background: inherit;
@@ -59,17 +65,17 @@ Header CSS
   right: 0.5vw;
   color: var(--white);
   pointer-events: none;
-  width: 1.5vw;
-  height: 1.5vw;
+  width: calc(var(--height) * 0.6);
+  height: calc(var(--height) * 0.6);
   text-align: center;
-  font-size: 1.5vw;
-  line-height: 1.5vw;
+  font-size: calc(var(--height) * 0.6);
+  line-height: calc(var(--height) * 0.6);
   transform: rotate(45deg)
 }
 #header-version {
   position: absolute;
   right: 0.5vw;
   color: var(--dark-white);
-  font-size: 1vw;
-  line-height: 2.5vw;
+  font-size: calc(var(--height) * 0.4);
+  line-height: var(--height);
 }

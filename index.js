@@ -6,12 +6,14 @@ var port = 8080
 app.use(bodyParser.urlencoded()); 
 
 let axios = require("axios")
+const minecraftItems = require('minecraft-items')
 
 let util = require("./util.js");
 let playerDB = require("./playerDB.js")
 let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //make a 500ms delay between requests to always be at the 120 reqs/min rate limit
 
 async function getPlayerDataFirstTime(name) {
+  let start = Date.now()
   let playerData = {};
   playerData.name = name;
   try {
@@ -42,6 +44,7 @@ async function getPlayerDataFirstTime(name) {
   for (let profile of profilesArr) {
     playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile);
   }
+  console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`)
   return playerData;
 }
 
@@ -90,38 +93,56 @@ async function getProfileData(uuid, profile) {
   //get fairy souls
   profileData.fairy_souls = profileAPI.members[uuid].fairy_souls_collected
 
-  //get armor
-  profileData.armor = await util.nbtToJson(profileAPI.members[uuid].inv_armor.data).i //this doesnt require inventory apis
-
   //get inventories
   profileData.inventories = [];
-  if (profileAPI.members[uuid].inv_contents) {
-    let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents"];
-    let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag"];
-    invNames.forEach(async (label,i) => {
-      profileData.inventories.push({
+  let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor"];
+  let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag"];
+  for (let i = 0; i<invNames.length; i++) { //for each inventory name
+    let label = invNames[i];
+    if (profileAPI.members[uuid][label]) {
+      let inventory = {
         name: label,
         clean_name: invCleanNames[i],
         contents: (await util.nbtToJson(profileAPI.members[uuid][label].data)).i
-      })
-    })
+      } //represent the inventory
+      //if (profileData.cute_name == "Lime") console.log(label, i, inventory);
+      for (let j = 0; j < inventory.contents.length; j++) {
+        let item = inventory.contents[j];
+        try {
+          if (item.tag) {
+            var mcItem = minecraftItems.get(item.id + (item.Damage ? ":" + item.Damage : ""));
+            let out = {
+              name: item.tag.display.Name,
+              lore: item.tag.display.Lore,
+              id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
+              icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
+              count: item.Count
+            } 
+            if (item.tag.SkullOwner) {
+              out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
+              out.faces = {
+                face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`,
+                side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=1`,
+                top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
+              }
+            }
+            inventory.contents[j] = out;
+          } else {
+            inventory.contents[j] = {};
+          }
+        } catch (err) {
+          console.log("item caused error:", item,mcItem,err)
+        }
+      };
+      //if (profileData.cute_name == "Lime") console.log(label, i, inventory);
+      profileData.inventories.push(inventory);
+    }
   }
 
   //get pets
-  profileData.pets = profileAPI.members[uuid].pets
+  profileData.pets = profileAPI.members[uuid].pets;
   return profileData
 }
-
-/*
-(async () => {
-  console.log((await reqScheduler.get("https://api.hypixel.net/player?key=27b8152d-094c-4fab-8f19-cc166f856faf&uuid=10df0a301952481884f3d1cd60c403d7",0)).headers)
-  for (let i = 0; i < 300; i++) {
-    reqScheduler.get("https://api.hypixel.net/player?key=27b8152d-094c-4fab-8f19-cc166f856faf&uuid=10df0a301952481884f3d1cd60c403d7",0).then((resp) => {
-      console.log(reqScheduler.reqsRemaining, resp.headers["ratelimit-reset"], reqScheduler.extraRequests);
-    })
-  }
-})();
-*/
 
 
 
@@ -151,6 +172,14 @@ app.get("/stats/:player", (req,res) => {
 })
 app.get("/stats/:player/:profile", (req,res) => {
   res.sendFile(__dirname + "/public/stats.html");
+})
+app.get("/img/head", async (req,res) => {
+  let img = await util.getSkinFace(req.query.skin,req.query.i);
+  res.writeHead(200, {
+     'Content-Type': 'image/png',
+     'Content-Length': img.length
+   });
+   res.end(img);
 })
 app.get("/", (req,res) => {
   res.sendFile(__dirname + "/public/index.html");
