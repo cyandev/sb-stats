@@ -2,7 +2,7 @@ const express = require("express");
 var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').createServer(app);
-var port = 8080
+var port = process.env.PORT || 8080
 app.use(bodyParser.urlencoded()); 
 
 let axios = require("axios")
