@@ -27,7 +27,6 @@ async function getPlayerDataFirstTime(name) {
     console.log("err getting /player api endpoint")
   }
   playerData.name = playerAPI.displayname;
-  playerData.color = playerAPI.monthlyRankColor;
   playerData.plus = playerAPI.rankPlusColor ? playerAPI.rankPlusColor.replace("DARK_",""): "";
   playerData.rank = playerAPI.newPackageRank
   if (playerAPI.rank) {
@@ -43,9 +42,15 @@ async function getPlayerDataFirstTime(name) {
     } else if (playerData.rank == "ADMIN") {
       playerData.color = "var(--red)"
     }
-  } else if (playerAPI.monthlyPackageRank != "NONE") {
+  } else if (playerAPI.monthlyPackageRank && playerAPI.monthlyPackageRank != "NONE") {
     playerData.rank = "MVP_PLUS_PLUS";
-    playerData.color = "GOLD";
+    playerData.color = "var(--yellow)";
+  } else {
+    if (playerData.rank == "VIP" || playerData.rank == "VIP_PLUS") {
+      playerData.color ="var(--green)";
+    } else if (playerData.rank == "MVP" || playerData.rank == "MVP_PLUS") {
+      playerData.color = "var(--cyan)"
+    } 
   }
   //get achievement data
   playerData.achievements = Object.keys(playerAPI.achievements).filter(x => x.includes("skyblock_")).reduce((t,x) => {t[x] = playerAPI.achievements[x]; return t },{});

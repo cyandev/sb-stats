@@ -283,7 +283,7 @@ document.querySelector("#item-hover").style.display = "none";
     profile = profileData.cute_name
   }
   window.history.pushState({}, "", `/stats/${username}/${profile}`);
-  document.getElementById("playerName").innerHTML = `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>`;
+  document.getElementById("playerName").innerHTML = data.rank ? `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>` : username;
   document.getElementById("profileName").innerHTML = profile;
   console.log(profileData);
 
