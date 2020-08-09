@@ -6,6 +6,11 @@
   --dark-white: #ced6e0;
   --blue: #4071bd;
   --darkish-blue: #4e5969;
+  --red: #bd4040;
+  --yellow: #bdb540;
+  --green: #59bd40;
+  --cyan: #40bdb7;
+  --purple: #b740bd;
 }
 /* loading */
 .lds-ellipsis {
@@ -127,6 +132,11 @@ body {
   height: auto;
   justify-content: space-around;
   flex-wrap: wrap;
+  width: 100%;
+}
+#skills > span {
+  width: 100%;
+  text-align: center;
 }
 #skills .skill {
   width: 44vw;
@@ -174,12 +184,12 @@ body {
   text-align: center;
 }
 #armor {
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 1vw);
+  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 2vw);
   width: calc( var(--width) * 0.1 - 3vw);
   margin-right: 1vw;
 }
 #wardrobe {
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 1vw);
+  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 2vw);
   flex-grow: 1;
   display: flex;
 }
@@ -239,9 +249,21 @@ body {
   background: rgba(43,43,43,0.5)
 }
 #pets {
-  height: 25vh;
+  height: auto;
   width: 100%;
 }
+#slayer {
+  height: auto;
+  width: 100%;
+}
+
+
+
+
+
+
+
+
 
 /* inv-view */
 .inv-view {
@@ -297,4 +319,44 @@ body {
 }
 .inv-view .item-cell .item-head .top {
   transform: rotateX(90deg) translateZ(calc((var(--size) / 2) - 0.5px));
+}
+/* Item Hover */
+#item-hover {
+  width: 30vw;
+  max-height: 75vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--dark-gray);
+  color: var(--white);
+  z-index: 3;
+  border-radius: 1vw;
+  font-size: 1.2vw;
+  text-align: center;
+  transform: translate3d(0,0,0);
+}
+#item-hover-header {
+  background: var(--gray);
+  border-radius: 1vw 1vw 0 0;
+  font-size: 1.5vw;
+  line-height: 2vw;
+  height: 2vw;
+  overflow-x: auto;
+}
+#item-hover-lore {
+  overflow-y: auto;
+  padding-top: 1vw;
+  padding-bottom: 1vw;
+  max-height: calc(75vh - 2vw - 2vw);
+}
+#item-hover-lore .inv-view {
+  grid-gap: 0.5vw;
+}
+#item-hover-lore .inv-view .item-cell .item-head {
+  --size: 1.2vw;
+}
+#item-hover-lore .inv-view .item-cell .item-count {
+  right: 0.1vw;
+  bottom: 0.1vw;
+  font-size: 0.9vw;
 }
