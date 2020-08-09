@@ -11,6 +11,7 @@
   --green: #59bd40;
   --cyan: #40bdb7;
   --purple: #b740bd;
+  --pink: #ba569e;
 }
 /* loading */
 .lds-ellipsis {
@@ -359,4 +360,15 @@ body {
   right: 0.1vw;
   bottom: 0.1vw;
   font-size: 0.9vw;
+}
+#item-hover-lore::-webkit-scrollbar {
+  opacity: 0;
+  width: 1vw;
+}
+#item-hover-lore::-webkit-scrollbar-button {
+  display: none;
+}
+#item-hover-lore::-webkit-scrollbar-thumb {
+  border-radius: 0.5vw;
+  background: var(--gray);
 }

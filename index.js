@@ -15,7 +15,6 @@ let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) 
 async function getPlayerDataFirstTime(name) {
   let start = Date.now()
   let playerData = {};
-  playerData.name = name;
   try {
     var uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + name)).data.id; //get uuid from mojang
     playerData.uuid = uuid;
@@ -27,10 +26,24 @@ async function getPlayerDataFirstTime(name) {
   } catch (err) {
     console.log("err getting /player api endpoint")
   }
+  playerData.name = playerAPI.displayname;
   playerData.color = playerAPI.monthlyRankColor;
-  playerData.plus = playerAPI.rankPlusColor.replace("DARK_","");
+  playerData.plus = playerAPI.rankPlusColor ? playerAPI.rankPlusColor.replace("DARK_",""): "";
   playerData.rank = playerAPI.newPackageRank
-  if (playerAPI.monthlyPackageRank != "NONE") {
+  if (playerAPI.rank) {
+    playerData.rank = playerAPI.rank;
+    if (playerData.rank == "YOUTUBER") {
+      playerData.color = "var(--red)";
+      playerData.rank = "YOUTUBE"
+    } else if (playerData.rank == "MODERATOR") {
+      playerData.color = "var(--green)";
+      playerData.rank = "MOD";
+    } else if (playerData.rank == "HELPER") {
+      playerData.color = "var(--cyan)"
+    } else if (playerData.rank == "ADMIN") {
+      playerData.color = "var(--red)"
+    }
+  } else if (playerAPI.monthlyPackageRank != "NONE") {
     playerData.rank = "MVP_PLUS_PLUS";
     playerData.color = "GOLD";
   }
@@ -73,7 +86,7 @@ async function getInventoryJSON(contents) {
             top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
           }
         }
-        if(mcItem.name && mcItem.name.includes("Leather") && item.tag.ExtraAttributes.color) {
+        if(mcItem && mcItem.name && mcItem.name.includes("Leather") && item.tag.ExtraAttributes.color) {
           out.icon = `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
         }
         if (out.name.includes("Backpack")) {

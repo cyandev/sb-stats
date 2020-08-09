@@ -31,7 +31,7 @@ var styleMap = {
     '§a': 'color:var(--green)',
     '§b': 'color:var(--cyan)',
     '§c': 'color:var(--red)',
-    '§d': 'color:var(--purple)',
+    '§d': 'color:var(--pink)',
     '§e': 'color:var(--yellow)',
     '§f': 'color:var(--white)',
     '§l': 'font-weight:bold',
@@ -150,23 +150,6 @@ function transformWardrobe(contents) {
   return wardrobeNew;
 }
 
-function setHoverTo(item) {
-  if (!boxLocked) {
-    if (!item || !item.name) {
-      document.querySelector("#item-hover").style.display = "none";
-      return;
-    }
-    document.querySelector("#item-hover").style.display = "initial";
-    document.querySelector("#item-hover-header").innerHTML = item.name.split(/§./).join("");
-    document.querySelector("#item-hover-lore").innerHTML = "";
-    document.querySelector("#item-hover-lore").appendChild(parseStyle(item.lore.join("<br>")));
-    //TODO: Add backpack contents
-    if (item.contents) {
-      document.querySelector("#item-hover-lore").innerHTML += "<br>"
-      document.querySelector("#item-hover-lore").appendChild(makeInventoryViewer(item.contents,{hasHotbar: false, cellSize: "2.5vw"}))
-    }
-  }
-}
 function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSize: "6vw"}) {
   //load in options
   let opt={cols: 9, hasHotbar: true, cellSize: "6vw"};
@@ -191,7 +174,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     <span class="item-count"></span>
     `
     itemCell.classList.add("item-cell");
-    if (item.faces) { //if the item has faces, make an itemHead with said faces
+    if (item && item.faces) { //if the item has faces, make an itemHead with said faces
       let itemHead = document.createElement("div");
       itemHead.classList.add("item-head");
       itemHead.innerHTML = `
@@ -205,7 +188,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       })
       itemCell.appendChild(itemHead);
       itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
-    } else if (item.name) { //if the item isnt empty
+    } else if (item && item.name) { //if the item isnt empty
       itemCell.querySelector(".item-icon").src = item.icon;
     } else { //if there is no item
       itemCell.querySelector(".item-icon").style.display = "none";
@@ -216,16 +199,26 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     //add hover based listeners
     itemCell.addEventListener("mouseenter", () => setHoverTo(item));
     itemCell.addEventListener("mouseleave", () => setHoverTo(false));
-    itemCell.addEventListener("click", () => boxLocked = !boxLocked);
+    itemCell.addEventListener("mousedown", () => {
+      boxLocked = !boxLocked;
+      console.log("toggled box")
+      if (boxLocked) {
+        setTimeout(() => {
+          window.addEventListener("mousedown", unlockBox);
+          console.log("added unlock listener")
+        }, 1);
+      }
+    });
     grid.appendChild(itemCell); //add the itemcell to the grid
   })
   return grid
 }
 
-/* Hover Box Listeners */
+/* Hover Box Listeners + Functions */
 var mouseX = 0;
 var mouseY = 0;
 var boxLocked = false;
+var boxItem = {}
 window.addEventListener("mousemove", (e) => {
   mouseX = e.clientX;
   mouseY = e.clientY;
@@ -247,6 +240,33 @@ window.addEventListener("mousemove", (e) => {
     }
   }
 })
+function unlockBox(e) {
+  if (e.target.id == "item-hover-lore") return; //ignore clicks on hover lore
+  boxLocked = false;
+  updateBoxContents();
+  window.removeEventListener("mousedown",unlockBox);
+  console.log("unlocked box")
+}
+function setHoverTo(item) {
+  boxItem = item;
+  if (!boxLocked) updateBoxContents()
+}
+function updateBoxContents() {
+  if (!boxItem || !boxItem.name) {
+    document.querySelector("#item-hover").style.display = "none";
+    return;
+  }
+  document.querySelector("#item-hover").style.display = "initial";
+  document.querySelector("#item-hover-header").innerHTML = boxItem.name.split(/§./).join("");
+  document.querySelector("#item-hover-lore").innerHTML = "";
+  document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("<br>")));
+  //TODO: Add backpack contents
+  if (boxItem.contents) {
+    document.querySelector("#item-hover-lore").innerHTML += "<br>"
+    document.querySelector("#item-hover-lore").appendChild(makeInventoryViewer(boxItem.contents,{hasHotbar: false, cellSize: "2.5vw"}))
+  }
+}
+
 document.querySelector("#item-hover").style.display = "none";
 
 /* Data Loading Funciton */
@@ -254,14 +274,15 @@ document.querySelector("#item-hover").style.display = "none";
   let username = window.location.href.split("/")[4];
   let profile = window.location.href.split("/").length > 4 ? window.location.href.split("/")[5] : "default"
   let data = await (await fetch(window.location.origin + "/api/data/" + username)).json();
+  username = data.name;
   console.log(data)
   let profileArr = Object.keys(data.profiles).map((x) => data.profiles[x]);
   let profileData = profileArr.find((x) => x.cute_name == profile)
   if (!profileData) {
     profileData = profileArr.sort((a,b) => b.last_save - a.last_save)[0];
     profile = profileData.cute_name
-    window.history.pushState("object or string", "Title", `/stats/${username}/${profile}`);
   }
+  window.history.pushState({}, "", `/stats/${username}/${profile}`);
   document.getElementById("playerName").innerHTML = `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>`;
   document.getElementById("profileName").innerHTML = profile;
   console.log(profileData);
