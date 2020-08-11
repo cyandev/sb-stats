@@ -241,7 +241,8 @@ window.addEventListener("mousemove", (e) => {
   }
 })
 function unlockBox(e) {
-  if (e.target.id == "item-hover-lore") return; //ignore clicks on hover lore
+  if (e.target.id == "item-hover-lore" || e.target.parentElement.id == "item-hover-lore") return; //ignore clicks on hover lore
+  console.log(e.target.parentElement)
   boxLocked = false;
   updateBoxContents();
   window.removeEventListener("mousedown",unlockBox);
@@ -392,6 +393,8 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#inventories").appendChild(apiWarn);
   }
 
+  //load pets 
+  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 9, hasHotbar: false}));
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";

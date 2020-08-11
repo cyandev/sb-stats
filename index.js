@@ -9,7 +9,7 @@ let axios = require("axios")
 const minecraftItems = require('minecraft-items')
 
 let util = require("./util.js");
-let playerDB = require("./playerDB.js")
+const constants = require("./const.js");
 let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //make a 500ms delay between requests to always be at the 120 reqs/min rate limit
 
 async function getPlayerDataFirstTime(name) {
@@ -66,6 +66,19 @@ async function getPlayerDataFirstTime(name) {
   return playerData;
 }
 
+/*
+Inventory Item:
+{
+  name,
+  lore,
+  id (opt),
+  icon (opt),
+  count, 
+  faces (opt),
+  rarity (opt, req'd soon)
+}
+inventory contents is arr of Inventory Items
+*/
 async function getInventoryJSON(contents) {
   let output = [];
   for (let j = 0; j < contents.length; j++) {
@@ -109,6 +122,7 @@ async function getInventoryJSON(contents) {
   };
   return output;
 }
+
 async function getProfileData(uuid, profile) {
   try {
     var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`)).data.profile;
@@ -173,7 +187,48 @@ async function getProfileData(uuid, profile) {
 
   //get pets
   profileData.pets = profileAPI.members[uuid].pets;
-  return profileData
+
+  //make pets into inventory contents
+  if (profileData.pets) {
+    profileData.pets = profileData.pets.map((pet) => {
+      let out = {
+        lore: [
+          `§8${constants.pets[pet.type].type[0].toUpperCase() + constants.pets[pet.type].type.slice(1)} Pet`,
+          "",
+          `LEVEL INFO PLACEHOLDER`,
+          "",
+          `§aCandy Used: ${pet.candyUsed} / 10`,
+          "",
+          `§6Held Item: ${pet.heldItem ? constants.petItems[pet.heldItem].name : "None"}`,
+          pet.heldItem ? constants.petItems[pet.heldItem].description : "",
+          "",
+          `§r${pet.tier[0] + pet.tier.slice(1).toLowerCase()} Pet`
+        ],
+        id: "NULL",
+        faces: {
+          face: `/img/head?skin=${constants.pets[pet.type].skin}&i=${0}`,
+          side: `/img/head?skin=${constants.pets[pet.type].skin}&i=${1}`,
+          top: `/img/head?skin=${constants.pets[pet.type].skin}&i=${2}`
+        },
+        count: 1,
+        rarity: pet.tier,
+      }
+      //get the pet's level
+      let remainingXp = pet.exp;
+      let level;
+      for (level = 1; level <= 100 && remainingXp >= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]]; level++) {
+        remainingXp -= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]];
+      }
+      //finish making item
+      if (out.lore[7] == "") { //remove held item description if there is none
+        out.lore.splice(7,1);
+      }
+      out.name = `§r[LVL ${level}] ${pet.type.split("_").map(x => x[0] + x.slice(1).toLowerCase()).join(" ")}`;
+      out.lore[2] = level != 100 ? `§r${(remainingXp / constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier] + 1] * 100).toFixed(2)}% to LVL ${level+1}` : "§bMAX LEVEL";
+      return out;
+    })
+    return profileData
+  }
 }
 
 //server go listen
@@ -233,18 +288,3 @@ app.get("/", (req,res) => {
 app.use((req, res) => {
     res.sendFile(__dirname + "/public" + req.url);
 })
-
-
-
-/*
-nbt.parse(Buffer.from(data, "base64"), (err,data) => {
-  if(err) {
-    console.log(err);
-    return
-  }
-  jsonData = nbt.simplify(data)
-  console.log(jsonData.i[3].tag.SkullOwner.Properties.textures[0].Value);
-  console.log(util)
-  console.log(util.nbtToImageUrl(jsonData.i[3]))
-})
-*/

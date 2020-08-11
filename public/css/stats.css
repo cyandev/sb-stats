@@ -252,6 +252,8 @@ body {
 #pets {
   height: auto;
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 #slayer {
   height: auto;
