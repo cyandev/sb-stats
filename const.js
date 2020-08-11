@@ -5,7 +5,7 @@ module.exports = {
       "type": "mining"
     },
     "BLAZE": {
-      "skin": "http://textures.minecraft.net/texture/b78ef2e4cf2c41a2d14bfde9caff10219f5b1bf5b35a49eb51c6467882cb5f0",
+      "skin": "./public/img/blaze.png",
       "type": "combat"
     },
     "CHICKEN": {
