@@ -187,9 +187,9 @@ async function getProfileData(uuid, profile) {
 
   //get pets
   profileData.pets = profileAPI.members[uuid].pets;
-
-  //make pets into inventory contents
+  //sort pets + make pets into inventory contents
   if (profileData.pets) {
+    // make into inventory
     profileData.pets = profileData.pets.map((pet) => {
       let out = {
         lore: [
@@ -216,19 +216,41 @@ async function getProfileData(uuid, profile) {
       //get the pet's level
       let remainingXp = pet.exp;
       let level;
-      for (level = 1; level <= 100 && remainingXp >= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]]; level++) {
+      for (level = 1; level < 100 && remainingXp >= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]]; level++) {
         remainingXp -= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]];
       }
       //finish making item
       if (out.lore[7] == "") { //remove held item description if there is none
         out.lore.splice(7,1);
       }
+      out.level = level;
+      out.remainingXp = out.remainingXp;
       out.name = `§r[LVL ${level}] ${pet.type.split("_").map(x => x[0] + x.slice(1).toLowerCase()).join(" ")}`;
-      out.lore[2] = level != 100 ? `§r${(remainingXp / constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier] + 1] * 100).toFixed(2)}% to LVL ${level+1}` : "§bMAX LEVEL";
+      out.lore[2] = level != 100 ? `§r${(remainingXp / constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]] * 100).toFixed(2)}% to LVL ${level+1}` : "§bMAX LEVEL";
       return out;
     })
-    return profileData
+    let rarities = {
+      COMMON: 0,
+      UNCOMMON: 1,
+      RARE: 2,
+      EPIC: 3,
+      LEGENDARY: 4,
+      MYTHIC: 5,
+    }
+    profileData.pets.sort((a,b) => {
+      if (rarities[b.rarity] - rarities[a.rarity] != 0) {
+        return rarities[b.rarity] - rarities[a.rarity];
+      } else if (b.level - a.level != 0) {
+        return b.level - a.level;
+      } else {
+        return a.name.localeCompare(b.name);
+      }
+    });
+
+  } else {
+    profileData.pets = [];
   }
+  return profileData
 }
 
 //server go listen

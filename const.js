@@ -187,7 +187,7 @@ module.exports = {
       COMMON: 0,
       UNCOMMON: 6,
       RARE: 11,
-      EPIC: 16,
+      EPIC: 15,
       LEGENDARY: 20
     }
   },

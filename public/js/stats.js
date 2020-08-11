@@ -394,7 +394,7 @@ document.querySelector("#item-hover").style.display = "none";
   }
 
   //load pets 
-  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 9, hasHotbar: false}));
+  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false}));
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";
