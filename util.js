@@ -1,5 +1,7 @@
 let nbt = require("prismarine-nbt");
-let jimp = require("jimp")
+let jimp = require("jimp");
+let fs = require("fs");
+
 //head images stored as base64 encoded JSON object at item.SkullOwner.Properties.Textures.value
 function nbtToJson(base64) {
   return new Promise((res,rej) => {
@@ -69,7 +71,8 @@ async function getColoredItem(item,color) {
       itemBase.bitmap.data[idx+2] = color[2] * itemBase.bitmap.data[idx + 2] / 255;
     });
     itemBase.composite(itemOverlay,0,0);
-    res((await itemBase.getBufferAsync(jimp.MIME_PNG)));
+    let imgBuffer = await itemBase.getBufferAsync(jimp.MIME_PNG);
+    res(imgBuffer);
   })
 }
 exports.getColoredItem = getColoredItem;

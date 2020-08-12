@@ -184,16 +184,24 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       <img class="top cube"></div>
       `
       Object.keys(item.faces).forEach(face => {
-        Array.from(itemHead.querySelectorAll(`.${face}`)).forEach(img => img.src = item.faces[face]);
+        Array.from(itemHead.querySelectorAll(`.${face}`)).forEach(img => {
+          img.src = item.faces[face];
+          img.onerror = () => {
+            console.log("image", img, "failed to load");
+            img.src = item.faces[face] + "&random=" + Date.now();
+          };
+        });
       })
       itemCell.appendChild(itemHead);
       itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
     } else if (item && item.name) { //if the item isnt empty
       itemCell.querySelector(".item-icon").src = item.icon;
+      itemCell.querySelector(".item-icon").onerror = () => {console.log("image failed to load", item)};
     } else { //if there is no item
       itemCell.querySelector(".item-icon").style.display = "none";
     }
-    if (item.count > 1) { //make the count appear if there are more than 1 item in a slot
+
+    if (item && item.count > 1) { //make the count appear if there are more than 1 item in a slot
       itemCell.querySelector(".item-count").innerHTML = item.count;
     }
     //add hover based listeners
@@ -201,7 +209,6 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     itemCell.addEventListener("mouseleave", () => setHoverTo(false));
     itemCell.addEventListener("mousedown", () => {
       boxLocked = !boxLocked;
-      console.log("toggled box")
       if (boxLocked) {
         setTimeout(() => {
           window.addEventListener("mousedown", unlockBox);
@@ -242,11 +249,9 @@ window.addEventListener("mousemove", (e) => {
 })
 function unlockBox(e) {
   if (e.target.id == "item-hover-lore" || e.target.parentElement.id == "item-hover-lore") return; //ignore clicks on hover lore
-  console.log(e.target.parentElement)
   boxLocked = false;
   updateBoxContents();
   window.removeEventListener("mousedown",unlockBox);
-  console.log("unlocked box")
 }
 function setHoverTo(item) {
   boxItem = item;
@@ -260,8 +265,24 @@ function updateBoxContents() {
   document.querySelector("#item-hover").style.display = "initial";
   document.querySelector("#item-hover-header").innerHTML = boxItem.name.split(/§./).join("");
   document.querySelector("#item-hover-lore").innerHTML = "";
-  document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("<br>")));
-  //TODO: Add backpack contents
+  if (boxItem.lore && boxItem.lore.length > 0) document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("<br>")));
+
+  let rarityColorMap = {
+    "COMMON": "§8",
+    "UNCOMMON": "§a",
+    "RARE": "§9",
+    "EPIC": "§5",
+    "LEGENDARY": "§6",
+    "MYTHIC": "§d",
+    "SPECIAL": "§c"
+  }
+  if (boxItem.rarity) {
+    document.querySelector("#item-hover-header").style.background = styleMap[rarityColorMap[boxItem.rarity]].split(":")[1];
+  } else {
+    document.querySelector("#item-hover-header").style.background = styleMap["§8"].split(":")[1];
+  }
+
+
   if (boxItem.contents) {
     document.querySelector("#item-hover-lore").innerHTML += "<br>"
     document.querySelector("#item-hover-lore").appendChild(makeInventoryViewer(boxItem.contents,{hasHotbar: false, cellSize: "2.5vw"}))

@@ -90,12 +90,32 @@ async function getInventoryJSON(contents) {
           mcItem = minecraftItems.get(item.id);
         }
         let out = {
-          name: item.tag.display.Name,
-          lore: item.tag.display.Lore,
+          name: item.tag.display ? item.tag.display.Name : "",
+          lore: item.tag.display ? item.tag.display.Lore : [],
           id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
           icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
           count: item.Count
-        } 
+        }
+
+        //apply tags to the item
+        let rarityMap = {
+          "§f": "COMMON",
+          "§a": "UNCOMMON",
+          "§9": "RARE",
+          "§5": "EPIC",
+          "§6": "LEGENDARY",
+          "§d": "MYTHIC",
+          "§c": "SPECIAL"
+        }
+        if (out.lore && out.lore.length > 0) {
+          Object.keys(rarityMap).forEach(code => {
+            if (out.lore[out.lore.length - 1].indexOf(code) == 0) {
+              out.rarity = rarityMap[code];
+            }
+          })
+        }
+
+        //check if player head, if so get the skin
         if (item.tag.SkullOwner) {
           out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
           out.faces = {
@@ -104,14 +124,19 @@ async function getInventoryJSON(contents) {
             top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
           }
         }
+
+        //check if leather, if so, set the icon to a leather icon
         if(mcItem && mcItem.name && mcItem.name.includes("Leather") && item.tag.ExtraAttributes.color) {
-          out.icon = `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
+          out.icon =  `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
         }
+
+        //check if backpack, if so, add the contents
         if (out.name.includes("Backpack")) {
           let bpBuffer = Buffer.from(item.tag.ExtraAttributes[item.tag.ExtraAttributes.id.toLowerCase() + "_data"]);
           let bp = await util.nbtBufToJson(bpBuffer);
           out.contents = await getInventoryJSON(bp.i);
         }
+
         output[j] = out;
       } else {
         output[j] = {};
