@@ -1,3 +1,8 @@
+//gracefulfs to stop some EMFILE errors
+var realFs = require('fs')
+var gracefulFs = require('graceful-fs')
+gracefulFs.gracefulify(realFs)
+
 const express = require("express");
 var bodyParser = require('body-parser');
 var app = express();
