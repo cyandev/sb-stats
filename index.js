@@ -99,7 +99,9 @@ async function getInventoryJSON(contents,profileData) {
           lore: item.tag.display ? item.tag.display.Lore : [],
           id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
           icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
-          count: item.Count
+          reforge: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.modifier : "none",
+          count: item.Count,
+          tags: []
         }
 
         //add rarity to the item
@@ -119,8 +121,14 @@ async function getInventoryJSON(contents,profileData) {
             }
           })
         }
-
-        //add stats to the item
+        //add dungeon tag
+        if (out.lore && out.lore[out.lore.length - 1].includes("DUNGEON")) {
+          out.tags.push("DUNGEON");
+        }
+        if (out.lore && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
+          out.tags.push("WEAPON");
+        }
+        //add stats / cata level
         let statNames = {
           "Damage": "dmg", 
           "Strength": "str",
@@ -134,17 +142,19 @@ async function getInventoryJSON(contents,profileData) {
           "True Defense": "td", 
           "Sea Creature Chance": "scc"
         }
-        //do stats / cata level
-        out.stats = {};
+        out.stats = {}; //stats w/ reforges
+        out.baseStats = {}; //stats w/o reforges
         if (out.lore && out.lore.length > 0) {
           Object.keys(statNames).forEach((stat) => {
             out.lore.forEach((loreLine) => {
               loreLine = loreLine.split(/§./).join(""); //strip formatting
-              let match = loreLine.match(RegExp( stat + String.raw`: \+([\d\.]+)( HP)?(?: \(\w+ \+[\d\.]+\) )?(?: \(\+[\d\.]+\2\) )?(?:\(\+([\d\.]+)\2?\))?`)); //match with crazy regexp
+              let match = loreLine.match(RegExp( stat + String.raw`: \+([\d\.]+)( HP|\%)?(?: \(\w+ \+([\d\.]+)\2\) *)?(?: \(\+[\d\.]+\2\) *)?(?:\(\+([\d\.]+)\2?\))?`)); //match with crazy regexp
               if (match) {
-                out.stats[statNames[stat]] = match[1]; //the green text
-                if (match[3] && !profileData.skills.catacombs && out.lore[out.lore.length - 1].includes("DUNGEON")) {
-                  profileData.skills.catacombs = Math.round((match[3] / match[1] - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
+                if (match.index != 0) return; //make sure a match includes the start of the string so "Bonus Attack Speed" doesnt trigger "Speed"
+                out.stats[statNames[stat]] = match[1]; //the non-dungeon stat
+                out.baseStats[statNames[stat]] = match[1] - (match[3] ? match[3] : 0)
+                if (match[4] && !profileData.skills.catacombs && out.tags.includes("DUNGEON")) {
+                  profileData.skills.catacombs = Math.round((match[4] / match[1] - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
                 }
               }
             })
@@ -173,6 +183,16 @@ async function getInventoryJSON(contents,profileData) {
         }
 
         output[j] = out;
+
+        //check if unique accessory, if so, add to talis
+        if (out.lore && out.lore[out.lore.length - 1].includes("CCESSORY") && !profileData.talis[out.id]) { //ccessory instead of accessory because of crab hat
+          profileData.talis[out.id] = out;
+        }
+
+        //check for weapon tag, if so, add to weapons
+        if (out.tags.includes("WEAPON")) {
+          profileData.weapons.push(out);
+        }
       } else {
         output[j] = {};
       }
@@ -228,6 +248,10 @@ async function getProfileData(uuid, profile) {
   //get fairy souls
   profileData.fairy_souls = profileAPI.members[uuid].fairy_souls_collected
 
+
+  //setup combat "inventories" to find talismans, weapons, and armor
+  profileData.talis = {};
+  profileData.weapons = [];
   //get inventories
   profileData.inventories = [];
   let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor"];

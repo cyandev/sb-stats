@@ -1,7 +1,9 @@
 // constants
 const xp_table = [0,50,125,200,300,500,750,1000,1500,2000,3500,5000,7500,10000,15000,20000,30000,50000,75000,100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000,1100000,1200000,1300000,1400000,1500000,1600000,1700000,1800000,1900000,2000000,2100000,2200000,2300000,2400000,2500000,2600000,2750000,2900000,3100000,3400000,3700000,4000000]
 const xp_table_runecrafting = [0,50,100,125,160,200,250,315,400,500,625,785,1000,1250,1600,2000,2465,3125,4000,5000,6200,7800,9800,12200,15300,19050];
-const xp_table_catacombs = [0,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9]
+const xp_table_catacombs = [0,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9];
+const xp_table_slayer = [0,5,10,185,800,4000,15000,80000,300000,600000];
+const xp_table_slayer_wolf = [0,10,15,225,1250,3500,15000,80000,300000,600000];
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
 const skillNames = ["alchemy","combat","enchanting","farming","fishing","foraging","mining","taming"];
 const skillNamesToAchievements = {
@@ -137,6 +139,7 @@ function clearObfuscators() {
 /* END MC TEXT FORMATTING */
 function cleanFormatNumber(n) {
   n = n.toFixed(0);
+  if (n.length <= 3) return n;
   const post = ["","k","m","b","t","q"];
   return n.slice(0,3) / ((n.length - 3) % 3 == 0 ? 1: Math.pow(10,3 - n.length % 3)) + post[Math.floor((n.length-1) / 3)]
 }
@@ -431,6 +434,59 @@ document.querySelector("#item-hover").style.display = "none";
 
   //load pets 
   document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false}));
+
+  //load slayers
+  document.querySelector("#slayer-grid").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer).length},1fr)`;
+  let slayerToBoss = {
+    "spider": "Tarantula Broodfather",
+    "wolf": "Sven Packmaster",
+    "zombie": "Revenant Horror"
+  }
+  for (let slayer in profileData.slayer) {
+    //get level and xpRemaining
+    let xpRemaining = profileData.slayer[slayer].xp;
+    let level = 0;
+    let table = slayer == "wolf" ? xp_table_slayer_wolf :  xp_table_slayer;
+    for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
+      xpRemaining -= table[i];
+      level = i; 
+    }
+    let slayerDisplay = document.createElement("div");
+    slayerDisplay.classList.add("slayer");
+    slayerDisplay.innerHTML = `
+    <div class='slayer-header'></div>
+    <div class='slayer-kills'>
+      <div class="slayer-kills-header">${slayerToBoss[slayer] + " x" + Object.keys(profileData.slayer[slayer].boss_kills).reduce((t,x) => t + profileData.slayer[slayer].boss_kills[x],0)}</div>
+    </div>
+    <div class='slayer-bar'>
+      <div class='slayer-bar-fill'></div>
+      <div class='slayer-bar-text'></div>
+    </div>`
+    //make slayer header
+    slayerDisplay.querySelector(".slayer-header").innerHTML = slayer.charAt(0).toUpperCase() + slayer.slice(1) + " " + level;
+    //make kills grid
+    slayerDisplay.querySelector(".slayer-kills").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer[slayer].boss_kills).length},1fr)`;
+    for (let tier in profileData.slayer[slayer].boss_kills) {
+      let label = document.createElement("div");
+      label.innerHTML = "Tier " + tier[tier.length - 1];
+      slayerDisplay.querySelector(".slayer-kills").appendChild(label)
+    }
+    for (let tier in profileData.slayer[slayer].boss_kills) {
+      let label = document.createElement("div");
+      label.innerHTML = profileData.slayer[slayer].boss_kills[tier] + " Kills";
+      slayerDisplay.querySelector(".slayer-kills").appendChild(label)
+    }
+    //make bar
+    if (level == table.length - 1) {
+      slayerDisplay.querySelector(".slayer-bar-fill").style.width = "100%";
+      slayerDisplay.querySelector(".slayer-bar-fill").style.backgroundColor = "#b3920d"
+      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(xpRemaining)
+    } else {
+      slayerDisplay.querySelector(".slayer-bar-fill").style.width = (xpRemaining / table[level+1] * 100) + "%";
+      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(xpRemaining) + " / " + cleanFormatNumber(table[level+1]);
+    }
+    document.querySelector("#slayer-grid").appendChild(slayerDisplay);
+  }
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";
