@@ -84,7 +84,7 @@ Inventory Item:
 }
 inventory contents is arr of Inventory Items
 */
-async function getInventoryJSON(contents) {
+async function getInventoryJSON(contents,profileData) {
   let output = [];
   for (let j = 0; j < contents.length; j++) {
     let item = contents[j];
@@ -102,7 +102,7 @@ async function getInventoryJSON(contents) {
           count: item.Count
         }
 
-        //apply tags to the item
+        //add rarity to the item
         let rarityMap = {
           "§f": "COMMON",
           "§a": "UNCOMMON",
@@ -120,6 +120,36 @@ async function getInventoryJSON(contents) {
           })
         }
 
+        //add stats to the item
+        let statNames = {
+          "Damage": "dmg", 
+          "Strength": "str",
+          "Crit Chance": "cc",
+          "Crit Damage": "cd", 
+          "Bonus Attack Speed": "as", 
+          "Health": "hp", 
+          "Defense": "def", 
+          "Speed": "spd", 
+          "Intelligence": "int", 
+          "True Defense": "td", 
+          "Sea Creature Chance": "scc"
+        }
+        //do stats / cata level
+        out.stats = {};
+        if (out.lore && out.lore.length > 0) {
+          Object.keys(statNames).forEach((stat) => {
+            out.lore.forEach((loreLine) => {
+              loreLine = loreLine.split(/§./).join(""); //strip formatting
+              let match = loreLine.match(RegExp( stat + String.raw`: \+([\d\.]+)( HP)?(?: \(\w+ \+[\d\.]+\) )?(?: \(\+[\d\.]+\2\) )?(?:\(\+([\d\.]+)\2?\))?`)); //match with crazy regexp
+              if (match) {
+                out.stats[statNames[stat]] = match[1]; //the green text
+                if (match[3] && !profileData.skills.catacombs && out.lore[out.lore.length - 1].includes("DUNGEON")) {
+                  profileData.skills.catacombs = Math.round((match[3] / match[1] - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
+                }
+              }
+            })
+          })
+        }
         //check if player head, if so get the skin
         if (item.tag.SkullOwner) {
           out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
@@ -139,7 +169,7 @@ async function getInventoryJSON(contents) {
         if (out.name.includes("Backpack")) {
           let bpBuffer = Buffer.from(item.tag.ExtraAttributes[item.tag.ExtraAttributes.id.toLowerCase() + "_data"]);
           let bp = await util.nbtBufToJson(bpBuffer);
-          out.contents = await getInventoryJSON(bp.i);
+          out.contents = await getInventoryJSON(bp.i,profileData);
         }
 
         output[j] = out;
@@ -210,7 +240,7 @@ async function getProfileData(uuid, profile) {
         clean_name: invCleanNames[i],
         contents: (await util.nbtToJson(profileAPI.members[uuid][label].data)).i
       } //represent the inventory
-      inventory.contents = await getInventoryJSON(inventory.contents)
+      inventory.contents = await getInventoryJSON(inventory.contents,profileData)
       profileData.inventories.push(inventory);
     }
   }

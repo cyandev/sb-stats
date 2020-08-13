@@ -1,7 +1,8 @@
 // constants
 const xp_table = [0,50,125,200,300,500,750,1000,1500,2000,3500,5000,7500,10000,15000,20000,30000,50000,75000,100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000,1100000,1200000,1300000,1400000,1500000,1600000,1700000,1800000,1900000,2000000,2100000,2200000,2300000,2400000,2500000,2600000,2750000,2900000,3100000,3400000,3700000,4000000]
 const xp_table_runecrafting = [0,50,100,125,160,200,250,315,400,500,625,785,1000,1250,1600,2000,2465,3125,4000,5000,6200,7800,9800,12200,15300,19050];
-const excludedSkills = ["carpentry","runecrafting"];
+const xp_table_catacombs = [0,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9]
+const excludedSkills = ["carpentry","runecrafting","catacombs"];
 const skillNames = ["alchemy","combat","enchanting","farming","fishing","foraging","mining","taming"];
 const skillNamesToAchievements = {
   "alchemy": "concoctor",
@@ -188,15 +189,18 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
           img.src = item.faces[face];
           img.onerror = () => {
             console.log("image", img, "failed to load");
-            img.src = item.faces[face] + "&random=" + Date.now();
+            img.src = item.faces[face];
           };
         });
       })
       itemCell.appendChild(itemHead);
       itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
-    } else if (item && item.name) { //if the item isnt empty
+    } else if (item && item.name && item.icon) { //if the item isnt empty
       itemCell.querySelector(".item-icon").src = item.icon;
-      itemCell.querySelector(".item-icon").onerror = () => {console.log("image failed to load", item)};
+      itemCell.querySelector(".item-icon").onerror = () => {
+        console.log("image failed to load", item);
+        itemCell.querySelector(".item-icon").src = item.icon;
+      };
     } else { //if there is no item
       itemCell.querySelector(".item-icon").style.display = "none";
     }
@@ -317,7 +321,7 @@ document.querySelector("#item-hover").style.display = "none";
   document.querySelector("#stats-text").innerHTML += `Fairy Souls: ${profileData.fairy_souls}, `
 
   //load skills
-  if (JSON.stringify(profileData.skills) == "{}") {
+  if (!profileData.skills.combat) {
     let apiWarn = document.createElement("span");
     apiWarn.innerHTML = "API Not Enabled! Skills are achievements which count all profiles (even past/wiped ones).";
     skillNames.forEach(skillName => {
@@ -333,7 +337,7 @@ document.querySelector("#item-hover").style.display = "none";
   Object.keys(profileData.skills).forEach((skillName) => {
     let xpRemaining = profileData.skills[skillName];
     let level = 0;
-    let table = skillName == "runecrafting" ? xp_table_runecrafting : xp_table;
+    let table = skillName == "runecrafting" ? xp_table_runecrafting : skillName == "catacombs" ? xp_table_catacombs: xp_table;
     for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
       xpRemaining -= table[i];
       level = i;
@@ -351,14 +355,22 @@ document.querySelector("#item-hover").style.display = "none";
       element.querySelector(".skillBarFill").style.width = (xpRemaining / table[level+1] * 100) + "%";
       element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(xpRemaining) + " / " + cleanFormatNumber(table[level+1]);
     }
+    //catacombs hide bar and make bigger text
+    if (skillName == "catacombs") {
+      element.style.fontSize = "1.5vw";
+      element.style.lineHeight = "3vw";
+      element.querySelector(".bar").style.display = "none";
+    }
     skills.push({
       name: skillName,
       levelPure: level,
-      levelProgress: level + (table[level+1] ? xpRemaining / table[level+1] : 0)
+      levelProgress: level + (table[level+1] ? xpRemaining / table[level+1] : 0),
+      xpRemaining: xpRemaining
     })
     document.getElementById("skills").appendChild(element);
   })
 
+  console.log(skills)
   //add avg skill lvl to basic stats
   skills = skills.filter(x => !excludedSkills.includes(x.name))
   document.querySelector("#stats-text").innerHTML += `Skill Average: ${(skills.reduce((t,x) => t+x.levelProgress,0) / skills.length).toFixed(2)}, `;
