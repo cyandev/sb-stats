@@ -272,6 +272,7 @@ async function getProfileData(uuid, profile) {
         },
         count: 1,
         rarity: pet.tier,
+        active: pet.active
       }
       //get the pet's level
       let remainingXp = pet.exp;
@@ -298,7 +299,9 @@ async function getProfileData(uuid, profile) {
       MYTHIC: 5,
     }
     profileData.pets.sort((a,b) => {
-      if (rarities[b.rarity] - rarities[a.rarity] != 0) {
+      if (b.active - a.active != 0) {
+        return b.active - a.active;
+      } else if (rarities[b.rarity] - rarities[a.rarity] != 0) {
         return rarities[b.rarity] - rarities[a.rarity];
       } else if (b.level - a.level != 0) {
         return b.level - a.level;

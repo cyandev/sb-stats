@@ -170,6 +170,9 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   contents.forEach((item,i) => {
     //make base itemCell
     let itemCell = document.createElement("div");
+    if (item.active) {
+      itemCell.style.border = "0.1vw solid var(--yellow)"
+    }
     itemCell.innerHTML = `
     <img class="item-icon">
     <span class="item-count"></span>
