@@ -1,21 +1,5 @@
 // constants
-const xp_table = [0,50,125,200,300,500,750,1000,1500,2000,3500,5000,7500,10000,15000,20000,30000,50000,75000,100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000,1100000,1200000,1300000,1400000,1500000,1600000,1700000,1800000,1900000,2000000,2100000,2200000,2300000,2400000,2500000,2600000,2750000,2900000,3100000,3400000,3700000,4000000]
-const xp_table_runecrafting = [0,50,100,125,160,200,250,315,400,500,625,785,1000,1250,1600,2000,2465,3125,4000,5000,6200,7800,9800,12200,15300,19050];
-const xp_table_catacombs = [0,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9];
-const xp_table_slayer = [0,5,10,185,800,4000,15000,80000,300000,600000];
-const xp_table_slayer_wolf = [0,10,15,225,1250,3500,15000,80000,300000,600000];
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
-const skillNames = ["alchemy","combat","enchanting","farming","fishing","foraging","mining","taming"];
-const skillNamesToAchievements = {
-  "alchemy": "concoctor",
-  "combat": "combat",
-  "enchanting": "augmentation",
-  "farming": "harvester",
-  "fishing": "angler",
-  "foraging": "gatherer",
-  "mining": "excavator",
-  "taming": "domesticator"
-}
 //helper functions
 
 /* MC TEXT FORMATTING */
@@ -180,6 +164,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     <img class="item-icon">
     <span class="item-count"></span>
     `
+    itemCell.item = item;
     itemCell.classList.add("item-cell");
     if (item && item.faces) { //if the item has faces, make an itemHead with said faces
       let itemHead = document.createElement("div");
@@ -193,9 +178,11 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       Object.keys(item.faces).forEach(face => {
         Array.from(itemHead.querySelectorAll(`.${face}`)).forEach(img => {
           img.src = item.faces[face];
+          img.failCount = 0;
           img.onerror = () => {
+            img.failCount++;
             console.log("image", img, "failed to load");
-            img.src = item.faces[face];
+            if (img.failCount < 5) setTimeout(() => img.src = item.faces[face], 1000)
           };
         });
       })
@@ -203,12 +190,13 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
     } else if (item && item.name && item.icon) { //if the item isnt empty
       itemCell.querySelector(".item-icon").src = item.icon;
+      itemCell.querySelector(".item-icon").failCount = 0;
       itemCell.querySelector(".item-icon").onerror = () => {
         console.log("image failed to load", item);
-        itemCell.querySelector(".item-icon").src = item.icon;
+        itemCell.querySelector(".item-icon").failCount++;
+        if (itemCell.querySelector(".item-icon").failCount < 5) setTimeout(() => itemCell.querySelector(".item-icon").src = item.icon, 1000);
       };
     } else { //if there is no item
-      itemCell.querySelector(".item-icon").style.display = "none";
     }
 
     if (item && item.count > 1) { //make the count appear if there are more than 1 item in a slot
@@ -230,7 +218,93 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   })
   return grid
 }
-
+function makeInventorySelector(contents) {
+  let view = makeInventoryViewer(contents,{cols: 12,hasHotbar:false});
+  view.style.gridAutoRows = "8vw";
+  for (let cell of view.children) {
+    let checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("item-selector");
+    checkbox.addEventListener("mouseup", (e) => {
+      console.log("box clicked")
+      unlockBox(e);
+      for (let check of view.querySelectorAll(".item-selector")) {
+        if (check != checkbox) check.checked = false;
+      }
+      view.checked = cell.item;
+      if (view.onUpdate) view.onUpdate(); //call event listener
+    })
+    cell.appendChild(checkbox);
+  }
+  if (view.children.length > 1) {
+    view.checked = contents[1];
+    view.children[1].querySelector(".item-selector").checked = true;
+  }
+  return view;
+}
+function makeStatsDisplay(label,stats) {
+  let statToIcon = {
+    "as": "⚔",
+    "cc": "☣",
+    "cd": "☠",
+    "dmg": "",
+    "str": "❁",
+    "int": "✎"
+  }
+  let statToColor = {
+    "as": "var(--yellow)",
+    "cc": "var(--blue)",
+    "cd": "var(--blue)",
+    "dmg": "#000000",
+    "str": "var(--red)",
+    "int": "var(--cyan)"
+  }
+  let statsDisplay = document.createElement("div");
+  statsDisplay.classList.add("stats-display");
+  statsDisplay.update = (stats) => {
+    statsDisplay.innerHTML = ""; //clear it out
+    let domLabel = document.createElement("div");
+    domLabel.classList.add("label");
+    domLabel.innerHTML = label;
+    statsDisplay.appendChild(domLabel);
+    for (let stat in stats) {
+      if (stat in statToIcon) {
+        //create colored preview
+        let icon = document.createElement("div");
+        icon.classList.add("icon")
+        icon.style.background = statToColor[stat];
+        icon.innerHTML = statToIcon[stat] + " " + stat.toUpperCase();
+        statsDisplay.appendChild(icon);
+        let number = document.createElement("div");
+        number.innerHTML = stats[stat];
+        statsDisplay.appendChild(number);
+      }
+    }
+  }
+  statsDisplay.update(stats);
+  return statsDisplay;
+}
+function doDamageCalc(weapon,profileData, stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
+  let baseDmg = (5 + stats.dmg + Math.floor(stats.str / 5)) * (1 + stats.str / 100) * (1 + stats.cd / 100);
+  let damageMultiplier = 1 + profileData.skills.find(skill => skill.name=="combat").levelPure * 0.04;
+  let enchantmentsBuffs = {
+    "sharpness": 0.05,
+    "smite": 0.08 * enemy.undead,
+    "bane_of_arthropods": 0.08 * enemy.spider,
+    "ender_slayer": 0.12 * enemy.ender,
+    "giant_killer": enemy.gk * 0.25 / (weapon.enchantments ? weapon.enchantments["giant_killer"]: 1), //capped at 25% no matter the level
+    "first_strike": 0.25,
+    "critical": 0.1,
+  }
+  for (let enchant in weapon.enchantments) {
+    if (enchantmentsBuffs[enchant]) {
+      damageMultiplier += enchantmentsBuffs[enchant] * weapon.enchantments[enchant];
+      console.log(enchant, enchantmentsBuffs[enchant] * weapon.enchantments[enchant])
+    }
+  }
+  console.log(damageMultiplier, baseDmg * damageMultiplier)
+  return baseDmg * damageMultiplier;
+}
 /* Hover Box Listeners + Functions */
 var mouseX = 0;
 var mouseY = 0;
@@ -275,7 +349,7 @@ function updateBoxContents() {
   document.querySelector("#item-hover").style.display = "initial";
   document.querySelector("#item-hover-header").innerHTML = boxItem.name.split(/§./).join("");
   document.querySelector("#item-hover-lore").innerHTML = "";
-  if (boxItem.lore && boxItem.lore.length > 0) document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("<br>")));
+  if (boxItem.lore && boxItem.lore.length > 0) document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("§r<br>")));
 
   let rarityColorMap = {
     "COMMON": "§8",
@@ -327,60 +401,33 @@ document.querySelector("#item-hover").style.display = "none";
   document.querySelector("#stats-text").innerHTML += `Fairy Souls: ${profileData.fairy_souls}, `
 
   //load skills
-  if (!profileData.skills.combat) {
-    let apiWarn = document.createElement("span");
-    apiWarn.innerHTML = "API Not Enabled! Skills are achievements which count all profiles (even past/wiped ones).";
-    skillNames.forEach(skillName => {
-      let xp = 0;
-      for (let i = 0; i <= data.achievements["skyblock_" + skillNamesToAchievements[skillName]]; i++) {
-        xp+= xp_table[i];
-      }
-      profileData.skills[skillName] = xp;
-    })
-    document.querySelector("#skills").appendChild(apiWarn);
-  }
-  let skills = [];
-  Object.keys(profileData.skills).forEach((skillName) => {
-    let xpRemaining = profileData.skills[skillName];
-    let level = 0;
-    let table = skillName == "runecrafting" ? xp_table_runecrafting : skillName == "catacombs" ? xp_table_catacombs: xp_table;
-    for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
-      xpRemaining -= table[i];
-      level = i;
-    }
+  profileData.skills.forEach((skill) => {
     let element = document.createElement("div");
     element.classList.add("skill")
     element.innerHTML = "<span class='skillName'></span><span class='skillLevel'></span><div class='bar'><span class='skillBarFill'></span><span class='skillBarText'></span></div>" //import some template HTML into div
-    element.querySelector(".skillName").innerHTML = skillName.charAt(0).toUpperCase() + skillName.slice(1);
-    element.querySelector(".skillLevel").innerHTML = level;
-    if (level == table.length - 1) {
+    element.querySelector(".skillName").innerHTML = skill.name.charAt(0).toUpperCase() + skill.name.slice(1);
+    element.querySelector(".skillLevel").innerHTML = skill.levelPure;
+    if (skill.levelPure == skill.maxLevel) {
       element.querySelector(".skillBarFill").style.width = "100%";
       element.querySelector(".skillBarFill").style.backgroundColor = "#b3920d"
-      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(xpRemaining)
+      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(skill.xpRemaining)
     } else {
-      element.querySelector(".skillBarFill").style.width = (xpRemaining / table[level+1] * 100) + "%";
-      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(xpRemaining) + " / " + cleanFormatNumber(table[level+1]);
+      element.querySelector(".skillBarFill").style.width = (skill.progress * 100) + "%";
+      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(skill.xpRemaining) + " / " + cleanFormatNumber(skill.nextLevel);
     }
     //catacombs hide bar and make bigger text
-    if (skillName == "catacombs") {
+    if (skill.name == "catacombs") {
       element.style.fontSize = "1.5vw";
       element.style.lineHeight = "3vw";
       element.querySelector(".bar").style.display = "none";
     }
-    skills.push({
-      name: skillName,
-      levelPure: level,
-      levelProgress: level + (table[level+1] ? xpRemaining / table[level+1] : 0),
-      xpRemaining: xpRemaining
-    })
     document.getElementById("skills").appendChild(element);
   })
 
-  console.log(skills)
   //add avg skill lvl to basic stats
-  skills = skills.filter(x => !excludedSkills.includes(x.name))
-  document.querySelector("#stats-text").innerHTML += `Skill Average: ${(skills.reduce((t,x) => t+x.levelProgress,0) / skills.length).toFixed(2)}, `;
-  document.querySelector("#stats-text").innerHTML += `True Skill Average: ${(skills.reduce((t,x) => t+x.levelPure,0) / skills.length).toFixed(2)}`
+  profileData.skills = profileData.skills.filter(x => !excludedSkills.includes(x.name))
+  document.querySelector("#stats-text").innerHTML += `Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelProgress,0) / profileData.skills.length).toFixed(2)}, `;
+  document.querySelector("#stats-text").innerHTML += `True Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelPure,0) / profileData.skills.length).toFixed(2)}`
 
 
   //load armor
@@ -436,6 +483,7 @@ document.querySelector("#item-hover").style.display = "none";
   document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false}));
 
   //load slayers
+  document.querySelector("#slayer-total").innerHTML = (Object.keys(profileData.slayer).reduce((t,x) => profileData.slayer[x].xp + t, 0)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Slayer XP"
   document.querySelector("#slayer-grid").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer).length},1fr)`;
   let slayerToBoss = {
     "spider": "Tarantula Broodfather",
@@ -443,14 +491,6 @@ document.querySelector("#item-hover").style.display = "none";
     "zombie": "Revenant Horror"
   }
   for (let slayer in profileData.slayer) {
-    //get level and xpRemaining
-    let xpRemaining = profileData.slayer[slayer].xp;
-    let level = 0;
-    let table = slayer == "wolf" ? xp_table_slayer_wolf :  xp_table_slayer;
-    for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
-      xpRemaining -= table[i];
-      level = i; 
-    }
     let slayerDisplay = document.createElement("div");
     slayerDisplay.classList.add("slayer");
     slayerDisplay.innerHTML = `
@@ -461,9 +501,10 @@ document.querySelector("#item-hover").style.display = "none";
     <div class='slayer-bar'>
       <div class='slayer-bar-fill'></div>
       <div class='slayer-bar-text'></div>
+      <span id="test"></span>
     </div>`
     //make slayer header
-    slayerDisplay.querySelector(".slayer-header").innerHTML = slayer.charAt(0).toUpperCase() + slayer.slice(1) + " " + level;
+    slayerDisplay.querySelector(".slayer-header").innerHTML = slayer.charAt(0).toUpperCase() + slayer.slice(1) + " " + profileData.slayer[slayer].level;
     //make kills grid
     slayerDisplay.querySelector(".slayer-kills").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer[slayer].boss_kills).length},1fr)`;
     for (let tier in profileData.slayer[slayer].boss_kills) {
@@ -477,16 +518,114 @@ document.querySelector("#item-hover").style.display = "none";
       slayerDisplay.querySelector(".slayer-kills").appendChild(label)
     }
     //make bar
-    if (level == table.length - 1) {
+    if (profileData.slayer[slayer].level == profileData.slayer[slayer].maxLevel) {
       slayerDisplay.querySelector(".slayer-bar-fill").style.width = "100%";
       slayerDisplay.querySelector(".slayer-bar-fill").style.backgroundColor = "#b3920d"
-      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(xpRemaining)
+      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(profileData.slayer[slayer].xpRemaining)
     } else {
-      slayerDisplay.querySelector(".slayer-bar-fill").style.width = (xpRemaining / table[level+1] * 100) + "%";
-      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(xpRemaining) + " / " + cleanFormatNumber(table[level+1]);
+      slayerDisplay.querySelector(".slayer-bar-fill").style.width = (profileData.slayer[slayer].xpRemaining / profileData.slayer[slayer].nextLevel * 100) + "%";
+      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(profileData.slayer[slayer].xpRemaining) + " / " + cleanFormatNumber(profileData.slayer[slayer].nextLevel);
     }
     document.querySelector("#slayer-grid").appendChild(slayerDisplay);
   }
+  /* COMBAT SECTION */
+  //make weapon section + stat display
+  if (profileData.inventories.length > 1) {
+    let weaponSelector = makeInventorySelector(profileData.weapons);
+    let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
+    weaponSelector.onUpdate = () => {
+      console.log(weaponSelector.checked)
+      weaponStats.update(weaponSelector.checked.stats);
+      getTotalStats()
+    }
+    document.querySelector("#weapon-select").appendChild(weaponSelector);
+    //add static stats, the ones that dont change based on dungeon/non-dungeon
+    staticStatToName = {
+      "base": "Base Stats",
+      "fairy_souls": "Fairy Souls",
+      "skills": "Skills",
+      "slayer": "Slayer"
+    }
+    for (let stat in profileData.staticStats) {
+      document.querySelector("#stats-separate").appendChild(makeStatsDisplay(staticStatToName[stat], profileData.staticStats[stat]))
+    }
+    //add talisman stats
+    let talisArr = Object.keys(profileData.talis).map(x => profileData.talis[x]);
+    let talisStats = {
+      "str": 0,
+      "cc": 0,
+      "cd": 0,
+      "as": 0,
+      "int": 0,
+    }
+    talisArr.forEach(tali => {
+      for (let stat in tali.stats) {
+        talisStats[stat] += Number(tali.stats[stat]);
+      }
+    })
+    for( let stat in talisStats) {
+      if (talisStats[stat] == 0) {
+        delete talisStats[stat];
+      }
+    }
+    document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
+    //add armor stats
+    let armorStats = {
+      "str": 0,
+      "cc": 0,
+      "cd": 0,
+      "as": 0,
+      "int": 0,
+    }
+    profileData.inventories.find((x) => x.name == "inv_armor").contents.forEach((item) => {
+      for (let stat in item.stats) {
+        armorStats[stat] += Number(item.stats[stat]);
+      }
+    })
+    for( let stat in armorStats) {
+      if (armorStats[stat] == 0) {
+        delete armorStats[stat];
+      }
+    }
+    document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Armor", armorStats));
+    //add weapon stats
+    document.querySelector("#stats-separate").appendChild(weaponStats);
+    let totalStats = makeStatsDisplay("Total");
+    document.querySelector("#stats-combined").appendChild(totalStats);
+    function getTotalStats() {
+      let statsBase = {
+        "dmg": 0,
+        "str": 0,
+        "cc": 0,
+        "cd": 0,
+        "as": 0,
+        "int": 0,
+      }
+      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponSelector.checked.stats: {}]);
+      for (let statMap of stats) {
+        for (let stat in statMap) {
+          statsBase[stat] += Number(statMap[stat]);
+        }
+      }
+      for( let stat in statsBase) {
+        if (statsBase[stat] == 0) {
+          delete statsBase[stat];
+        }
+      }
+      totalStats.update(statsBase);
+      if (weaponSelector.checked) {
+        document.querySelector("#zealot-dmg-number").innerHTML = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{ender:true,gk:true}));
+        document.querySelector("#crypt-ghoul-dmg-number").innerHTML = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{undead:true}));
+      }
+    }
+    getTotalStats();
+  } else {
+    document.querySelector("#combat").innerHTML = `
+    <div class="section-label">Combat</div>
+    Inventories API Not Enabled!
+    `
+  }
+
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";

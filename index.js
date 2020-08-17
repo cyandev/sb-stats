@@ -16,7 +16,6 @@ const minecraftItems = require('minecraft-items')
 let util = require("./util.js");
 const constants = require("./const.js");
 let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //make a 500ms delay between requests to always be at the 120 reqs/min rate limit
-
 async function getPlayerDataFirstTime(name) {
   let start = Date.now()
   let playerData = {};
@@ -65,7 +64,7 @@ async function getPlayerDataFirstTime(name) {
 
   playerData.profiles = {};
   for (let profile of profilesArr) {
-    playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile);
+    playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile,playerData);
   }
   console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`)
   return playerData;
@@ -127,6 +126,7 @@ async function getInventoryJSON(contents,profileData) {
         }
         if (out.lore && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
           out.tags.push("WEAPON");
+          out.enchantments = item.tag.ExtraAttributes.enchantments;
         }
         //add stats / cata level
         let statNames = {
@@ -148,17 +148,30 @@ async function getInventoryJSON(contents,profileData) {
           Object.keys(statNames).forEach((stat) => {
             out.lore.forEach((loreLine) => {
               loreLine = loreLine.split(/§./).join(""); //strip formatting
-              let match = loreLine.match(RegExp( stat + String.raw`: \+([\d\.]+)( HP|\%)?(?: \(\w+ \+([\d\.]+)\2\) *)?(?: \(\+[\d\.]+\2\) *)?(?:\(\+([\d\.]+)\2?\))?`)); //match with crazy regexp
+              let match = loreLine.match(RegExp( stat + String.raw`: ([+-\d\.]+)( HP|\%)?(?: \(\w+ ([+-\d\.]+)\2\) *)?(?: \([+-\d\.]+\2\) *)?(?:\(([+-\d\.]+)\2?\))?`)); //match with crazy regexp
               if (match) {
                 if (match.index != 0) return; //make sure a match includes the start of the string so "Bonus Attack Speed" doesnt trigger "Speed"
-                out.stats[statNames[stat]] = match[1]; //the non-dungeon stat
-                out.baseStats[statNames[stat]] = match[1] - (match[3] ? match[3] : 0)
+                out.stats[statNames[stat]] = Number(match[1]); //the non-dungeon stat
+                out.baseStats[statNames[stat]] = Number(match[1]) - (match[3] ? Number(match[3]) : 0)
                 if (match[4] && !profileData.skills.catacombs && out.tags.includes("DUNGEON")) {
-                  profileData.skills.catacombs = Math.round((match[4] / match[1] - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
+                  profileData.skills.catacombs = Math.round((Number(match[4]) / Number(match[1]) - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
                 }
               }
             })
           })
+        }
+        //item specific stats
+        if (out.id == "DAY_CRYSTAL" || out.id == "NIGHT_CRYSTAL") {
+          out.stats.str += 2.5;
+          out.stats.def += 2.5;
+          out.baseStats.str += 2.5;
+          out.baseStats.def += 2.5;
+        }
+        if (out.id == "GRAVITY_TALISMAN") {
+          out.stats.str += 10;
+          out.stats.def += 10;
+          out.baseStats.str += 10;
+          out.baseStats.def += 10;
         }
         //check if player head, if so get the skin
         if (item.tag.SkullOwner) {
@@ -188,7 +201,24 @@ async function getInventoryJSON(contents,profileData) {
         if (out.lore && out.lore[out.lore.length - 1].includes("CCESSORY") && !profileData.talis[out.id]) { //ccessory instead of accessory because of crab hat
           profileData.talis[out.id] = out;
         }
-
+        //check if defuse kit
+        if (out.id == "DEFUSE_KIT") {
+          let trapsDefused = out.lore[5].slice(19);
+          let kitInt = 0;
+          if (trapsDefused >= 1) {kitInt  = 1};
+          if (trapsDefused >= 5) {kitInt = 2};
+          if (trapsDefused >= 10) {kitInt = 3};
+          if (trapsDefused >= 15) {kitInt = 4};
+          if (trapsDefused >= 20) {kitInt = 5};
+          if (trapsDefused >= 25) {kitInt = 6};
+          if (trapsDefused >= 30) {kitInt = 7};
+          if (trapsDefused >= 35) {kitInt = 8};
+          if (trapsDefused >= 40) {kitInt = 9};
+          if (trapsDefused >= 45) {kitInt = 10};
+          if (!profileData.defuseKitInt || kitInt > profileData.defuseKitInt) {
+            profileData.defuseKitInt = kitInt;
+          }
+        }
         //check for weapon tag, if so, add to weapons
         if (out.tags.includes("WEAPON")) {
           profileData.weapons.push(out);
@@ -203,7 +233,7 @@ async function getInventoryJSON(contents,profileData) {
   return output;
 }
 
-async function getProfileData(uuid, profile) {
+async function getProfileData(uuid, profile, playerData) {
   try {
     var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`)).data.profile;
   } catch (err) {
@@ -236,22 +266,39 @@ async function getProfileData(uuid, profile) {
         }
       }
     })
+
+    //should be integrated into above loop, copied from client
+    for (let slayer in profileData.slayer) {
+      //get level and xpRemaining
+      let xpRemaining = profileData.slayer[slayer].xp;
+      let level = 0;
+      let table = slayer == "wolf" ? constants.xp_table_slayer_wolf :  constants.xp_table_slayer;
+      for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
+        xpRemaining -= table[i];
+        level = i;
+      }
+      profileData.slayer[slayer].level = level;
+      profileData.slayer[slayer].xpRemaining = xpRemaining;
+      profileData.slayer[slayer].maxLevel = table.length - 1;
+      profileData.slayer[slayer].nextLevel = table[level + 1];
+    }
   }
-
-  //get skills
-  profileData.skills = {};
-  Object.keys(profileAPI.members[uuid]).filter(x => x.includes("experience_skill_")).forEach(skill => {
-    profileData.skills[skill.slice(17)] = profileAPI.members[uuid][skill]
-  })
-
 
   //get fairy souls
   profileData.fairy_souls = profileAPI.members[uuid].fairy_souls_collected
 
+  //pre-define skills
+  profileData.skills = {};
 
   //setup combat "inventories" to find talismans, weapons, and armor
   profileData.talis = {};
-  profileData.weapons = [];
+  profileData.weapons = [{
+    stats: {"dmg":5},
+    lore: ["Your Fist!"],
+    name: "None",
+    rarity: "SPECIAL",
+    icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAHlBMVEUAAAC/v7+xAADCAADOa23PAADPFx3TUVTXNznjAADsVN7GAAAAAnRSTlMAAHaTzTgAAABuSURBVChTfc5BEcQgEETRtvAtjIVYwAIWYmEtYKHd5gAhtcVA3/47TI3E36QFgDIHZFA8d6dQ7EuSpGaHUrgYXXcAo3WE5qojNFcdofcBRu/hbTlIobkCwC8FFX/t0Apwey4gA2KODfSn1C8v8AANKW0LVmxNTAAAAABJRU5ErkJggg=="
+    }];
   //get inventories
   profileData.inventories = [];
   let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor"];
@@ -268,6 +315,56 @@ async function getProfileData(uuid, profile) {
       profileData.inventories.push(inventory);
     }
   }
+
+  //get skills (needs to be rewritten. some code moved from client -> server)
+  Object.keys(profileAPI.members[uuid]).filter(x => x.includes("experience_skill_")).forEach(skill => {
+    profileData.skills[skill.slice(17)] = profileAPI.members[uuid][skill]
+  })
+  if (!profileData.skills.combat) {
+    constants.skillNames.forEach(skillName => {
+      let xp = 0;
+      for (let i = 0; i <= playerData.achievements["skyblock_" + constants.skillNamesToAchievements[skillName]]; i++) {
+        xp+= constants.xp_table[i];
+      }
+      profileData.skills[skillName] = xp;
+    })
+  }
+  let skills = [];
+  Object.keys(profileData.skills).forEach((skillName) => {
+    let xpRemaining = profileData.skills[skillName];
+    let level = 0;
+    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : skillName == "catacombs" ? constants.xp_table_catacombs: constants.xp_table;
+    for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
+      xpRemaining -= table[i];
+      level = i;
+    }
+    skills.push({
+      name: skillName,
+      levelPure: level,
+      levelProgress: level + (table[level+1] ? xpRemaining / table[level+1] : 0),
+      xpRemaining: xpRemaining,
+      progress: (xpRemaining / table[level+1]),
+      maxLevel: table.length - 1,
+      nextLevel: table[level + 1]
+    })
+  })
+
+  //sort skills into skylea order
+  let skillOrderer = {
+    "taming": 10,
+    "farming": 9,
+    "mining": 8,
+    "combat": 7,
+    "foraging": 6,
+    "fishing": 5,
+    "enchanting": 4,
+    "alchemy": 3,
+    "carpentry": 2,
+    "runecrafting": 1,
+    "catacombs": 0
+  }
+  skills.sort((a,b) => skillOrderer[b.name] - skillOrderer[a.name])
+  profileData.skills = skills;
 
   //get pets
   profileData.pets = profileAPI.members[uuid].pets;
@@ -336,6 +433,57 @@ async function getProfileData(uuid, profile) {
 
   } else {
     profileData.pets = [];
+  }
+
+  //get static stats: unchanging ones like the ones from slayer, skills, fairy souls, etc.
+  profileData.staticStats = {};
+
+  //base stats
+  profileData.staticStats.base = {
+    cc: 30,
+    cd: 50,
+    int: 0,
+  }
+  //apply melody's hair under "base stats"
+  if (profileData.talis["MELODY_HAIR"]) {
+    profileData.staticStats.base.int += 26;
+  }
+  //apply defuse kit int under "base stats"
+  if (profileData.defuseKitInt) {
+    profileData.staticStats.base.int += profileData.defuseKitInt;
+  }
+  
+  //fairy soul static stats
+  profileData.staticStats.fairy_souls = {
+    str: 0,
+  }
+  for (let i = 0; i < Math.floor(profileData.fairy_souls / 5); i++){
+      profileData.staticStats.fairy_souls.str += (i + 1) % 5 == 0 ? 2 : 1;
+  }
+
+  //skills static stats
+  profileData.staticStats.skills = {
+    cc: 0,
+    str: 0,
+    int: 0
+  }
+  profileData.skills.forEach(skill => {
+    if (skill.name in constants.skillStats) {
+      for (let i = 0; i <= skill.levelPure; i++) {
+        profileData.staticStats.skills[constants.skillStats[skill.name].stat] += constants.skillStats[skill.name].table[i]
+      }
+    }
+  })
+
+  //slayers static stats
+  profileData.staticStats.slayer = {
+    cd: 0,
+    cc: 0
+  };
+  for (let slayer in profileData.slayer) {
+    for (let stat in constants.slayerStats[slayer]) {
+      profileData.staticStats.slayer[stat] += constants.slayerStats[slayer][stat][profileData.slayer[slayer].level]
+    }
   }
   return profileData
 }

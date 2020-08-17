@@ -258,6 +258,14 @@ body {
 #slayer {
   height: auto;
   width: 100%;
+  position: relative;
+}
+#slayer-total {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 0.5vw;
+  font-size: 1.5vw
 }
 #slayer-grid {
   display: grid;
@@ -319,10 +327,108 @@ body {
 }
 .slayer .slayer-bar .slayer-bar-text {
   text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: inherit;
+  width: 100%;
+}
+#combat {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+.combat-section {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  line-height: 3.5vw;
+  font-size: 2vw;
+}
+#combat-stats-dmg-wrapper {
+  width: 100%;
+  height: 32.5vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+#combat-stats {
+  height:21.5vw;
+  width: 100%;
+  margin-bottom: 1vw;
+  border: 0.1vw solid var(--dark-white);
+  border-radius: 0.5vw;
+  display: flex;
+  justify-content: space-around;
+}
+#stats-separate {
+  display: flex;
+  width: 85%;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+#stats-combined {
+  width: 15%;
+  height: auto;
+  border-left: 0.1vw solid var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+#combat-dmg {
+  border: 0.1vw solid var(--dark-white);
+  border-radius: 0.5vw;
+  height: 10vw;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+#combat-dmg > div {
+  width: 20vw;
+  height: 10vw;
+}
+#combat-dmg > div .dmg-header {
+  width: 100%;
+  height: 3vw;
+  line-height: 3vw;
+  font-size: 2vw;
+  display: block;
+  text-align: center;
+}
+#combat-dmg > div .dmg-number {
+  width: 100%;
+  height: 7vw;
+  font-size: 4vw;
+  line-height: 7vw;
+  text-align: center;
+  display: block;
 }
 
 
 
+
+.stats-display {
+  display: grid;
+  width: 10vw;
+  grid-template-columns: 50% 50%;
+  grid-auto-rows: 3vw;
+  text-align: center;
+}
+.stats-display > div {
+  height: 2vw;
+  margin: 0.25vw 0;
+  border-radius: 0.5vw;
+  font-size: 1.35vw
+}
+.stats-display .label {
+  grid-column: 1 / -1;
+}
 
 /* inv-view */
 .inv-view {
@@ -330,12 +436,13 @@ body {
 }
 .inv-view .item-cell {
   position: relative;
-  width: 100%;
-  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
   border: 0.1vw solid var(--dark-white);
   background: var(--dark-gray);
   border-radius: 10%;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
 }
@@ -349,7 +456,16 @@ body {
 .inv-view .item-cell .item-icon {
   image-rendering: pixelated;
   width: 80%;
-  height: 80%;
+  margin: 10%;
+}
+.inv-view .item-cell .item-selector {
+  width: 1vw;
+  height: 1vw;
+  margin-bottom: 1vw;
+  background: var(--dark-white);
+}
+.inv-view .item-cell .item-selector:checked {
+  background: var(--yellow);
 }
 .inv-view .item-cell .item-head {
   position: relative;
@@ -399,8 +515,7 @@ body {
   border-radius: 1vw 1vw 0 0;
   font-size: 1.5vw;
   line-height: 2vw;
-  height: 2vw;
-  overflow-x: auto;
+  height: auto;
 }
 #item-hover-lore {
   overflow-y: auto;
