@@ -380,6 +380,9 @@ document.querySelector("#item-hover").style.display = "none";
   let username = window.location.href.split("/")[4];
   let profile = window.location.href.split("/").length > 4 ? window.location.href.split("/")[5] : "default"
   let data = await (await fetch(window.location.origin + "/api/data/" + username)).json();
+  if (!data) {
+    window.location.href = window.location.origin + "?err=Invalid Player!"
+  }
   username = data.name;
   console.log(data)
   let profileArr = Object.keys(data.profiles).map((x) => data.profiles[x]);

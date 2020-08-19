@@ -516,6 +516,7 @@ body {
   font-size: 1.5vw;
   line-height: 2vw;
   height: auto;
+  padding: 0 1vw;
 }
 #item-hover-lore {
   overflow-y: auto;

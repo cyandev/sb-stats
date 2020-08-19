@@ -28,7 +28,12 @@ async function getPlayerDataFirstTime(name) {
   try {
     var playerAPI = (await reqScheduler.get(`https://api.hypixel.net/player?key=${process.env.API_KEY}&uuid=${uuid}`, 0)).data.player; // /player api request
   } catch (err) {
-    console.log("err getting /player api endpoint")
+    console.log("err getting /player api endpoint");
+    return false;
+  }
+  //catch lack of player api
+  if (!playerAPI) {
+    return false;
   }
   playerData.name = playerAPI.displayname;
   playerData.plus = playerAPI.rankPlusColor ? playerAPI.rankPlusColor.replace("DARK_",""): "";
