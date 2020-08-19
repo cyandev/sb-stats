@@ -13,6 +13,11 @@
   --purple: #9e40bd;
   --pink: #ba569e;
 }
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
 /* loading */
 .lds-ellipsis {
   display: inline-block;
@@ -350,7 +355,6 @@ body {
 }
 #combat-stats-dmg-wrapper {
   width: 100%;
-  height: 32.5vw;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
@@ -379,6 +383,40 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-around;
+}
+#pot-select {
+  display: flex;
+  justify-content: space-around;
+  color: white;
+  line-height: 2vw;
+  font-size: 1.5vw;
+  width: 100%;
+  margin-bottom: 1vw;
+  border: 0.1vw solid var(--white);
+  border-radius: 0.5vw;
+  padding: 1vw;
+}
+#pot-select .pot {
+  display: flex;
+  align-items: center;
+}
+#pot-select .pot input {
+  width: 2vw;
+  height: 2vw;
+  margin: 0 0.5vw;
+}
+#pot-select .pot input[type=number] {
+  background: var(--dark-white);
+  color: black;
+  font-size: 1.5vw;
+  text-align: center;
+  border: none;
+}
+#pot-select .pot input[type=checkbox] {
+  background: var(--dark-white);
+}
+#pot-select .pot input[type=checkbox]:checked {
+  background: var(--yellow);
 }
 #combat-dmg {
   border: 0.1vw solid var(--dark-white);

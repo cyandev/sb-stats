@@ -468,8 +468,8 @@ async function getProfileData(uuid, profile, playerData) {
 
   //skills static stats
   profileData.staticStats.skills = {
-    cc: 0,
     str: 0,
+    cc: 0,
     int: 0
   }
   profileData.skills.forEach(skill => {

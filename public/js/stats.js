@@ -262,6 +262,7 @@ function makeStatsDisplay(label,stats) {
   let statsDisplay = document.createElement("div");
   statsDisplay.classList.add("stats-display");
   statsDisplay.update = (stats) => {
+    statsDisplay.stats = stats;
     statsDisplay.innerHTML = ""; //clear it out
     let domLabel = document.createElement("div");
     domLabel.classList.add("label");
@@ -572,6 +573,52 @@ document.querySelector("#item-hover").style.display = "none";
       }
     }
     document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
+    //potion stats
+    let potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
+    document.querySelector("#stats-separate").appendChild(potsStats);
+    for (let checkbox of document.querySelectorAll("#pot-select input")) {
+      checkbox.addEventListener("click", getPotsStats);
+      checkbox.addEventListener("input", getPotsStats);
+    }
+    function getPotsStats() {
+      let stats = {
+        "str": 0,
+        "cc": 0,
+        "cd": 0
+      }
+      if (document.querySelector("#dungeon-pot").checked) {
+        let dungeonPots = {
+          1: {
+            "str": 20,
+            "cc": 10,
+            "cd": 10
+          },
+          2: {
+            "str": 20,
+            "cc": 10,
+            "cd": 10
+          },
+          3: {
+            "str": 20,
+            "cc": 15,
+            "cd": 20
+          },
+          4: {
+            "str": 30,
+            "cc": 15,
+            "cd": 20
+          },
+        }
+        stats = dungeonPots[document.querySelector("#dungeon-pot-num").value]
+      }
+      if (document.querySelector("#godsplash-pot").checked) {
+        stats.str += 78 //str 8 carbonated
+        stats.cc += 25; //crit
+        stats.cd += 80 //crit + spirit
+      }
+      potsStats.update(stats)
+      getTotalStats()
+    }
     //add armor stats
     let armorStats = {
       "str": 0,
@@ -595,7 +642,7 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#stats-separate").appendChild(weaponStats);
     let totalStats = makeStatsDisplay("Total");
     document.querySelector("#stats-combined").appendChild(totalStats);
-    function getTotalStats() {
+    function getTotalStats() { //redo this
       let statsBase = {
         "dmg": 0,
         "str": 0,
@@ -604,7 +651,7 @@ document.querySelector("#item-hover").style.display = "none";
         "as": 0,
         "int": 0,
       }
-      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponSelector.checked.stats: {}]);
+      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponSelector.checked.stats: {}, potsStats.stats]);
       for (let statMap of stats) {
         for (let stat in statMap) {
           statsBase[stat] += Number(statMap[stat]);
