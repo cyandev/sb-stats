@@ -107,12 +107,14 @@ async function getInventoryJSON(contents,profileData) {
           name: item.tag.display ? item.tag.display.Name : "",
           lore: item.tag.display ? item.tag.display.Lore : [],
           id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
-          icon: mcItem ? "data:image/png;base64," + mcItem.icon : "",
           reforge: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.modifier : "none",
           count: item.Count,
+          inventoryClass: "icon-" + item.id + "_" + item.Damage,
           tags: []
         }
-
+        if (item.tag.ExtraAttributes && item.tag.ExtraAttributes.item_durability) {
+          out.inventoryClass = "icon-" + mcItem.id.replace(":","_")
+        }
         //add rarity to the item
         let rarityMap = {
           "§f": "COMMON",
@@ -185,7 +187,6 @@ async function getInventoryJSON(contents,profileData) {
         }
         //check if player head, if so get the skin
         if (item.tag.SkullOwner) {
-          out.icon = `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`; //provide icon for fallback
           out.faces = {
             face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`,
             side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=1`,
@@ -195,7 +196,7 @@ async function getInventoryJSON(contents,profileData) {
 
         //check if leather, if so, set the icon to a leather icon
         if(mcItem && mcItem.name && mcItem.name.includes("Leather") && item.tag.ExtraAttributes.color) {
-          out.icon =  `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${JSON.stringify(item.tag.ExtraAttributes.color.split(":"))}`
+          out.icon =  `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${encodeURIComponent(JSON.stringify(item.tag.ExtraAttributes.color.split(":")))}`
         }
 
         //check if backpack, if so, add the contents
@@ -307,7 +308,7 @@ async function getProfileData(uuid, profile, playerData) {
     lore: ["Your Fist!"],
     name: "None",
     rarity: "SPECIAL",
-    icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAHlBMVEUAAAC/v7+xAADCAADOa23PAADPFx3TUVTXNznjAADsVN7GAAAAAnRSTlMAAHaTzTgAAABuSURBVChTfc5BEcQgEETRtvAtjIVYwAIWYmEtYKHd5gAhtcVA3/47TI3E36QFgDIHZFA8d6dQ7EuSpGaHUrgYXXcAo3WE5qojNFcdofcBRu/hbTlIobkCwC8FFX/t0Apwey4gA2KODfSn1C8v8AANKW0LVmxNTAAAAABJRU5ErkJggg=="
+    inventoryClass: "icon-166_0"
     }];
   //get inventories
   profileData.inventories = [];

@@ -78,6 +78,7 @@ async function getColoredItem(item,color) {
       itemBase.bitmap.data[idx+2] = color[2] * itemBase.bitmap.data[idx + 2] / 255;
     });
     itemBase.composite(itemOverlay,0,0);
+    itemBase.resize(128,128,jimp.RESIZE_NEAREST_NEIGHBOR);
     let imgBuffer = await itemBase.getBufferAsync(jimp.MIME_PNG);
     itemCache[item+color] = imgBuffer;
     res(imgBuffer);

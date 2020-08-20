@@ -149,6 +149,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   }
   //create the grid
   let grid = document.createElement("div");
+  grid.style.setProperty("--cellSize", parseInt(opt.cellSize) * Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100);
   grid.classList.add("inv-view")
   grid.style.display = "inline-grid";
   grid.style.gridTemplateColumns = `repeat(${opt.cols}, ${opt.cellSize})`;
@@ -161,7 +162,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       itemCell.style.border = "0.1vw solid var(--yellow)"
     }
     itemCell.innerHTML = `
-    <img class="item-icon">
+    <div class="item-icon"></div>
     <span class="item-count"></span>
     `
     itemCell.item = item;
@@ -188,15 +189,12 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       })
       itemCell.appendChild(itemHead);
       itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
-    } else if (item && item.name && item.icon) { //if the item isnt empty
-      itemCell.querySelector(".item-icon").src = item.icon;
-      itemCell.querySelector(".item-icon").failCount = 0;
-      itemCell.querySelector(".item-icon").onerror = () => {
-        console.log("image failed to load", item);
-        itemCell.querySelector(".item-icon").failCount++;
-        if (itemCell.querySelector(".item-icon").failCount < 5) setTimeout(() => itemCell.querySelector(".item-icon").src = item.icon, 1000);
-      };
+    } else if (item && item.icon) { //if theres a fancy icon
+      itemCell.querySelector(".item-icon").style.backgroundImage = `url(${item.icon})`
+    } else if (item && item.inventoryClass) { //if the item isnt empty
+      itemCell.querySelector(".item-icon").classList.add(item.inventoryClass);
     } else { //if there is no item
+      itemCell.querySelector(".item-icon").style.backgroundImage = "none";
     }
 
     if (item && item.count > 1) { //make the count appear if there are more than 1 item in a slot
@@ -210,7 +208,6 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
       if (boxLocked) {
         setTimeout(() => {
           window.addEventListener("mousedown", unlockBox);
-          console.log("added unlock listener")
         }, 1);
       }
     });
@@ -222,11 +219,11 @@ function makeInventorySelector(contents) {
   let view = makeInventoryViewer(contents,{cols: 12,hasHotbar:false});
   view.style.gridAutoRows = "8vw";
   for (let cell of view.children) {
+    cell.querySelector(".item-icon").style.transform += "translate(-50%, -50%) translateY(-1vw) scale(calc(var(--cellSize) / 128 * 0.8))"
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.classList.add("item-selector");
     checkbox.addEventListener("mouseup", (e) => {
-      console.log("box clicked")
       unlockBox(e);
       for (let check of view.querySelectorAll(".item-selector")) {
         if (check != checkbox) check.checked = false;
@@ -540,7 +537,6 @@ document.querySelector("#item-hover").style.display = "none";
     let weaponSelector = makeInventorySelector(profileData.weapons);
     let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
-      console.log(weaponSelector.checked)
       weaponStats.update(weaponSelector.checked.stats);
       getTotalStats()
     }
