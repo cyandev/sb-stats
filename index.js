@@ -25,6 +25,9 @@ async function getPlayerDataFirstTime(name) {
   } catch (err) {
     return false;
   }
+  if (!uuid) { //catch no uuid
+    return false;
+  }
   try {
     var playerAPI = (await reqScheduler.get(`https://api.hypixel.net/player?key=${process.env.API_KEY}&uuid=${uuid}`, 0)).data.player; // /player api request
   } catch (err) {

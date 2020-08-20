@@ -33,7 +33,10 @@ class RequestScheduler {
         }
         req.res(axiosResp); //request from the url and resolve the promise returned from .get with the data from the web request
       } catch (err) {
-        this.reqs[req.priority].push(req);
+        req.timeout *= 2;
+        setTimeout(() => {
+          this.reqs[req.priority].push(req);
+        },req.timeout)
         console.log("error requesting to url" + req.url, err)
       }
     }
@@ -50,7 +53,8 @@ class RequestScheduler {
       priority: priority,
       method: "get",
       url: url,
-      res: resolutionFunction
+      res: resolutionFunction,
+      timeout: 500
     })
     return promise;
   }
