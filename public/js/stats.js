@@ -390,7 +390,11 @@ document.querySelector("#item-hover").style.display = "none";
   let profileData = profileArr.find((x) => x.cute_name == profile)
   if (!profileData) {
     profileData = profileArr.sort((a,b) => b.last_save - a.last_save)[0];
-    profile = profileData.cute_name
+    if (profileData) {
+      profile = profileData.cute_name
+    } else {
+      window.location.href = window.location.origin + "?err=No Profiles Found"
+    }
   }
   window.history.pushState({}, "", `/stats/${username}/${profile}`);
   document.getElementById("playerName").innerHTML = data.rank ? `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>` : username;

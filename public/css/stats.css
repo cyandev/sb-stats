@@ -151,7 +151,7 @@ body {
   border-radius: 0.5vw;
   background: var(--darkish-blue);
   position: relative;
-  font-size: 1vw;
+  font-size: 0.9vw;
   margin: 0.25vw;
 }
 #skills .skill .skillName {
@@ -404,6 +404,7 @@ body {
   width: 2vw;
   height: 2vw;
   margin: 0 0.5vw;
+  border-radius: 0.2vw;
 }
 #pot-select .pot input[type=number] {
   background: var(--dark-white);

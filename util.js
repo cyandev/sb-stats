@@ -29,40 +29,47 @@ function nbtBufToJson(buf) {
 }
 exports.nbtBufToJson = nbtBufToJson;
 
+var skinCache = {}
 async function getSkinFace(skinUrl,i) {
   return new Promise(async (res, rej) => {
-    let skinImg = await jimp.read(skinUrl);
-    if (i == 0) {
-      let faceBase = skinImg.clone();
-      let faceOverlay = skinImg.clone();
-      faceBase.crop(8,8,8,8); //head
-      faceOverlay.crop(40,8,8,8); //head second layer
-      faceBase.composite(faceOverlay,0,0); //combined face
-      let buffer = (await faceBase.getBufferAsync(jimp.MIME_PNG));
-      res(buffer)
-    } else if (i == 1) {
-      let sideBase = skinImg.clone();
-      let sideOverlay = skinImg.clone();
-      sideBase.crop(0,8,8,8); 
-      sideOverlay.crop(32,8,8,8);
-      sideBase.composite(sideOverlay,0,0);
-      let buffer = (await sideBase.getBufferAsync(jimp.MIME_PNG));
-      res(buffer)  
-    } else if (i == 2) {
-      let topBase = skinImg.clone();
-      let topOverlay = skinImg.clone();
-      topBase.crop(8,0,8,8); 
-      topOverlay.crop(40,0,8,8); 
-      topBase.composite(topOverlay,0,0);
-      let buffer = (await topBase.getBufferAsync(jimp.MIME_PNG));
-      res(buffer)
+    if (skinCache[skinUrl+i]) {
+      res(skinCache[skinUrl+i]);
     }
+    let skinImg = await jimp.read(skinUrl);
+    let faceNumberMap = {
+      0: {
+        base: [8,8,8,8],
+        overlay: [40,8,8,8]
+      },
+      1: {
+        base: [0,8,8,8],
+        overlay: [32,8,8,8]
+      },
+      2: {
+        base: [8,0,8,8],
+        overlay: [40,0,8,8]
+      }
+    }
+    let faceBase = skinImg.clone();
+    let faceOverlay = skinImg.clone();
+    let [a,b,c,d] = faceNumberMap[i].base;
+    faceBase.crop(a,b,c,d); //head
+    [a,b,c,d] = faceNumberMap[i].overlay;
+    faceOverlay.crop(a,b,c,d); //head second layer
+    faceBase.composite(faceOverlay,0,0); //combined face
+    let buffer = (await faceBase.getBufferAsync(jimp.MIME_PNG));
+    skinCache[skinUrl+i] = buffer;
+    res(buffer)
   });
 }
 exports.getSkinFace = getSkinFace;
 
+let itemCache = {}
 async function getColoredItem(item,color) {
   return new Promise(async (res,rej) => {
+    if (itemCache[item+color]) {
+      res(itemCache[item+color]);
+    }
     let itemBase = await jimp.read(__dirname + "/public/img/" + item + ".png");
     let itemOverlay = await jimp.read(__dirname + "/public/img/" + item + "_overlay.png");
     itemBase.scan(0,0,itemBase.bitmap.width, itemBase.bitmap.height, (x,y,idx) => {
@@ -72,6 +79,7 @@ async function getColoredItem(item,color) {
     });
     itemBase.composite(itemOverlay,0,0);
     let imgBuffer = await itemBase.getBufferAsync(jimp.MIME_PNG);
+    itemCache[item+color] = imgBuffer;
     res(imgBuffer);
   })
 }
