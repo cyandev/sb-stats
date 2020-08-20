@@ -35,7 +35,7 @@ async function getPlayerDataFirstTime(name) {
     return false;
   }
   //catch lack of player api
-  if (!playerAPI) {
+  if (!playerAPI || !playerAPI.stats.SkyBlock) {
     return false;
   }
   playerData.name = playerAPI.displayname;
@@ -66,7 +66,6 @@ async function getPlayerDataFirstTime(name) {
   }
   //get achievement data
   playerData.achievements = Object.keys(playerAPI.achievements).filter(x => x.includes("skyblock_")).reduce((t,x) => {t[x] = playerAPI.achievements[x]; return t },{});
-
   let profiles = playerAPI.stats.SkyBlock.profiles
   let profilesArr = Object.keys(profiles).reduce((o,x) => o.concat(profiles[x]), []); //make into array of {profile_id, cute_name} objects
 
