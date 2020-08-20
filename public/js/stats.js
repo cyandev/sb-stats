@@ -200,7 +200,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     }
 
     if (item && item.count > 1) { //make the count appear if there are more than 1 item in a slot
-      itemCell.querySelector(".item-count").innerHTML = item.count;
+      itemCell.querySelector(".item-count").innerText = item.count;
     }
     //add hover based listeners
     itemCell.addEventListener("mouseenter", () => setHoverTo(item));
@@ -266,7 +266,7 @@ function makeStatsDisplay(label,stats) {
     statsDisplay.innerHTML = ""; //clear it out
     let domLabel = document.createElement("div");
     domLabel.classList.add("label");
-    domLabel.innerHTML = label;
+    domLabel.innerText = label;
     statsDisplay.appendChild(domLabel);
     for (let stat in stats) {
       if (stat in statToIcon) {
@@ -274,10 +274,10 @@ function makeStatsDisplay(label,stats) {
         let icon = document.createElement("div");
         icon.classList.add("icon")
         icon.style.background = statToColor[stat];
-        icon.innerHTML = statToIcon[stat] + " " + stat.toUpperCase();
+        icon.innerText = statToIcon[stat] + " " + stat.toUpperCase();
         statsDisplay.appendChild(icon);
         let number = document.createElement("div");
-        number.innerHTML = stats[stat];
+        number.innerText = stats[stat];
         statsDisplay.appendChild(number);
       }
     }
@@ -300,10 +300,8 @@ function doDamageCalc(weapon,profileData, stats,enemy={undead:false,ender:false,
   for (let enchant in weapon.enchantments) {
     if (enchantmentsBuffs[enchant]) {
       damageMultiplier += enchantmentsBuffs[enchant] * weapon.enchantments[enchant];
-      console.log(enchant, enchantmentsBuffs[enchant] * weapon.enchantments[enchant])
     }
   }
-  console.log(damageMultiplier, baseDmg * damageMultiplier)
   return baseDmg * damageMultiplier;
 }
 /* Hover Box Listeners + Functions */
@@ -398,30 +396,30 @@ document.querySelector("#item-hover").style.display = "none";
   }
   window.history.pushState({}, "", `/stats/${username}/${profile}`);
   document.getElementById("playerName").innerHTML = data.rank ? `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>` : username;
-  document.getElementById("profileName").innerHTML = profile;
+  document.getElementById("profileName").innerText = profile;
   console.log(profileData);
 
   //load basic stats
   if (profileData.balance) {
-    document.querySelector("#stats-text").innerHTML += `Bank: ${cleanFormatNumber(profileData.balance)}, `
+    document.querySelector("#stats-text").innerText += `Bank: ${cleanFormatNumber(profileData.balance)}, `
   }
-  document.querySelector("#stats-text").innerHTML += `Purse: ${cleanFormatNumber(profileData.purse)}, `
-  document.querySelector("#stats-text").innerHTML += `Fairy Souls: ${profileData.fairy_souls}, `
+  document.querySelector("#stats-text").innerText += `Purse: ${cleanFormatNumber(profileData.purse)}, `
+  document.querySelector("#stats-text").innerText += `Fairy Souls: ${profileData.fairy_souls}, `
 
   //load skills
   profileData.skills.forEach((skill) => {
     let element = document.createElement("div");
     element.classList.add("skill")
     element.innerHTML = "<span class='skillName'></span><span class='skillLevel'></span><div class='bar'><span class='skillBarFill'></span><span class='skillBarText'></span></div>" //import some template HTML into div
-    element.querySelector(".skillName").innerHTML = skill.name.charAt(0).toUpperCase() + skill.name.slice(1);
-    element.querySelector(".skillLevel").innerHTML = skill.levelPure;
+    element.querySelector(".skillName").innerText = skill.name.charAt(0).toUpperCase() + skill.name.slice(1);
+    element.querySelector(".skillLevel").innerText = skill.levelPure;
     if (skill.levelPure == skill.maxLevel) {
       element.querySelector(".skillBarFill").style.width = "100%";
       element.querySelector(".skillBarFill").style.backgroundColor = "#b3920d"
-      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(skill.xpRemaining)
+      element.querySelector(".skillBarText").innerText = cleanFormatNumber(skill.xpRemaining)
     } else {
       element.querySelector(".skillBarFill").style.width = (skill.progress * 100) + "%";
-      element.querySelector(".skillBarText").innerHTML = cleanFormatNumber(skill.xpRemaining) + " / " + cleanFormatNumber(skill.nextLevel);
+      element.querySelector(".skillBarText").innerText = cleanFormatNumber(skill.xpRemaining) + " / " + cleanFormatNumber(skill.nextLevel);
     }
     //catacombs hide bar and make bigger text
     if (skill.name == "catacombs") {
@@ -434,8 +432,8 @@ document.querySelector("#item-hover").style.display = "none";
 
   //add avg skill lvl to basic stats
   profileData.skills = profileData.skills.filter(x => !excludedSkills.includes(x.name))
-  document.querySelector("#stats-text").innerHTML += `Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelProgress,0) / profileData.skills.length).toFixed(2)}, `;
-  document.querySelector("#stats-text").innerHTML += `True Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelPure,0) / profileData.skills.length).toFixed(2)}`
+  document.querySelector("#stats-text").innerText += `Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelProgress,0) / profileData.skills.length).toFixed(2)}, `;
+  document.querySelector("#stats-text").innerText += `True Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelPure,0) / profileData.skills.length).toFixed(2)}`
 
 
   //load armor
@@ -446,7 +444,7 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#wardrobe").appendChild(makeInventoryViewer(transformWardrobe( profileData.inventories.find((x) => x.name == "wardrobe_contents").contents), {cols: 18, hasHotbar: false}));
   } else {
     let apiWarn = document.createElement("span");
-    apiWarn.innerHTML = "API Not Enabled!"
+    apiWarn.innerText = "API Not Enabled!"
     document.querySelector("#wardrobe").appendChild(apiWarn);
   }
 
@@ -483,7 +481,7 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#labels").style.display = "none";
     document.querySelector("#inv-view-container").style.display = "none";
     let apiWarn = document.createElement("span");
-    apiWarn.innerHTML = "API Not Enabled!"
+    apiWarn.innerText = "API Not Enabled!"
     document.querySelector("#inventories").appendChild(apiWarn);
   }
 
@@ -491,7 +489,7 @@ document.querySelector("#item-hover").style.display = "none";
   document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false}));
 
   //load slayers
-  document.querySelector("#slayer-total").innerHTML = (Object.keys(profileData.slayer).reduce((t,x) => profileData.slayer[x].xp + t, 0)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Slayer XP"
+  document.querySelector("#slayer-total").innerText = (Object.keys(profileData.slayer).reduce((t,x) => profileData.slayer[x].xp + t, 0)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Slayer XP"
   document.querySelector("#slayer-grid").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer).length},1fr)`;
   let slayerToBoss = {
     "spider": "Tarantula Broodfather",
@@ -512,27 +510,27 @@ document.querySelector("#item-hover").style.display = "none";
       <span id="test"></span>
     </div>`
     //make slayer header
-    slayerDisplay.querySelector(".slayer-header").innerHTML = slayer.charAt(0).toUpperCase() + slayer.slice(1) + " " + profileData.slayer[slayer].level;
+    slayerDisplay.querySelector(".slayer-header").innerText = slayer.charAt(0).toUpperCase() + slayer.slice(1) + " " + profileData.slayer[slayer].level;
     //make kills grid
     slayerDisplay.querySelector(".slayer-kills").style.gridTemplateColumns = `repeat(${Object.keys(profileData.slayer[slayer].boss_kills).length},1fr)`;
     for (let tier in profileData.slayer[slayer].boss_kills) {
       let label = document.createElement("div");
-      label.innerHTML = "Tier " + tier[tier.length - 1];
+      label.innerText = "Tier " + tier[tier.length - 1];
       slayerDisplay.querySelector(".slayer-kills").appendChild(label)
     }
     for (let tier in profileData.slayer[slayer].boss_kills) {
       let label = document.createElement("div");
-      label.innerHTML = profileData.slayer[slayer].boss_kills[tier] + " Kills";
+      label.innerText = profileData.slayer[slayer].boss_kills[tier] + " Kills";
       slayerDisplay.querySelector(".slayer-kills").appendChild(label)
     }
     //make bar
     if (profileData.slayer[slayer].level == profileData.slayer[slayer].maxLevel) {
       slayerDisplay.querySelector(".slayer-bar-fill").style.width = "100%";
       slayerDisplay.querySelector(".slayer-bar-fill").style.backgroundColor = "#b3920d"
-      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(profileData.slayer[slayer].xpRemaining)
+      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xpRemaining)
     } else {
       slayerDisplay.querySelector(".slayer-bar-fill").style.width = (profileData.slayer[slayer].xpRemaining / profileData.slayer[slayer].nextLevel * 100) + "%";
-      slayerDisplay.querySelector(".slayer-bar-text").innerHTML = cleanFormatNumber(profileData.slayer[slayer].xpRemaining) + " / " + cleanFormatNumber(profileData.slayer[slayer].nextLevel);
+      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xpRemaining) + " / " + cleanFormatNumber(profileData.slayer[slayer].nextLevel);
     }
     document.querySelector("#slayer-grid").appendChild(slayerDisplay);
   }
@@ -668,8 +666,8 @@ document.querySelector("#item-hover").style.display = "none";
       }
       totalStats.update(statsBase);
       if (weaponSelector.checked) {
-        document.querySelector("#zealot-dmg-number").innerHTML = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{ender:true,gk:true}));
-        document.querySelector("#crypt-ghoul-dmg-number").innerHTML = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{undead:true}));
+        document.querySelector("#zealot-dmg-number").innerText = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{ender:true,gk:true}));
+        document.querySelector("#crypt-ghoul-dmg-number").innerText = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{undead:true}));
       }
     }
     getTotalStats();

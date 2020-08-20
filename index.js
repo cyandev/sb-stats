@@ -3,11 +3,14 @@ var realFs = require('fs')
 var gracefulFs = require('graceful-fs')
 gracefulFs.gracefulify(realFs)
 
+const helmet = require("helmet")
 const express = require("express");
 var bodyParser = require('body-parser');
 var app = express();
 var http = require('http').createServer(app);
-var port = process.env.PORT || 8080
+var port = process.env.PORT || 8080;
+
+app.use(helmet());
 app.use(bodyParser.urlencoded()); 
 
 let axios = require("axios")
