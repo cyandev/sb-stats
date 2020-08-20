@@ -1,7 +1,15 @@
 // constants
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
 //helper functions
-
+var rarityColorMap = {
+    "COMMON": "§8",
+    "UNCOMMON": "§a",
+    "RARE": "§9",
+    "EPIC": "§5",
+    "LEGENDARY": "§6",
+    "MYTHIC": "§d",
+    "SPECIAL": "§c"
+  }
 /* MC TEXT FORMATTING */
 var obfuscators = [];
 var styleMap = {
@@ -138,9 +146,9 @@ function transformWardrobe(contents) {
   return wardrobeNew;
 }
 
-function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSize: "6vw"}) {
+function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSize: "6vw", rarityColor: false}) {
   //load in options
-  let opt={cols: 9, hasHotbar: true, cellSize: "6vw"};
+  let opt={cols: 9, hasHotbar: true, cellSize: "6vw", rarityColor: false};
   for (let key in options) {
     opt[key] = options[key];
   }
@@ -150,6 +158,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   //create the grid
   let grid = document.createElement("div");
   grid.style.setProperty("--cellSize", parseInt(opt.cellSize) * Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100);
+  window.addEventListener("resize", () => grid.style.setProperty("--cellSize", parseInt(opt.cellSize) * Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100))
   grid.classList.add("inv-view")
   grid.style.display = "inline-grid";
   grid.style.gridTemplateColumns = `repeat(${opt.cols}, ${opt.cellSize})`;
@@ -158,6 +167,7 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   contents.forEach((item,i) => {
     //make base itemCell
     let itemCell = document.createElement("div");
+    if (opt.rarityColor && item.rarity) itemCell.style.boxShadow = "inset 0vw 0vw 0.5vw 0.1vw " + styleMap[rarityColorMap[item.rarity]].split(":")[1];
     if (item.active) {
       itemCell.style.border = "0.1vw solid var(--yellow)"
     }
@@ -347,15 +357,6 @@ function updateBoxContents() {
   document.querySelector("#item-hover-lore").innerHTML = "";
   if (boxItem.lore && boxItem.lore.length > 0) document.querySelector("#item-hover-lore").appendChild(parseStyle(boxItem.lore.join("§r<br>")));
 
-  let rarityColorMap = {
-    "COMMON": "§8",
-    "UNCOMMON": "§a",
-    "RARE": "§9",
-    "EPIC": "§5",
-    "LEGENDARY": "§6",
-    "MYTHIC": "§d",
-    "SPECIAL": "§c"
-  }
   if (boxItem.rarity) {
     document.querySelector("#item-hover-header").style.background = styleMap[rarityColorMap[boxItem.rarity]].split(":")[1];
   } else {
@@ -434,11 +435,11 @@ document.querySelector("#item-hover").style.display = "none";
 
 
   //load armor
-  document.querySelector("#armor").appendChild(makeInventoryViewer(profileData.inventories.find((x) => x.name == "inv_armor").contents.reverse(), {cols: 1, hasHotbar: false}));
+  document.querySelector("#armor").appendChild(makeInventoryViewer(profileData.inventories.find((x) => x.name == "inv_armor").contents.reverse(), {cols: 1, hasHotbar: false, rarityColor: true}));
 
   //load wardrobe / wardrobe api check
   if (profileData.inventories.find((x) => x.name == "wardrobe_contents")) {
-    document.querySelector("#wardrobe").appendChild(makeInventoryViewer(transformWardrobe( profileData.inventories.find((x) => x.name == "wardrobe_contents").contents), {cols: 18, hasHotbar: false}));
+    document.querySelector("#wardrobe").appendChild(makeInventoryViewer(transformWardrobe( profileData.inventories.find((x) => x.name == "wardrobe_contents").contents), {cols: 18, hasHotbar: false, rarityColor: true}));
   } else {
     let apiWarn = document.createElement("span");
     apiWarn.innerText = "API Not Enabled!"
@@ -483,7 +484,7 @@ document.querySelector("#item-hover").style.display = "none";
   }
 
   //load pets 
-  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false}));
+  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false, rarityColor:true}));
 
   //load slayers
   document.querySelector("#slayer-total").innerText = (Object.keys(profileData.slayer).reduce((t,x) => profileData.slayer[x].xp + t, 0)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Slayer XP"
