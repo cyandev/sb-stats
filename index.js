@@ -19,9 +19,18 @@ const minecraftItems = require('minecraft-items')
 let util = require("./util.js");
 const constants = require("./const.js");
 let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //make a 500ms delay between requests to always be at the 120 reqs/min rate limit
-async function getPlayerDataFirstTime(name) {
+
+const MongoClient = require('mongodb').MongoClient;
+const uri = `mongodb+srv://admin:${process.env.MONGO_PASSWORD}@cluster0.bjpjk.mongodb.net/SBStatsDB?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, { useNewUrlParser: true});
+var playersCollection;
+client.connect().then((connection) => {
+  playersCollection = connection.db("SBStatsDB").collection("Players");
+});
+
+async function getPlayerData(name) {
   let start = Date.now()
-  let playerData = {};
+  let playerData = {lastUpdated: start};
   try {
     var uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + name)).data.id; //get uuid from mojang
     playerData.uuid = uuid;
@@ -43,6 +52,7 @@ async function getPlayerDataFirstTime(name) {
     return false;
   }
   playerData.name = playerAPI.displayname;
+  playerData.nameLower = playerData.name.toLowerCase();
   playerData.plus = playerAPI.rankPlusColor ? playerAPI.rankPlusColor.replace("DARK_",""): "";
   playerData.rank = playerAPI.newPackageRank
   if (playerAPI.rank) {
@@ -74,8 +84,14 @@ async function getPlayerDataFirstTime(name) {
   let profilesArr = Object.keys(profiles).reduce((o,x) => o.concat(profiles[x]), []); //make into array of {profile_id, cute_name} objects
 
   playerData.profiles = {};
+  playerData.currentProfile = null;
+  let lastUpdated = 0;
   for (let profile of profilesArr) {
     playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile,playerData);
+    if (playerData.profiles[profile.profile_id].last_save > lastUpdated) {
+      playerData.currentProfile = profile.profile_id;
+      lastUpdated = playerData.profiles[profile.profile_id].last_save;
+    }
   }
   console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`)
   return playerData;
@@ -505,8 +521,18 @@ async function getProfileData(uuid, profile, playerData) {
 http.listen(port, () => {
   console.log('listening...');
 })
+
+/* Stats API */
 app.get("/api/data/:player/", async (req,res) => {
-  res.json(await getPlayerDataFirstTime(req.params.player))
+  let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
+  if (!playerData || playerData.lastUpdated + 1000 * 60 < Date.now()) { //60 seconds cached
+    console.log("updating data in db")
+    playerData = await getPlayerData(req.params.player);
+    playersCollection.replaceOne({name: req.params.player},playerData,{upsert: true});
+  } else {
+    console.log("sending data from db")
+  }
+  res.json(playerData);
 })
 app.get("/api/exists/:player", async (req,res) => {
   try {
@@ -522,7 +548,7 @@ app.get("/api/exists/:player", async (req,res) => {
   }
 })
 
-/* Stats API */
+/* Stats Routes */
 app.get("/stats/:player", (req,res) => {
   res.sendFile(__dirname + "/public/stats.html");
 })

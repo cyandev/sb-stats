@@ -382,6 +382,7 @@ document.querySelector("#item-hover").style.display = "none";
   }
   username = data.name;
   console.log(data)
+  // REDO WITH "currentProfile" API
   let profileArr = Object.keys(data.profiles).map((x) => data.profiles[x]);
   let profileData = profileArr.find((x) => x.cute_name == profile)
   if (!profileData) {
