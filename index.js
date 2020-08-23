@@ -38,7 +38,8 @@ async function getPlayerDataFirstTime(name) {
     return false;
   }
   //catch lack of player api
-  if (!playerAPI || !playerAPI.stats.SkyBlock) {
+  if (!playerAPI || !playerAPI.stats || !playerAPI.stats.SkyBlock) {
+    console.log(playerAPI);
     return false;
   }
   playerData.name = playerAPI.displayname;
