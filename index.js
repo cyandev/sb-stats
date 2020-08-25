@@ -532,7 +532,7 @@ async function getGuildData(guildname) {
   if (!guildApi.success) return false;
   //get name, tag, and tagcolor
   guildData.name = guildApi.guild.name;
-
+  guildData.players = guildApi.guild.members.length;
   guildData.tag = {}
   guildData.tag.text = guildApi.tag
   guildData.tag.color = guildApi.tagColor
@@ -550,7 +550,8 @@ async function getGuildData(guildname) {
       getPlayerData(null, 1, guildApi.guild.members[i].uuid);
     }
   })
-  
+  guildData.members = guildData.members.filter(x => x);
+
   guildData.averageSkillLevel = (guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2);
   guildData.averageSlayer = (guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2);
 
