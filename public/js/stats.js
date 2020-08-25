@@ -430,9 +430,8 @@ document.querySelector("#item-hover").style.display = "none";
   })
 
   //add avg skill lvl to basic stats
-  profileData.skills = profileData.skills.filter(x => !excludedSkills.includes(x.name))
-  document.querySelector("#stats-text").innerText += `Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelProgress,0) / profileData.skills.length).toFixed(2)}, `;
-  document.querySelector("#stats-text").innerText += `True Skill Average: ${(profileData.skills.reduce((t,x) => t+x.levelPure,0) / profileData.skills.length).toFixed(2)}`
+  document.querySelector("#stats-text").innerText += `Skill Average: ${profileData.averageSkillProgress}, `;
+  document.querySelector("#stats-text").innerText += `True Skill Average: ${profileData.averageSkillPure}`
 
 
   //load armor

@@ -28,20 +28,21 @@ client.connect().then((connection) => {
   playersCollection = connection.db("SBStatsDB").collection("Players");
 });
 
-async function getPlayerData(name) {
+async function getPlayerData(name,priority=0,uuid) {
   let start = Date.now()
   let playerData = {lastUpdated: start};
-  try {
-    var uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + name)).data.id; //get uuid from mojang
-    playerData.uuid = uuid;
-  } catch (err) {
-    return false;
+  if (name && !uuid) {
+    try {
+      uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + name)).data.id; //get uuid from mojang
+    } catch (err) {
+      return false;
+    }
+    if (!uuid) { //catch no uuid
+      return false;
+    }
   }
-  if (!uuid) { //catch no uuid
-    return false;
-  }
   try {
-    var playerAPI = (await reqScheduler.get(`https://api.hypixel.net/player?key=${process.env.API_KEY}&uuid=${uuid}`, 0)).data.player; // /player api request
+    var playerAPI = (await reqScheduler.get(`https://api.hypixel.net/player?key=${process.env.API_KEY}&uuid=${uuid}`, priority)).data.player; // /player api request
   } catch (err) {
     console.log("err getting /player api endpoint");
     return false;
@@ -51,6 +52,7 @@ async function getPlayerData(name) {
     console.log(playerAPI);
     return false;
   }
+  playerData.uuid = playerAPI.uuid;
   playerData.name = playerAPI.displayname;
   playerData.nameLower = playerData.name.toLowerCase();
   playerData.plus = playerAPI.rankPlusColor ? playerAPI.rankPlusColor.replace("DARK_",""): "";
@@ -87,13 +89,14 @@ async function getPlayerData(name) {
   playerData.currentProfile = null;
   let lastUpdated = 0;
   for (let profile of profilesArr) {
-    playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile,playerData);
+    playerData.profiles[profile.profile_id] = await getProfileData(uuid, profile, playerData, priority);
     if (playerData.profiles[profile.profile_id].last_save > lastUpdated) {
       playerData.currentProfile = profile.profile_id;
       lastUpdated = playerData.profiles[profile.profile_id].last_save;
     }
   }
-  console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`)
+  console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`);
+  playersCollection.replaceOne({name: playerData.name},playerData,{upsert: true}); //add it to / update database
   return playerData;
 }
 
@@ -120,7 +123,7 @@ async function getInventoryJSON(contents,profileData) {
         if (!mcItem) {
           mcItem = minecraftItems.get(item.id);
         }
-        let out = {
+        var out = {
           name: item.tag.display ? item.tag.display.Name : "",
           lore: item.tag.display ? item.tag.display.Lore : [],
           id: item.tag.ExtraAttributes ? item.tag.ExtraAttributes.id : "NULL",
@@ -150,10 +153,10 @@ async function getInventoryJSON(contents,profileData) {
           })
         }
         //add dungeon tag
-        if (out.lore && out.lore[out.lore.length - 1].includes("DUNGEON")) {
+        if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("DUNGEON")) {
           out.tags.push("DUNGEON");
         }
-        if (out.lore && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
+        if (out.lore && out.lore.length > 0 && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
           out.tags.push("WEAPON");
           out.enchantments = item.tag.ExtraAttributes.enchantments;
         }
@@ -216,8 +219,8 @@ async function getInventoryJSON(contents,profileData) {
           out.icon =  `/img/item?item=${mcItem.name.toLowerCase().replace(" ","_").replace("tunic","chestplate").replace("pants","leggings")}&color=${encodeURIComponent(JSON.stringify(item.tag.ExtraAttributes.color.split(":")))}`
         }
 
-        //check if backpack, if so, add the contents
-        if (out.name.includes("Backpack")) {
+        //check if backpack with contents, if so, add the contents
+        if (out.name.includes("Backpack") && item.tag.ExtraAttributes[item.tag.ExtraAttributes.id.toLowerCase() + "_data"]) {
           let bpBuffer = Buffer.from(item.tag.ExtraAttributes[item.tag.ExtraAttributes.id.toLowerCase() + "_data"]);
           let bp = await util.nbtBufToJson(bpBuffer);
           out.contents = await getInventoryJSON(bp.i,profileData);
@@ -226,7 +229,7 @@ async function getInventoryJSON(contents,profileData) {
         output[j] = out;
 
         //check if unique accessory, if so, add to talis
-        if (out.lore && out.lore[out.lore.length - 1].includes("CCESSORY") && !profileData.talis[out.id]) { //ccessory instead of accessory because of crab hat
+        if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("CCESSORY") && !profileData.talis[out.id]) { //ccessory instead of accessory because of crab hat
           profileData.talis[out.id] = out;
         }
         //check if defuse kit
@@ -255,15 +258,15 @@ async function getInventoryJSON(contents,profileData) {
         output[j] = {};
       }
     } catch (err) {
-      console.log("item caused error:", item,mcItem,err)
+      console.log("item caused error:",item,mcItem,out,err)
     }
   };
   return output;
 }
 
-async function getProfileData(uuid, profile, playerData) {
+async function getProfileData(uuid, profile, playerData, priority) {
   try {
-    var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`)).data.profile;
+    var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`,priority)).data.profile;
   } catch (err) {
     console.log("err getting /skyblock/profile endpoint")
   }
@@ -283,6 +286,7 @@ async function getProfileData(uuid, profile, playerData) {
   //get slayer
   if (profileAPI.members[uuid].slayer_bosses) {
     profileData.slayer = {};
+    profileData.slayerXp = 0;
     Object.keys(profileAPI.members[uuid].slayer_bosses).forEach((boss) => {
       profileData.slayer[boss] = {
         xp: profileAPI.members[uuid].slayer_bosses[boss].xp ? profileAPI.members[uuid].slayer_bosses[boss].xp : 0,
@@ -293,6 +297,7 @@ async function getProfileData(uuid, profile, playerData) {
           tier4: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_3 ? profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_3 : 0,
         }
       }
+      profileData.slayerXp += profileData.slayer[boss].xp
     })
 
     //should be integrated into above loop, copied from client
@@ -376,7 +381,7 @@ async function getProfileData(uuid, profile, playerData) {
       nextLevel: table[level + 1]
     })
   })
-
+  
   //sort skills into skylea order
   let skillOrderer = {
     "taming": 10,
@@ -393,6 +398,11 @@ async function getProfileData(uuid, profile, playerData) {
   }
   skills.sort((a,b) => skillOrderer[b.name] - skillOrderer[a.name])
   profileData.skills = skills;
+
+  let filteredSkills = profileData.skills.filter(x => !constants.excludedSkills.includes(x.name));
+
+  profileData.averageSkillProgress = (filteredSkills.reduce((t,x) => t+x.levelProgress,0) / filteredSkills.length).toFixed(2);
+  profileData.averageSkillPure = (filteredSkills.reduce((t,x) => t+x.levelPure,0) / filteredSkills.length).toFixed(2);
 
   //get pets
   profileData.pets = profileAPI.members[uuid].pets;
@@ -516,24 +526,50 @@ async function getProfileData(uuid, profile, playerData) {
   return profileData
 }
 
-//server go listen
+async function getGuildData(guildname) {
+  let guildData = {};
+  let guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&name=${guildname}`, 0)).data;
+  if (!guildApi.success) return false;
+  //get name, tag, and tagcolor
+  guildData.name = guildApi.guild.name;
 
-http.listen(port, () => {
-  console.log('listening...');
-})
+  guildData.tag = {}
+  guildData.tag.text = guildApi.tag
+  guildData.tag.color = guildApi.tagColor
+  let playerDataArr = await Promise.all(guildApi.guild.members.map(async x => await playersCollection.findOne({uuid: x.uuid})))
+  guildData.members = playerDataArr.map((x,i) => {
+    if (x) {
+      let profile = x.profiles[x.currentProfile];
+      return {
+        name: x.name,
+        slayer: profile.slayerXp,
+        averageSkill: Number(profile.averageSkillProgress)
+      }
+    } else {
+      guildData.incomplete = true;
+      getPlayerData(null, 1, guildApi.guild.members[i].uuid);
+    }
+  })
+  
+  guildData.averageSkillLevel = (guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2);
+  guildData.averageSlayer = (guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2);
+
+  return guildData;
+}
+
 
 /* Stats API */
-app.get("/api/data/:player/", async (req,res) => {
+app.get("/api/data/:player", async (req,res) => {
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || playerData.lastUpdated + 1000 * 60 < Date.now()) { //60 seconds cached
+  if (!playerData || playerData.lastUpdated + 1000 * 120 < Date.now()) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
-    playersCollection.replaceOne({name: req.params.player},playerData,{upsert: true});
   } else {
     console.log("sending data from db")
   }
   res.json(playerData);
-})
+});
+
 app.get("/api/exists/:player", async (req,res) => {
   try {
     let uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + req.params.player)).data.id; //get uuid from mojang
@@ -546,8 +582,20 @@ app.get("/api/exists/:player", async (req,res) => {
     console.log(err)
     res.send(false);
   }
-})
+});
 
+app.get("/api/guild/:guildname",async (req,res) => {
+  res.json(await getGuildData(req.params.guildname));
+});
+
+app.get("/api/dbinfo", async (req,res) => {
+  let players = await playersCollection.find({}).toArray();
+  res.json({
+    players: players.length,
+    names: players.map(x => x.name),
+    uuids: players.map(x => x.uuid)
+  })
+})
 /* Stats Routes */
 app.get("/stats/:player", (req,res) => {
   res.sendFile(__dirname + "/public/stats.html");
@@ -582,4 +630,10 @@ app.get("/", (req,res) => {
 })
 app.use((req, res) => {
     res.sendFile(__dirname + "/public" + req.url);
+})
+
+//server go listen
+
+http.listen(port, () => {
+  console.log('listening...');
 })

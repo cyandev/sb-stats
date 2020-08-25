@@ -340,6 +340,7 @@ module.exports = {
     "mining": "excavator",
     "taming": "domesticator"
   },
+  excludedSkills: ["carpentry","runecrafting","catacombs"],
   skillStats: {
     "combat": {
       stat: "cc",
