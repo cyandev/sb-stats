@@ -188,7 +188,7 @@ module.exports = {
       UNCOMMON: 6,
       RARE: 11,
       EPIC: 15,
-      LEGENDARY: 20
+      LEGENDARY: 19
     }
   },
   petItems: {

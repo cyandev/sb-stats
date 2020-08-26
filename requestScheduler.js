@@ -37,7 +37,7 @@ class RequestScheduler {
         setTimeout(() => {
           this.reqs[req.priority].push(req);
         },req.timeout)
-        console.log("error requesting to url" + req.url, err)
+        console.log("error requesting to url " + req.url, err)
       }
     }
   }

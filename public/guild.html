@@ -1,11 +1,10 @@
 <html>
   <head>
-    <link href="/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="/css/guild.css" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
     <link id="favicon" rel="shortcut icon" type="image/png" href="/img/favicon.png" />
     <title>SB Stats</title>
   </head>
-
   <body>
     <!-- Header -->
     <div id="header">
@@ -25,12 +24,17 @@
       <script src="/js/header.js"></script>
     </div>
     <!-- End Header -->
-    <div id="err-msg"></div>
-    <div id="search">
-      <span id="search-label">Find Stats for</span>
-      <input id="search-text" placeholder="Username" type="text">
-      <input id="search-button" type="button" value="Go">
+    <div id="loading" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    <div id="content">
+      <div id="guildName"></div>
+      <div id="guildDescription">
+        <div id="guildLoadingMessage">This Guild is currently loading. This may take awhile due to API limitations. Check back later for stats.</div>
+      </div>
+      <div id="guildListContainer">
+        <div id="listHeader"><div>Username</div><div>Slayer</div><div>Average Skill</div></div>
+        <div id="guildMemberList"></div>
+      </div>
     </div>
-    <script src="/js/main.js"></script>
+    <script src="/js/guild.js"></script>
   </body>
 </html>

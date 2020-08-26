@@ -24,8 +24,10 @@ const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://admin:${process.env.MONGO_PASSWORD}@cluster0.bjpjk.mongodb.net/SBStatsDB?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true});
 var playersCollection;
+var guildsCollection;
 client.connect().then((connection) => {
   playersCollection = connection.db("SBStatsDB").collection("Players");
+  guildsCollection = connection.db("SBStatsDB").collection("Guilds");
 });
 
 async function getPlayerData(name,priority=0,uuid) {
@@ -49,6 +51,7 @@ async function getPlayerData(name,priority=0,uuid) {
   }
   //catch lack of player api
   if (!playerAPI || !playerAPI.stats || !playerAPI.stats.SkyBlock) {
+    console.log("player failed with name + uuid", name, uuid);
     console.log(playerAPI);
     return false;
   }
@@ -374,6 +377,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
     skills.push({
       name: skillName,
       levelPure: level,
+      xp: profileData.skills[skillName],
       levelProgress: level + (table[level+1] ? xpRemaining / table[level+1] : 0),
       xpRemaining: xpRemaining,
       progress: (xpRemaining / table[level+1]),
@@ -431,7 +435,8 @@ async function getProfileData(uuid, profile, playerData, priority) {
         },
         count: 1,
         rarity: pet.tier,
-        active: pet.active
+        active: pet.active,
+        xp: pet.exp
       }
       //get the pet's level
       let remainingXp = pet.exp;
@@ -525,48 +530,93 @@ async function getProfileData(uuid, profile, playerData, priority) {
   }
   return profileData
 }
-
+var loadingUuids = [];
 async function getGuildData(guildname) {
-  let guildData = {};
+  let guildData = {incomplete: false};
   let guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&name=${guildname}`, 0)).data;
   if (!guildApi.success) return false;
   //get name, tag, and tagcolor
+  guildData._id = guildApi.guild._id;
   guildData.name = guildApi.guild.name;
   guildData.players = guildApi.guild.members.length;
-  guildData.tag = {}
-  guildData.tag.text = guildApi.tag
-  guildData.tag.color = guildApi.tagColor
-  let playerDataArr = await Promise.all(guildApi.guild.members.map(async x => await playersCollection.findOne({uuid: x.uuid})))
+  guildData.tag = {};
+  guildData.tag.text = guildApi.guild.tag;
+  guildData.tag.color = guildApi.guild.tagColor;
+  let playerDataArr = await Promise.all(guildApi.guild.members.map(async x => await playersCollection.findOne({uuid: x.uuid})));
   guildData.members = playerDataArr.map((x,i) => {
     if (x) {
+      if (!x.currentProfile) return false;
       let profile = x.profiles[x.currentProfile];
       return {
         name: x.name,
         slayer: profile.slayerXp,
-        averageSkill: Number(profile.averageSkillProgress)
+        averageSkill: Number(profile.averageSkillProgress),
+        skillXp: profile.skills.reduce((t,x) => t+x.xp, 0)
       }
     } else {
       guildData.incomplete = true;
-      getPlayerData(null, 1, guildApi.guild.members[i].uuid);
+      if (!loadingUuids.includes(guildApi.guild.members[i].uuid)) {
+        getPlayerData(null, 1, guildApi.guild.members[i].uuid).then(() => {
+          loadingUuids.splice(loadingUuids.indexOf(guildApi.guild.members[i].uuid),1);
+        });
+        loadingUuids.push(guildApi.guild.members[i].uuid);
+      }
+      return false;
     }
   })
   guildData.members = guildData.members.filter(x => x);
 
-  guildData.averageSkillLevel = (guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2);
-  guildData.averageSlayer = (guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2);
+  guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
+  guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));
+  guildData.averageSkillXp = Number((guildData.members.reduce((t,x) => t+x.skillXp, 0) / guildData.members.length).toFixed(2));
 
+  await guildsCollection.replaceOne({name: guildApi.guild.name}, guildData, {upsert: true})
+  
   return guildData;
 }
 
+async function calculateGuilds() {
+  let maxGuild = (await guildsCollection.aggregate([
+    {$match: {incomplete: false}},
+    {$group: {
+      _id: null,
+      averageSkillXp: {$max: "$averageSkillXp"},
+      averageSlayer: {$max: "$averageSlayer"}
+    }}
+  ]).toArray())[0];
+  
+  return await guildsCollection.aggregate([
+    {
+      $match: {
+        incomplete: false
+      }
+    }, 
+    {
+      $addFields: {
+        score: {
+          $multiply: [
+            {
+              $add: [
+                {$divide: ["$averageSkillXp", maxGuild.averageSkillXp]},
+                {$divide: ["$averageSlayer", maxGuild.averageSlayer]}
+              ]
+            },
+            100
+          ]
+        }
+      }
+    }
+  ]).toArray()
+}
 
-/* Stats API */
+/* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => {
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || playerData.lastUpdated + 1000 * 120 < Date.now()) { //re-get more than 120 second old profiles
+  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 120) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
   } else {
-    console.log("sending data from db")
+    console.log("sending data from db: age in ms: ", Date.now() - playerData.lastUpdated)
   }
   res.json(playerData);
 });
@@ -589,6 +639,10 @@ app.get("/api/guild/:guildname",async (req,res) => {
   res.json(await getGuildData(req.params.guildname));
 });
 
+app.get("/api/gtop", async (req,res) => {
+  res.json((await calculateGuilds()).sort((a,b) => b.score - a.score).slice(0,25));
+})
+
 app.get("/api/dbinfo", async (req,res) => {
   let players = await playersCollection.find({}).toArray();
   res.json({
@@ -596,13 +650,6 @@ app.get("/api/dbinfo", async (req,res) => {
     names: players.map(x => x.name),
     uuids: players.map(x => x.uuid)
   })
-})
-/* Stats Routes */
-app.get("/stats/:player", (req,res) => {
-  res.sendFile(__dirname + "/public/stats.html");
-})
-app.get("/stats/:player/:profile", (req,res) => {
-  res.sendFile(__dirname + "/public/stats.html");
 })
 
 /* Images API */
@@ -626,6 +673,18 @@ app.get("/img/item", async (req,res) => {
 })
 
 /* Normal Routes */
+
+app.get("/stats/:player", (req,res) => {
+  res.sendFile(__dirname + "/public/stats.html");
+})
+app.get("/stats/:player/:profile", (req,res) => {
+  res.sendFile(__dirname + "/public/stats.html");
+})
+
+app.get("/guild/:guildname", (req,res) => {
+  res.sendFile(__dirname + "/public/guild.html");
+})
+
 app.get("/", (req,res) => {
   res.sendFile(__dirname + "/public/index.html");
 })
