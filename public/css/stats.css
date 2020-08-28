@@ -130,6 +130,10 @@ body {
   height: auto;
   width: 100%;
 }
+#stats .section-label a {
+  color: white;
+  text-decoration: none;
+}
 #stats-text {
   font-size: 1.2vw;
   width: 100%;

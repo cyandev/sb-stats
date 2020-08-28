@@ -393,7 +393,7 @@ document.querySelector("#item-hover").style.display = "none";
     }
   }
   window.history.pushState({}, "", `/stats/${username}/${profile}`);
-  document.getElementById("playerName").innerHTML = data.rank ? `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>` : username;
+  document.getElementById("playerName").innerHTML = `<a href='/guild/${data.guild}'>[${data.guild}]</a>  ` + (data.rank ? `<span style="color:${data.color}">[${data.rank.split("_PLUS").join(`${data.rank.includes("MVP") ? `<span style="color:${data.plus}">+</span>` : "+"}`)}] ${username}</span>` : username);
   document.getElementById("profileName").innerText = profile;
   console.log(profileData);
 
