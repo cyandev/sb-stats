@@ -24,12 +24,9 @@ function createTableIn(div,data) {
   document.querySelector("#guildName").innerText = `${guildApi.name} [${guildApi.tag.text}]`;
   if (guildApi.incomplete) {
     document.querySelector("#guildLoadingMessage").style.display = "block";
-    document.querySelector("#loading").style.display = "none";
-    document.querySelector("#guildListContainer").style.display = "none";
-    document.querySelector("#content").style.display = "block";
-    return;
+  } else {
+    document.querySelector("#guildDescription").innerText = `${cleanFormatNumber(guildApi.averageSlayer)} Slayer - ${guildApi.averageSkillLevel} Average Skill Level`;
   }
-  document.querySelector("#guildDescription").innerText = `${cleanFormatNumber(guildApi.averageSlayer)} Slayer - ${guildApi.averageSkillLevel} Average Skill Level`
   createTableIn(document.querySelector("#guildMemberList"), guildApi.members.map(x => [x.name, cleanFormatNumber(x.slayer), x.averageSkill]))
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "block";

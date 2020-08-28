@@ -55,6 +55,13 @@ async function getPlayerData(name,priority=0,uuid) {
     console.log(playerAPI);
     return false;
   }
+  //try to get the guild
+  try {
+    var guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&player=${playerAPI.uuid}`, 0)).data;
+    playerData.guild = guildApi.guild.name;
+  } catch (err) {
+    //move on
+  }
   playerData.uuid = playerAPI.uuid;
   playerData.name = playerAPI.displayname;
   playerData.nameLower = playerData.name.toLowerCase();
@@ -307,18 +314,16 @@ async function getProfileData(uuid, profile, playerData, priority) {
 
     //should be integrated into above loop, copied from client
     for (let slayer in profileData.slayer) {
-      //get level and xpRemaining
-      let xpRemaining = profileData.slayer[slayer].xp;
+      let xpNext = 0;
       let level = 0;
       let table = slayer == "wolf" ? constants.xp_table_slayer_wolf :  constants.xp_table_slayer;
-      for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
-        xpRemaining -= table[i];
+      for (let i = 0; i < table.length && profileData.slayer[slayer].xp >= xpNext; i++) {
+        xpNext += table[i+1];
         level = i;
       }
       profileData.slayer[slayer].level = level;
-      profileData.slayer[slayer].xpRemaining = xpRemaining;
+      profileData.slayer[slayer].xpNext = xpNext;
       profileData.slayer[slayer].maxLevel = table.length - 1;
-      profileData.slayer[slayer].nextLevel = table[level + 1];
     }
   }
 
@@ -571,7 +576,8 @@ async function getGuildData(guildname) {
   guildData.tag = {};
   guildData.tag.text = guildApi.guild.tag;
   guildData.tag.color = guildApi.guild.tagColor;
-  let playerDataArr = await Promise.all(guildApi.guild.members.map(async x => await playersCollection.findOne({uuid: x.uuid})));
+  let playerDataArr = await playersCollection.find({uuid: {$in: guildApi.guild.members.map(x => x.uuid)}}).toArray();
+  
   guildData.members = playerDataArr.map((x,i) => {
     if (x) {
       if (!x.currentProfile) return false;
@@ -641,7 +647,7 @@ async function calculateGuilds() {
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => {
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 10) { //re-get more than 120 second old profiles
+  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 180) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
   } else {

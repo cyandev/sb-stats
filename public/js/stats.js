@@ -547,10 +547,10 @@ document.querySelector("#item-hover").style.display = "none";
     if (profileData.slayer[slayer].level == profileData.slayer[slayer].maxLevel) {
       slayerDisplay.querySelector(".slayer-bar-fill").style.width = "100%";
       slayerDisplay.querySelector(".slayer-bar-fill").style.backgroundColor = "#b3920d"
-      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xpRemaining)
+      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xp)
     } else {
-      slayerDisplay.querySelector(".slayer-bar-fill").style.width = (profileData.slayer[slayer].xpRemaining / profileData.slayer[slayer].nextLevel * 100) + "%";
-      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xpRemaining) + " / " + cleanFormatNumber(profileData.slayer[slayer].nextLevel);
+      slayerDisplay.querySelector(".slayer-bar-fill").style.width = (profileData.slayer[slayer].xp / profileData.slayer[slayer].xpNext * 100) + "%";
+      slayerDisplay.querySelector(".slayer-bar-text").innerText = cleanFormatNumber(profileData.slayer[slayer].xp) + " / " + cleanFormatNumber(profileData.slayer[slayer].xpNext);
     }
     document.querySelector("#slayer-grid").appendChild(slayerDisplay);
   }
