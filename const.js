@@ -2,183 +2,418 @@ module.exports = {
   pets: { /* Adapted from leaphant/skyblock-stats, sky.lea.moe */
     "BAT": {
       "skin": "http://textures.minecraft.net/texture/382fc3f71b41769376a9e92fe3adbaac3772b999b219c9d6b4680ba9983e527",
-      "type": "mining"
+      "type": "mining",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        spd: 0.05
+      }
     },
     "BLAZE": {
       "skin": "./public/img/blaze.png",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {
+        def: 10
+      },
+      "perLevelStats": {
+        int: 1,
+        def: 0.2
+      }
     },
     "CHICKEN": {
       "skin": "http://textures.minecraft.net/texture/7f37d524c3eed171ce149887ea1dee4ed399904727d521865688ece3bac75e",
-      "type": "farming"
+      "type": "farming",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 2
+      }
     },
     "HORSE": {
       "skin": "http://textures.minecraft.net/texture/36fcd3ec3bc84bafb4123ea479471f9d2f42d8fb9c5f11cf5f4e0d93226",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 0.5,
+        spd: 0.25
+      }
     },
     "JERRY": {
       "skin": "http://textures.minecraft.net/texture/822d8e751c8f2fd4c8942c44bdb2f5ca4d8ae8e575ed3eb34c18a86e93b",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        int: -1
+      }
     },
     "OCELOT": {
       "skin": "http://textures.minecraft.net/texture/5657cd5c2989ff97570fec4ddcdc6926a68a3393250c1be1f0b114a1db1",
-      "type": "foraging"
+      "type": "foraging",
+      "baseStats": {},
+      "perLevelStats": {
+        spd: 0.5
+      }
     },
     "PIGMAN": {
       "skin": "http://textures.minecraft.net/texture/63d9cb6513f2072e5d4e426d70a5557bc398554c880d4e7b7ec8ef4945eb02f2",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.5,
+        def: 0.5
+      }
     },
     "RABBIT": {
       "skin": "http://textures.minecraft.net/texture/117bffc1972acd7f3b4a8f43b5b6c7534695b8fd62677e0306b2831574b",
-      "type": "farming"
+      "type": "farming",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1,
+        spd: 0.2
+      }
     },
     "SHEEP": {
       "skin": "http://textures.minecraft.net/texture/64e22a46047d272e89a1cfa13e9734b7e12827e235c2012c1a95962874da0",
-      "type": "alchemy"
+      "type": "alchemy",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        ad: 0.5
+      }
     },
     "SILVERFISH": {
       "skin": "http://textures.minecraft.net/texture/da91dab8391af5fda54acd2c0b18fbd819b865e1a8f1d623813fa761e924540",
-      "type": "mining"
+      "type": "mining",
+      "baseStats": {},
+      "perLevelStats": {
+        def: 1,
+        hp: 0.2
+      }
     },
     "WITHER_SKELETON": {
       "skin": "http://textures.minecraft.net/texture/f5ec964645a8efac76be2f160d7c9956362f32b6517390c59c3085034f050cff",
-      "type": "mining"
+      "type": "mining",
+      "baseStats": {},
+      "perLevelStats": {
+        cd: 0.25,
+        def: 0.25,
+        str: 0.25,
+        int: 0.25,
+        cc: 0.05
+      }
     },
     "SKELETON_HORSE": {
       "skin": "http://textures.minecraft.net/texture/47effce35132c86ff72bcae77dfbb1d22587e94df3cbc2570ed17cf8973a",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        spd: 0.5
+      }
     },
     "WOLF": {
       "skin": "http://textures.minecraft.net/texture/dc3dd984bb659849bd52994046964c22725f717e986b12d548fd169367d494",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 0.5,
+        spd: 0.2,
+        td: 0.1,
+        cd: 0.1
+      }
     },
     "ENDERMAN": {
       "skin": "http://textures.minecraft.net/texture/6eab75eaa5c9f2c43a0d23cfdce35f4df632e9815001850377385f7b2f039ce1",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        cd: 0.75
+      }
     },
     "PHOENIX": {
       "skin": "http://textures.minecraft.net/texture/23aaf7b1a778949696cb99d4f04ad1aa518ceee256c72e5ed65bfa5c2d88d9e",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {
+        int: 50,
+        str: 10
+      },
+      "perLevelStats": {
+        int: 1,
+        str: 1
+      }
     },
     "MAGMA_CUBE": {
       "skin": "http://textures.minecraft.net/texture/38957d5023c937c4c41aa2412d43410bda23cf79a9f6ab36b76fef2d7c429",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 0.5,
+        def: 0.333,
+        str: 0.2
+      }
     },
     "FLYING_FISH": {
       "skin": "http://textures.minecraft.net/texture/40cd71fbbbbb66c7baf7881f415c64fa84f6504958a57ccdb8589252647ea",
-      "type": "fishing"
+      "type": "fishing",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 0.5,
+        def: 0.5
+      }
     },
     "BLUE_WHALE": {
       "skin": "http://textures.minecraft.net/texture/dab779bbccc849f88273d844e8ca2f3a67a1699cb216c0a11b44326ce2cc20",
-      "type": "fishing"
+      "type": "fishing",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 2
+      }
     },
     "TIGER": {
       "skin": "http://textures.minecraft.net/texture/fc42638744922b5fcf62cd9bf27eeab91b2e72d6c70e86cc5aa3883993e9d84",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {
+        str: 5
+      },
+      "perLevelStats": {
+        cd: 0.5,
+        str: 0.1,
+        cc: 0.05
+      }
     },
     "LION": {
       "skin": "http://textures.minecraft.net/texture/38ff473bd52b4db2c06f1ac87fe1367bce7574fac330ffac7956229f82efba1",
-      "type": "foraging"
+      "type": "foraging",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.5,
+        spd: 0.25
+      }
     },
     "PARROT": {
       "skin": "http://textures.minecraft.net/texture/5df4b3401a4d06ad66ac8b5c4d189618ae617f9c143071c8ac39a563cf4e4208",
-      "type": "alchemy"
+      "type": "alchemy",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        cd: 0.1
+      }
     },
     "SNOWMAN": {
       "skin": "http://textures.minecraft.net/texture/11136616d8c4a87a54ce78a97b551610c2b2c8f6d410bc38b858f974b113b208",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        dmg: 0.25,
+        str: 0.25,
+        cd: 0.25
+      }
     },
     "TURTLE": {
       "skin": "http://textures.minecraft.net/texture/212b58c841b394863dbcc54de1c2ad2648af8f03e648988c1f9cef0bc20ee23c",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        def: 1,
+        hp: 1
+      }
     },
     "BEE": {
       "skin": "http://textures.minecraft.net/texture/7e941987e825a24ea7baafab9819344b6c247c75c54a691987cd296bc163c263",
-      "type": "farming"
+      "type": "farming",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 0.5,
+        str: 0.25,
+        spd: 0.1
+      }
     },
     "ENDER_DRAGON": {
       "skin": "http://textures.minecraft.net/texture/aec3ff563290b13ff3bcc36898af7eaa988b6cc18dc254147f58374afe9b21b9",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.5,
+        cd: 0.5,
+        cc: 0.1
+      }
     },
     "GUARDIAN": {
       "skin": "http://textures.minecraft.net/texture/221025434045bda7025b3e514b316a4b770c6faa4ba9adb4be3809526db77f9d",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        def: 0.5
+      }
     },
     "SQUID": {
       "skin": "http://textures.minecraft.net/texture/01433be242366af126da434b8735df1eb5b3cb2cede39145974e9c483607bac",
-      "type": "fishing"
+      "type": "fishing",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1,
+        hp: 1
+      }
     },
     "GIRAFFE": {
       "skin": "http://textures.minecraft.net/texture/176b4e390f2ecdb8a78dc611789ca0af1e7e09229319c3a7aa8209b63b9",
-      "type": "foraging"
+      "type": "foraging",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1,
+        cc: 0.05
+      }
     },
     "ELEPHANT": {
       "skin": "http://textures.minecraft.net/texture/7071a76f669db5ed6d32b48bb2dba55d5317d7f45225cb3267ec435cfa514",
-      "type": "farming"
+      "type": "farming",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1,
+        int: 0.75
+      }
     },
     "MONKEY": {
       "skin": "http://textures.minecraft.net/texture/13cf8db84807c471d7c6922302261ac1b5a179f96d1191156ecf3e1b1d3ca",
-      "type": "foraging"
+      "type": "foraging",
+      "baseStats": {},
+      "perLevelStats": {
+        spd: 0.2,
+        int: 0.5
+      }
     },
     "SPIDER": {
       "skin": "http://textures.minecraft.net/texture/cd541541daaff50896cd258bdbdd4cf80c3ba816735726078bfe393927e57f1",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        cc: 0.1,
+        str: 0.1
+      }
     },
     "ENDERMITE": {
       "skin": "http://textures.minecraft.net/texture/5a1a0831aa03afb4212adcbb24e5dfaa7f476a1173fce259ef75a85855",
-      "type": "mining"
+      "type": "mining",
+      "baseStats": {},
+      "perLevelStats": {
+        int: 1
+      }
     },
     "GHOUL": {
       "skin": "http://textures.minecraft.net/texture/87934565bf522f6f4726cdfe127137be11d37c310db34d8c70253392b5ff5b",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1,
+        int: 0.7
+      }
     },
     "JELLYFISH": {
       "skin": "http://textures.minecraft.net/texture/913f086ccb56323f238ba3489ff2a1a34c0fdceeafc483acff0e5488cfd6c2f1",
-      "type": "alchemy"
+      "type": "alchemy",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 2
+      }
     },
     "PIG": {
       "skin": "http://textures.minecraft.net/texture/621668ef7cb79dd9c22ce3d1f3f4cb6e2559893b6df4a469514e667c16aa4",
-      "type": "farming"
+      "type": "farming",
+      "baseStats": {},
+      "perLevelStats": {
+        spd: 0.25
+      }
     },
     "ROCK": {
       "skin": "http://textures.minecraft.net/texture/cb2b5d48e57577563aca31735519cb622219bc058b1f34648b67b8e71bc0fa",
-      "type": "mining"
+      "type": "mining",
+      "baseStats": {},
+      "perLevelStats": {
+        def: 2,
+        td: 0.1
+      }
     },
     "SKELETON": {
       "skin": "http://textures.minecraft.net/texture/fca445749251bdd898fb83f667844e38a1dff79a1529f79a42447a0599310ea4",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        cc: 0.15,
+        cd: 0.3
+      }
     },
     "ZOMBIE": {
       "skin": "http://textures.minecraft.net/texture/56fc854bb84cf4b7697297973e02b79bc10698460b51a639c60e5e417734e11",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1,
+        cd: 0.25
+      }
     },
     "DOLPHIN": {
       "skin": "http://textures.minecraft.net/texture/cefe7d803a45aa2af1993df2544a28df849a762663719bfefc58bf389ab7f5",
-      "type": "fishing"
+      "type": "fishing",
+      "baseStats": {},
+      "perLevelStats": {
+        scc: 0.05,
+        int: 1
+      }
     },
     "BABY_YETI": {
       "skin": "http://textures.minecraft.net/texture/ab126814fc3fa846dad934c349628a7a1de5b415021a03ef4211d62514d5",
-      "type": "fishing"
+      "type": "fishing",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.4,
+        int: 0.74
+      }
     },
     "GOLEM": {
       "skin": "http://textures.minecraft.net/texture/89091d79ea0f59ef7ef94d7bba6e5f17f2f7d4572c44f90f76c4819a714",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        hp: 1.5,
+        str: 0.25
+      }
     },
     "HOUND": {
       "skin": "http://textures.minecraft.net/texture/b7c8bef6beb77e29af8627ecdc38d86aa2fea7ccd163dc73c00f9f258f9a1457",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.4,
+        "as": 0.15
+      }
     },
     "TARANTULA": {
       "skin": "http://textures.minecraft.net/texture/8300986ed0a04ea79904f6ae53f49ed3a0ff5b1df62bba622ecbd3777f156df8",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        str: 0.1,
+        cc: 0.1,
+        cd: 0.3
+      }
     },
     "BLACK_CAT": {
       "skin": "http://textures.minecraft.net/texture/e4b45cbaa19fe3d68c856cd3846c03b5f59de81a480eec921ab4fa3cd81317",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        spd: 0.25,
+        int: 1
+      }
     },
     "SPIRIT": {
       "skin": "http://textures.minecraft.net/texture/8d9ccc670677d0cebaad4058d6aaf9acfab09abea5d86379a059902f2fe22655",
-      "type": "combat"
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        spd: 0.3,
+        int: 1
+      }
     }
   },
   petLeveling: { /* Adapted from sky.lea.moe */
@@ -189,36 +424,50 @@ module.exports = {
       RARE: 11,
       EPIC: 15,
       LEGENDARY: 19
+    },
+    total: {
+      COMMON: 5624785,
+      UNCOMMON: 8644220,
+      RARE: 12626665,
+      EPIC: 18608500,
+      LEGENDARY: 25353230
     }
   },
   petItems: {
     PET_ITEM_ALL_SKILLS_BOOST_COMMON: {
       description: "§7Gives +§a10% §7pet exp for all skills",
-      name: "All Skills Exp Boost"
+      name: "All Skills Exp Boost",
     },
     PET_ITEM_BIG_TEETH_COMMON: {
       description: "§7Increases §9Crit Chance §7by §a5%",
       name: "Big Teeth",
       stats: {
-        crit_chance: 5
+        add: {cc: 5},
+        multiply: {}
       }
     },
     PET_ITEM_IRON_CLAWS_COMMON: {
       description: "§7Increases the pet's §9Crit Damage §7by §a40% §7and §9Crit Chance §7by §a40%",
-      name: "Iron Claws"
+      name: "Iron Claws",
+      stats: {
+        add: {},
+        multiply: {cc: 1.4, cd: 1.4}
+      }
     },
     PET_ITEM_SHARPENED_CLAWS_UNCOMMON: {
       description: "§7Increases §9Crit Damage §7by §a15%",
       name: "Sharpened Claws",
       stats: {
-        crit_damage: 15
+        add: {cd: 15},
+        multiply: {}
       }
     },
     PET_ITEM_HARDENED_SCALES_UNCOMMON: {
       description: "§7Increases §aDefense §7by §a25",
       name: "Hardened Scales",
       stats: {
-        defense: 25
+        add: {def: 25},
+        multiply: {}
       }
     },
     PET_ITEM_BUBBLEGUM: {
@@ -228,13 +477,14 @@ module.exports = {
     PET_ITEM_LUCKY_CLOVER: {
       description: "§7Increases §bMagic Find §7by §a7",
       name: "Lucky Clover",
-      stats: {
-        magic_find: 7
-      }
     },
     PET_ITEM_TEXTBOOK: {
       description: "§7Increases the pet's §bIntelligence §7by §a100%",
-      name: "Textbook"
+      name: "Textbook",
+      stats: {
+        add: {},
+        multiply: {int: 2}
+      }
     },
     PET_ITEM_SADDLE: {
       description: "§7Increase horse speed by §a50% §7 and jump boost by §a100%",

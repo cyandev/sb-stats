@@ -155,9 +155,10 @@ async function getInventoryJSON(contents,profileData) {
             }
           })
         }
-        //add dungeon tag
+        //add dungeon tag / stars
         if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("DUNGEON")) {
           out.tags.push("DUNGEON");
+          out.stars = (out.name.split("✪").length - 1);
         }
         if (out.lore && out.lore.length > 0 && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
           out.tags.push("WEAPON");
@@ -191,6 +192,7 @@ async function getInventoryJSON(contents,profileData) {
                 if (match[4] && !profileData.skills.catacombs && out.tags.includes("DUNGEON")) {
                   profileData.skills.catacombs = Math.round((Number(match[4]) / Number(match[1]) - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
                 }
+                
               }
             })
           })
@@ -425,6 +427,8 @@ async function getProfileData(uuid, profile, playerData, priority) {
           `§6Held Item: ${pet.heldItem ? constants.petItems[pet.heldItem].name : "None"}`,
           pet.heldItem ? constants.petItems[pet.heldItem].description : "",
           "",
+          `§7Total XP: §f${util.cleanFormatNumber(pet.exp)} §6/ §f${util.cleanFormatNumber(constants.petLeveling.total[pet.tier])}`,
+          "",
           `§r${pet.tier[0] + pet.tier.slice(1).toLowerCase()} Pet`
         ],
         id: "NULL",
@@ -444,6 +448,31 @@ async function getProfileData(uuid, profile, playerData, priority) {
       for (level = 1; level < 100 && remainingXp >= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]]; level++) {
         remainingXp -= constants.petLeveling.table[level + constants.petLeveling.rarityOffset[pet.tier]];
       }
+      //get the pets stats
+      var stats = {}
+      for (let stat in constants.pets[pet.type].perLevelStats) {
+        stats[stat] = constants.pets[pet.type].perLevelStats[stat] * level + (constants.pets[pet.type].baseStats[stats] ? constants.pets[pet.type].baseStats[stats] : 0); //add the stats
+      }
+      //apply pet item to stats
+      if (constants.petItems[pet.heldItem] && constants.petItems[pet.heldItem].stats) {
+        for (let operation in constants.petItems[pet.heldItem].stats) {
+          for (let stat in constants.petItems[pet.heldItem].stats[operation]) {
+            if (operation == "add") {
+              if (stats[stat]) {
+                stats[stat] += constants.petItems[pet.heldItem].stats[operation][stat];
+              } else {
+                stats[stat] = constants.petItems[pet.heldItem].stats[operation][stat];
+              }
+            } else if (operation == "multiply") {
+              if (stats[stat]) {
+                stats[stat] *= constants.petItems[pet.heldItem].stats[operation][stat];
+              }
+            }
+          }
+        }
+      }
+      out.stats = stats;
+
       //finish making item
       if (out.lore[7] == "") { //remove held item description if there is none
         out.lore.splice(7,1);
@@ -612,7 +641,7 @@ async function calculateGuilds() {
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => {
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 120) { //re-get more than 120 second old profiles
+  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 10) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
   } else {

@@ -85,3 +85,10 @@ async function getColoredItem(item,color) {
   })
 }
 exports.getColoredItem = getColoredItem;
+function cleanFormatNumber(n) {
+  n = n.toFixed(0);
+  if (n.length <= 3) return n;
+  const post = ["","k","m","b","t","q"];
+  return n.slice(0,3) / ((n.length - 3) % 3 == 0 ? 1: Math.pow(10,3 - n.length % 3)) + post[Math.floor((n.length-1) / 3)]
+}
+exports.cleanFormatNumber = cleanFormatNumber;

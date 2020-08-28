@@ -11,16 +11,15 @@ async function headerSearch() {
   } else if (searchType == "Guild") {
     window.location = window.location.origin + "/guild/" + document.getElementById("header-search-text").value;
   }
-  
 }
+
 document.querySelector("#search-type-selector").addEventListener("mouseover", () => {
-  console.log("in")
   for (let opt of document.querySelector("#search-type-selector").querySelectorAll(".selector-opt")) {
     opt.style.display = "block";
   }
 })
+
 document.querySelector("#search-type-selector").addEventListener("mouseout", () => {
-  console.log("out")
   for (let opt of document.querySelector("#search-type-selector").querySelectorAll(".selector-opt")) {
     opt.style.display = "none";
   }

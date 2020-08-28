@@ -223,7 +223,7 @@ body {
   background: var(--dark-white);
   display: none;
 }
-#wardrobe .inv-view::-webkit-scrollbar-thumb:hover {
+#wardrobe:hover .inv-view::-webkit-scrollbar-thumb {
   display: initial;
 }
 #inventories {

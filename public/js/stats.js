@@ -168,9 +168,6 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
     //make base itemCell
     let itemCell = document.createElement("div");
     if (opt.rarityColor && item.rarity) itemCell.style.boxShadow = "inset 0vw 0vw 0.5vw 0.1vw " + styleMap[rarityColorMap[item.rarity]].split(":")[1];
-    if (item.active) {
-      itemCell.style.border = "0.1vw solid var(--yellow)"
-    }
     itemCell.innerHTML = `
     <div class="item-icon"></div>
     <span class="item-count"></span>
@@ -225,11 +222,12 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
   })
   return grid
 }
-function makeInventorySelector(contents) {
-  let view = makeInventoryViewer(contents,{cols: 12,hasHotbar:false});
+function makeInventorySelector(contents,opt) {
+  let view = makeInventoryViewer(contents,opt ? opt : {cols: 12,hasHotbar:false});
   view.style.gridAutoRows = "8vw";
   for (let cell of view.children) {
-    cell.querySelector(".item-icon").style.transform += "translate(-50%, -50%) translateY(-1vw) scale(calc(var(--cellSize) / 128 * 0.8))"
+    if (cell.querySelector(".item-head")) cell.querySelector(".item-head").style.transform = "translateY(-1vw) rotateY(45deg) rotateX(-15deg) rotateZ(-15deg)"
+    cell.querySelector(".item-icon").style.transform = "translate(-50%, -50%) translateY(-1vw) scale(calc(var(--cellSize) / 128 * 0.8))"
     let checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.classList.add("item-selector");
@@ -238,6 +236,7 @@ function makeInventorySelector(contents) {
       for (let check of view.querySelectorAll(".item-selector")) {
         if (check != checkbox) check.checked = false;
       }
+      setTimeout(() => checkbox.checked = true, 1); //delayed because click toggles it
       view.checked = cell.item;
       if (view.onUpdate) view.onUpdate(); //call event listener
     })
@@ -284,7 +283,7 @@ function makeStatsDisplay(label,stats) {
         icon.innerText = statToIcon[stat] + " " + stat.toUpperCase();
         statsDisplay.appendChild(icon);
         let number = document.createElement("div");
-        number.innerText = stats[stat];
+        number.innerText = Math.round(stats[stat]);
         statsDisplay.appendChild(number);
       }
     }
@@ -483,8 +482,31 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#inventories").appendChild(apiWarn);
   }
 
-  //load pets 
-  document.querySelector("#pets").appendChild(makeInventoryViewer(profileData.pets, {cols: 12, hasHotbar: false, rarityColor:true}));
+  //load pets
+  let petSelector = makeInventorySelector(profileData.pets, {cols: 12, hasHotbar: false, rarityColor:true});
+  petSelector.gridAutoRows = "9vw"
+  for (let cell of petSelector.querySelectorAll(".item-cell")) {
+    cell.querySelector(".item-head").style.transform = "translateY(-0.4vw) rotateY(45deg) rotateX(-15deg) rotateZ(-15deg)";
+    let levelNumber = document.createElement("div");
+    levelNumber.innerText = `LVL ${cell.item.level}`;
+    levelNumber.style.position = "absolute";
+    levelNumber.style.top = "0.3vw";
+    levelNumber.style.left = 0;
+    levelNumber.style.width = "100%";
+    levelNumber.style.textAlign = "center";
+    levelNumber.style.fontSize = "1.05vw";
+    cell.appendChild(levelNumber);
+  }
+
+  console.log(petSelector)
+  petSelector.checked = profileData.pets[0];
+  if (petSelector.children[0]) {
+    petSelector.children[0].querySelector(".item-selector").checked = true;
+  }
+  if (petSelector.children[1]) {
+    petSelector.children[1].querySelector(".item-selector").checked = false;
+  }
+  document.querySelector("#pets").appendChild(petSelector);
 
   //load slayers
   document.querySelector("#slayer-total").innerText = (Object.keys(profileData.slayer).reduce((t,x) => profileData.slayer[x].xp + t, 0)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " Slayer XP"
@@ -532,13 +554,19 @@ document.querySelector("#item-hover").style.display = "none";
     }
     document.querySelector("#slayer-grid").appendChild(slayerDisplay);
   }
-  /* COMBAT SECTION */
+  /* COMBAT SECTION !!! REDO THIS DUMPSTER FIRE !!!*/
   //make weapon section + stat display
   if (profileData.inventories.length > 1) {
     let weaponSelector = makeInventorySelector(profileData.weapons);
     let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
-      weaponStats.update(weaponSelector.checked.stats);
+      let stats = {...weaponSelector.checked.stats};
+      if (document.querySelector("#in-dungeons").checked && profileData.skills.find(x => x.name == "catacombs") && weaponSelector.checked.tags.includes("DUNGEON") ) {
+        for (let stat in stats) {
+          stats[stat] = stats[stat] * (1+ (weaponSelector.checked.stars ? weaponSelector.checked.stars * 0.1 : 0) + profileData.skills.find(x => x.name == "catacombs").xp * 0.01 )
+        }
+      }
+      weaponStats.update(stats);
       getTotalStats()
     }
     document.querySelector("#weapon-select").appendChild(weaponSelector);
@@ -572,6 +600,13 @@ document.querySelector("#item-hover").style.display = "none";
       }
     }
     document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
+    //pet stats
+    let petsStats = makeStatsDisplay("Pet", profileData.pets.find(x => x.active).stats);
+    petSelector.onUpdate = () => {
+      petsStats.update(petSelector.checked.stats);
+      getTotalStats();
+    }
+    document.querySelector("#stats-separate").appendChild(petsStats);
     //potion stats
     let potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
     document.querySelector("#stats-separate").appendChild(potsStats);
@@ -619,26 +654,49 @@ document.querySelector("#item-hover").style.display = "none";
       getTotalStats()
     }
     //add armor stats
-    let armorStats = {
-      "str": 0,
-      "cc": 0,
-      "cd": 0,
-      "as": 0,
-      "int": 0,
-    }
-    profileData.inventories.find((x) => x.name == "inv_armor").contents.forEach((item) => {
-      for (let stat in item.stats) {
-        armorStats[stat] += Number(item.stats[stat]);
+    let armorStats = {};
+    let armorStatsDisplay = makeStatsDisplay("Armor", armorStats);
+    function makeArmorStats() {
+      armorStats = {
+        "str": 0,
+        "cc": 0,
+        "cd": 0,
+        "as": 0,
+        "int": 0,
       }
-    })
-    for( let stat in armorStats) {
-      if (armorStats[stat] == 0) {
-        delete armorStats[stat];
+      profileData.inventories.find((x) => x.name == "inv_armor").contents.forEach((item) => {
+        for (let stat in item.stats) {
+          let pieceStat = Number(item.stats[stat]);
+          if (document.querySelector("#in-dungeons").checked && profileData.skills.find(x => x.name == "catacombs") && item.tags.includes("DUNGEON")) {
+            pieceStat *= 1 + (item.stars ? item.stars * 0.1 : 0) + profileData.skills.find(x => x.name == "catacombs").xp * 0.01;
+          }
+          armorStats[stat] += pieceStat;
+        }
+      })
+      for( let stat in armorStats) {
+        if (armorStats[stat] == 0) {
+          delete armorStats[stat];
+        }
       }
+      armorStatsDisplay.update(armorStats);
     }
-    document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Armor", armorStats));
+    makeArmorStats();
+
+    
+    document.querySelector("#stats-separate").appendChild(armorStatsDisplay);
     //add weapon stats
     document.querySelector("#stats-separate").appendChild(weaponStats);
+
+    //dungeons checkbox
+    document.querySelector("#in-dungeons").addEventListener("mouseup", () => {
+      setTimeout(() => {
+        makeArmorStats();
+        weaponSelector.onUpdate();
+        getTotalStats();
+      },1)
+    })
+
+    //everything together
     let totalStats = makeStatsDisplay("Total");
     document.querySelector("#stats-combined").appendChild(totalStats);
     function getTotalStats() { //redo this
@@ -650,7 +708,7 @@ document.querySelector("#item-hover").style.display = "none";
         "as": 0,
         "int": 0,
       }
-      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponSelector.checked.stats: {}, potsStats.stats]);
+      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
       for (let statMap of stats) {
         for (let stat in statMap) {
           statsBase[stat] += Number(statMap[stat]);
