@@ -601,7 +601,8 @@ document.querySelector("#item-hover").style.display = "none";
     }
     document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
     //pet stats
-    let petsStats = makeStatsDisplay("Pet", profileData.pets.find(x => x.active).stats);
+    let activePet = profileData.pets.find(x => x.active);
+    let petsStats = makeStatsDisplay("Pet", activePet ? activePet.stats: {});
     petSelector.onUpdate = () => {
       petsStats.update(petSelector.checked.stats);
       getTotalStats();
