@@ -577,29 +577,28 @@ async function getGuildData(guildname) {
   guildData.tag.text = guildApi.guild.tag;
   guildData.tag.color = guildApi.guild.tagColor;
   let playerDataArr = await playersCollection.find({uuid: {$in: guildApi.guild.members.map(x => x.uuid)}}).toArray();
+  let foundPlayerUuids = playerDataArr.map(x => x.uuid);
+  let missedPlayersArr = guildApi.guild.members.map(x => x.uuid).filter(x => !foundPlayerUuids.includes(x));
   
+  missedPlayersArr.forEach((uuid) => {
+    console.log(uuid)
+    guildData.incomplete = true;
+    if (!loadingUuids.includes(uuid)) {
+      getPlayerData(null, 1, uuid).then(() => {
+        loadingUuids.splice(loadingUuids.indexOf(uuid),1);
+      });
+      loadingUuids.push(uuid);
+    }
+  });
   guildData.members = playerDataArr.map((x,i) => {
-    if (x) {
-      if (!x.currentProfile) return false;
-      let profile = x.profiles[x.currentProfile];
-      return {
-        name: x.name,
-        slayer: profile.slayerXp,
-        averageSkill: Number(profile.averageSkillProgress),
-        skillXp: profile.skills.reduce((t,x) => t+x.xp, 0)
-      }
-    } else {
-      guildData.incomplete = true;
-      if (!loadingUuids.includes(guildApi.guild.members[i].uuid)) {
-        getPlayerData(null, 1, guildApi.guild.members[i].uuid).then(() => {
-          loadingUuids.splice(loadingUuids.indexOf(guildApi.guild.members[i].uuid),1);
-        });
-        loadingUuids.push(guildApi.guild.members[i].uuid);
-      }
-      return false;
+    let profile = x.profiles[x.currentProfile];
+    return {
+      name: x.name,
+      slayer: profile.slayerXp,
+      averageSkill: Number(profile.averageSkillProgress),
+      skillXp: profile.skills.reduce((t,x) => t+x.xp, 0)
     }
   })
-  guildData.members = guildData.members.filter(x => x);
 
   guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
   guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));

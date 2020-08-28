@@ -115,9 +115,11 @@ body {
 }
 #guildMemberList {
   height: calc(100% - 2vw);
-  display: flex;
+  display: grid;
   flex-wrap: wrap;
   overflow-y: scroll;
+  grid-auto-rows: 2vw;
+  overflow-x: hidden;
 }
 #guildMemberList::-webkit-scrollbar {
   width: 1vw;

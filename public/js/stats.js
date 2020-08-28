@@ -557,7 +557,7 @@ document.querySelector("#item-hover").style.display = "none";
   /* COMBAT SECTION !!! REDO THIS DUMPSTER FIRE !!!*/
   //make weapon section + stat display
   if (profileData.inventories.length > 1) {
-    let weaponSelector = makeInventorySelector(profileData.weapons);
+    let weaponSelector = makeInventorySelector(profileData.weapons, {cols: 12, hasHotbar: false, rarityColor:true});
     let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
       let stats = {...weaponSelector.checked.stats};
