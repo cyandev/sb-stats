@@ -172,7 +172,7 @@ async function getInventoryJSON(contents,profileData) {
             out.tags.push("BOW");
             out.tags.push("WEAPON");
             out.enchantments = item.tag.ExtraAttributes.enchantments;
-          } else if ((out.lore[out.lore.length - 1].includes("SWORD")) {
+          } else if (out.lore[out.lore.length - 1].includes("SWORD")) {
             out.tags.push("SWORD");
             out.tags.push("WEAPON");
             out.enchantments = item.tag.ExtraAttributes.enchantments;
