@@ -291,7 +291,10 @@ function makeStatsDisplay(label,stats) {
   statsDisplay.update(stats);
   return statsDisplay;
 }
-function doDamageCalc(weapon,profileData, stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
+function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
+  stats = Object.assign({},stats);
+  //variable stat increases by a #
+
   let baseDmg = (5 + stats.dmg + Math.floor(stats.str / 5)) * (1 + stats.str / 100) * (1 + stats.cd / 100);
   let damageMultiplier = 1 + profileData.skills.find(skill => skill.name=="combat").levelPure * 0.04;
   let enchantmentsBuffs = {
@@ -308,7 +311,48 @@ function doDamageCalc(weapon,profileData, stats,enemy={undead:false,ender:false,
       damageMultiplier += enchantmentsBuffs[enchant] * weapon.enchantments[enchant];
     }
   }
-  return baseDmg * damageMultiplier;
+  //add fancy damage bonuses
+  let extraBonus = 1
+  //dungeon skeleton sets SKELETON_TYPE
+  if (weapon.tags && weapon.tags.includes("BOW")) {
+    armor.forEach((piece) => {
+      if (piece && piece.id.includes("SKELETON")) {
+        extraBonus += 0.05;
+      }
+    })
+    if (armor.every((piece) => piece && piece.id.includes("SKELETON_SOLDIER")) || armor.every((piece) => piece && piece.id.includes("SKELETON_MASTER"))) {
+      extraBonus += 0.25;
+    }
+  }
+  //tuxes TYPE_TUXEDO
+  if (armor.slice(1).every((piece) => piece.id && piece.id.includes("CHEAP_TUXEDO"))) {
+    extraBonus *= 1.5
+  }
+  if (armor.slice(1).every((piece) => piece.id && piece.id.includes("FANCY_TUXEDO"))) {
+    extraBonus *= 2
+  }
+  if (armor.slice(1).every((piece) => piece.id && piece.id.includes("ELEGANT_TUXEDO"))) {
+    extraBonus *= 2.5
+  }
+  //sword bonuses
+  if (weapon.id == "REAPER_SWORD" && enemy.undead) {
+    extraBonus *= 3
+  }
+  if ((weapon.id == "SCORPION_FOIL" && enemy.spider) || (weapon.id == "REVENANT_SWORD" && enemy.undead)) {
+    extraBonus *= 2.5
+  }
+  if ((weapon.id == "END_SWORD" && enemy.ender) || (weapon.id == "SPIDER_SWORD" && enemy.spider) || (weapon.id == "UNDEAD_SWORD" && enemy.undead) || (weapon.id == "SAVANAH_BOW")) {
+    extraBonus *= 2
+  }
+  let damage = [baseDmg * damageMultiplier * extraBonus];
+  //ranged damages
+  if (weapon.reforge == "fabled") {
+    damage.push(damage[0] * 1.2) //normal damage, max crit (+20%)
+  }
+  if (weapon.reforge == "precise") {
+    damage.push(damage[0] * 1.1) //normal damage, headshot damage (+10%)
+  }
+  return damage
 }
 /* Hover Box Listeners + Functions */
 var mouseX = 0;
@@ -434,11 +478,46 @@ document.querySelector("#item-hover").style.display = "none";
 
 
   //load armor
-  document.querySelector("#armor").appendChild(makeInventoryViewer(profileData.inventories.find((x) => x.name == "inv_armor").contents.reverse(), {cols: 1, hasHotbar: false, rarityColor: true}));
+  document.querySelector("#armor-inv").appendChild(makeInventoryViewer(profileData.inventories.find((x) => x.name == "inv_armor").contents.reverse(), {cols: 1, hasHotbar: false, rarityColor: true}));
 
   //load wardrobe / wardrobe api check
   if (profileData.inventories.find((x) => x.name == "wardrobe_contents")) {
-    document.querySelector("#wardrobe").appendChild(makeInventoryViewer(transformWardrobe( profileData.inventories.find((x) => x.name == "wardrobe_contents").contents), {cols: 18, hasHotbar: false, rarityColor: true}));
+    var wardrobeSelector = makeInventorySelector(transformWardrobe( profileData.inventories.find((x) => x.name == "wardrobe_contents").contents), {cols: 18, hasHotbar: false, rarityColor: true});
+    wardrobeSelector.onUpdate = () => {
+      console.log("wardrobe update")
+
+      //set selected to an inventory of the armor
+      let bootsIndex = Array.from(wardrobeSelector.children).indexOf(Array.from(wardrobeSelector.children).find(x => x.item == wardrobeSelector.checked));
+      wardrobeSelector.checked = [wardrobeSelector.children[bootsIndex- 18 * 3].item, wardrobeSelector.children[bootsIndex- 18 * 2].item, wardrobeSelector.children[bootsIndex- 18 * 1].item, wardrobeSelector.children[bootsIndex].item];
+      console.log(wardrobeSelector.checked)
+
+      //set armor display to show selected
+      document.querySelector("#armor-inv").innerHTML = ""
+      document.querySelector("#armor-inv").appendChild(makeInventoryViewer(wardrobeSelector.checked, {cols: 1, hasHotbar: false, rarityColor: true}));
+      
+      //set the inv_armor to the newly selected set
+      profileData.inventories.find((x) => x.name == "inv_armor").contents = wardrobeSelector.checked;
+
+      //remake armor stats
+      makeArmorStats();
+      getTotalStats();
+    }
+    console.log(wardrobeSelector.children);
+    wardrobeSelector.style.gridAutoRows = "6vw";
+    for (let i = 0; i < 18 * 4; i++) {
+      // console.log(wardrobeSelector.children[i], i)
+      if (i < 18 * 3) {
+        wardrobeSelector.children[i].removeChild(wardrobeSelector.children[i].querySelector(".item-selector"))
+      } else {
+        wardrobeSelector.children[i].querySelector(".item-selector").style.bottom = "-3.5vw";
+        wardrobeSelector.children[i].querySelector(".item-selector").style.width = "2vw";
+        wardrobeSelector.children[i].querySelector(".item-selector").style.height = "2vw";
+      }
+      if (wardrobeSelector.children[i].querySelector(".item-head")) wardrobeSelector.children[i].querySelector(".item-head").style.transform = "rotateY(45deg) rotateX(-15deg) rotateZ(-15deg)"
+      wardrobeSelector.children[i].querySelector(".item-icon").style.transform = "translate(-50%, -50%) scale(calc(var(--cellSize) / 128 * 0.8))"
+    }
+    document.querySelector("#wardrobe").appendChild(wardrobeSelector);
+
   } else {
     let apiWarn = document.createElement("span");
     apiWarn.innerText = "API Not Enabled!"
@@ -701,6 +780,7 @@ document.querySelector("#item-hover").style.display = "none";
     let totalStats = makeStatsDisplay("Total");
     document.querySelector("#stats-combined").appendChild(totalStats);
     function getTotalStats() { //redo this
+      let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
       let statsBase = {
         "dmg": 0,
         "str": 0,
@@ -720,10 +800,26 @@ document.querySelector("#item-hover").style.display = "none";
           delete statsBase[stat];
         }
       }
+      if (armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
+        for (let stat in statsBase) {
+          if (stat != "dmg") statsBase[stat] *= 1.05
+        }
+      }
+      armor.forEach((piece) => {
+        console.log(piece.reforge, piece.reforge == "renowned", statsBase)
+        if (piece.reforge == "renowned") {
+          for (let stat in statsBase) {
+            console.log(stat, statsBase[stat])
+            if (stat != "dmg") statsBase[stat] *= 1.01
+          }
+        }
+      })
+
       totalStats.update(statsBase);
       if (weaponSelector.checked) {
-        document.querySelector("#zealot-dmg-number").innerText = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{ender:true,gk:true}));
-        document.querySelector("#crypt-ghoul-dmg-number").innerText = cleanFormatNumber(doDamageCalc(weaponSelector.checked, profileData, statsBase,{undead:true}));
+        document.querySelector("#zealot-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{ender:true,gk:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#crypt-ghoul-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{undead:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#spider-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{spider:true}).map(x => cleanFormatNumber(x)).join("-");
       }
     }
     getTotalStats();

@@ -42,7 +42,6 @@ Header CSS
   left: 0.5vw
 }
 #header-search {
-  margin-top: calc(var(--height) * 0.2);
   width: auto;
   min-width: 20vw;
   position: relative;

@@ -167,9 +167,16 @@ async function getInventoryJSON(contents,profileData) {
           out.tags.push("DUNGEON");
           out.stars = (out.name.split("✪").length - 1);
         }
-        if (out.lore && out.lore.length > 0 && (out.lore[out.lore.length - 1].includes("SWORD") || out.lore[out.lore.length - 1].includes("BOW"))) {
-          out.tags.push("WEAPON");
-          out.enchantments = item.tag.ExtraAttributes.enchantments;
+        if (out.lore && out.lore.length > 0) {
+          if (out.lore[out.lore.length - 1].includes("BOW")) {
+            out.tags.push("BOW");
+            out.tags.push("WEAPON");
+            out.enchantments = item.tag.ExtraAttributes.enchantments;
+          } else if ((out.lore[out.lore.length - 1].includes("SWORD")) {
+            out.tags.push("SWORD");
+            out.tags.push("WEAPON");
+            out.enchantments = item.tag.ExtraAttributes.enchantments;
+          }
         }
         //add stats / cata level
         let statNames = {
