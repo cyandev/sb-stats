@@ -29,6 +29,11 @@ client.connect().then((connection) => {
   playersCollection = connection.db("SBStatsDB").collection("Players");
   guildsCollection = connection.db("SBStatsDB").collection("Guilds");
 });
+var bazaarData;
+(async () => {
+  bazaarData = await getBazaarData();
+  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 120);
+})();
 
 async function getPlayerData(name,priority=0,uuid) {
   let start = Date.now()
@@ -295,7 +300,75 @@ async function getProfileData(uuid, profile, playerData, priority) {
   profileData.cute_name = profile.cute_name
   profileData.members = Object.keys(profileAPI.members);
   profileData.last_save = profileAPI.members[uuid].last_save
+  
+  //get minions
+  let craftedGens = {};
+  constants.minionNames.forEach((name) => {
+    craftedGens[name] = Array.from({length:12}, x => false)
+  })
+  for (let uuid of Object.keys(profileAPI.members)) {
+    if (profileAPI.members[uuid].crafted_generators) profileAPI.members[uuid].crafted_generators.forEach((id) => {
+      let idNumSplit = id.split("_") // [ITEM_ID, TIER]
+      let tier = idNumSplit.pop();
+      let name = idNumSplit.join("_");
+      if (!craftedGens[name]) {
+        console.log(`Unknown minion name: ${name}`);
+        craftedGens[name] = Array.from({length:12}, x => false);
+      }
+      craftedGens[name][tier] = true;
+    })
+  }
 
+  //get missing minions + # crafted
+  let missingMinions = []
+  let minionsCrafted = 0;
+  for (let name in craftedGens) {
+    for (let tier = 1; tier <= 11; tier++) {
+      if (!craftedGens[name][tier]) {
+        let price;
+        if (!constants.minionCrafts[name][tier]) {
+          price = null;
+        } else {
+          price = (bazaarData[constants.minionCrafts[name][tier].item.replace("name", name)].quick_status.buyPrice * constants.minionCrafts[name][tier].quantity).toFixed(1);
+        }
+        missingMinions.push({
+          name: name,
+          tier: tier,
+          price: price
+        })
+      } else {
+        minionsCrafted++;
+      }
+    }
+  }
+  let i = minionsCrafted;
+  while (!constants.minionSlots[i]) {i--};
+  let minionSlots = constants.minionSlots[i];
+
+  i = 1;
+  while (Object.keys(constants.minionSlots)[i] <= minionsCrafted) i++;
+  let nextTier = Object.keys(constants.minionSlots)[i] - minionsCrafted;
+
+  let bonusSlots = 0;
+
+  try { //new things, could cause issues
+    let slotUpgrades = [];
+    if (profileAPI.community_upgrades && profileAPI.community_upgrades.upgrade_states) slotUpgrades = profileAPI.community_upgrades.upgrade_states.filter(x => x.upgrade == "minion_slots").sort((a,b) => b.tier - a.tier);
+    if (slotUpgrades[0]) bonusSlots = slotUpgrades[0].tier;
+  } catch (err) {
+    console.log("Getting slot upgrades failed")
+    console.log(err)
+    console.log(profileAPI.community_upgrades.upgrade_states)
+  }
+  profileData.minions = {
+    matrix: craftedGens,
+    uniques: minionsCrafted,
+    nextTier: nextTier,
+    slots: minionSlots,
+    bonusSlots: bonusSlots,
+    missing: missingMinions.sort((a,b) => a.price == b.price ? 0 : !a.price ? 1: !b.price ?  -1: a.price - b.price),
+  }
+  
   //get coin purse / bank
   if (profileAPI.banking) {
     profileData.balance = profileAPI.banking.balance;
@@ -428,6 +501,14 @@ async function getProfileData(uuid, profile, playerData, priority) {
   if (profileData.pets) {
     // make into inventory
     profileData.pets = profileData.pets.map((pet) => {
+      if (!constants.pets[pet.type]) {
+        console.log("NEW PET TYPE: " + pet.type)
+        pet.type = "PIG"; //make unknown pets pigs because thats quirky and cool and epic
+      }
+      if (pet.heldItem != null && !constants.petItems[pet.heldItem]) {
+        console.log("NEW PET ITEM: " + pet.heldItem)
+        pet.heldItem = null; //make unknown items not exist
+      }
       let out = {
         lore: [
           `§8${constants.pets[pet.type].type[0].toUpperCase() + constants.pets[pet.type].type.slice(1)} Pet`,
@@ -650,10 +731,14 @@ async function calculateGuilds() {
   ]).toArray()
 }
 
+async function getBazaarData() { //bazaar data
+  console.log("updating bazaar products...")
+  return (await reqScheduler.get(`https://api.hypixel.net/skyblock/bazaar?key=${process.env.API_KEY}`)).data.products
+}
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => {
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 180) { //re-get more than 120 second old profiles
+  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 10) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
   } else {
@@ -691,6 +776,10 @@ app.get("/api/dbinfo", async (req,res) => {
     names: players.map(x => x.name),
     uuids: players.map(x => x.uuid)
   })
+})
+
+app.get("/api/bazaar", (req,res) => {
+  res.json(bazaarData);
 })
 
 /* Images API */

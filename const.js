@@ -1,5 +1,17 @@
 module.exports = {
   pets: { /* Adapted from leaphant/skyblock-stats, sky.lea.moe */
+    "GRIFFIN": {
+      "skin": "http://textures.minecraft.net/texture/4c27e3cb52a64968e60c861ef1ab84e0a0cb5f07be103ac78da67761731f00c8",
+      "type": "combat",
+      "baseStats": {},
+      "perLevelStats": {
+        cc: 0.1,
+        cd: 0.5,
+        str: 0.25,
+        mf: 0.1,
+        int: 0.1
+      }
+    },
     "BAT": {
       "skin": "http://textures.minecraft.net/texture/382fc3f71b41769376a9e92fe3adbaac3772b999b219c9d6b4680ba9983e527",
       "type": "mining",
@@ -434,6 +446,13 @@ module.exports = {
     }
   },
   petItems: {
+    ANTIQUE_REMEDIES: {
+      description: "§7§7Increases the pet's §c❁ §cStrength §7by §a80%",
+      name: "Antique Remedies",
+      stats: {
+        multiply: {str: 1.8}
+      }
+    },
     PET_ITEM_ALL_SKILLS_BOOST_COMMON: {
       description: "§7Gives +§a10% §7pet exp for all skills",
       name: "All Skills Exp Boost",
@@ -622,5 +641,138 @@ module.exports = {
     wolf: {
       cd: [0,0,0,0,0,1,1,3,3,3]
     }
+  },
+  minionNames: ["COBBLESTONE", "OBSIDIAN", "GLOWSTONE", "GRAVEL", "SAND", "CLAY", "ICE", "SNOW", "COAL", "IRON", "GOLD", "DIAMOND", "LAPIS", "REDSTONE", "EMERALD", "QUARTZ", "ENDER_STONE", "WHEAT", "MELON", "PUMPKIN", "CARROT", "POTATO", "MUSHROOM", "CACTUS", "COCOA", "SUGAR_CANE", "NETHER_WARTS", "FLOWER", "FISHING", "ZOMBIE", "REVENANT", "SKELETON", "CREEPER", "SPIDER", "TARANTULA", "CAVESPIDER", "BLAZE", "MAGMA_CUBE", "ENDERMAN", "GHAST", "SLIME", "COW", "PIG", "CHICKEN", "SHEEP", "RABBIT", "OAK", "SPRUCE", "BIRCH", "DARK_OAK", "ACACIA", "JUNGLE"],
+  minionCrafts: {
+    "COBBLESTONE": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
+
+    "OBSIDIAN": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
+
+    "GLOWSTONE": [null, {item: "name_DUST", quantity: 128}, {item: "name_DUST", quantity: 256}, {item: "name_DUST", quantity: 512}, {item: "ENCHANTED_name_DUST", quantity: 8}, {item: "ENCHANTED_name_DUST", quantity: 24}, {item: "ENCHANTED_name_DUST", quantity: 64}, {item: "ENCHANTED_name_DUST", quantity: 128}, {item: "ENCHANTED_name_DUST", quantity: 256}, {item: "ENCHANTED_name_DUST", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}], 
+
+    "GRAVEL": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_FLINT", quantity: 8}, {item: "ENCHANTED_FLINT", quantity: 16}, {item: "ENCHANTED_FLINT", quantity: 32}, {item: "ENCHANTED_FLINT", quantity: 64}, {item: "ENCHANTED_FLINT", quantity: 128}, {item: "ENCHANTED_FLINT", quantity: 256}, {item: "ENCHANTED_FLINT", quantity: 512}], 
+
+    "SAND": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
+
+    "CLAY": [null, {item: "name_BALL", quantity: 80}, {item: "name_BALL", quantity: 160}, {item: "name_BALL", quantity: 320}, {item: "name_BALL", quantity: 512}, {item: "ENCHANTED_name_BALL", quantity: 8}, {item: "ENCHANTED_name_BALL", quantity: 16}, {item: "ENCHANTED_name_BALL", quantity: 32}, {item: "ENCHANTED_name_BALL", quantity: 64}, {item: "ENCHANTED_name_BALL", quantity: 128}, {item: "ENCHANTED_name_BALL", quantity: 256}, {item: "ENCHANTED_name_BALL", quantity: 512}], 
+
+    "ICE": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "PACKED_name", quantity: 128}, {item: "PACKED_name", quantity: 256}, {item: "PACKED_name", quantity: 512}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
+
+    "SNOW": [null, null, {item: "name_BLOCK", quantity: 32}, {item: "name_BLOCK", quantity: 64}, {item: "name_BLOCK", quantity: 128}, {item: "name_BLOCK", quantity: 256}, {item: "name_BLOCK", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}, {item: "ENCHANTED_name_BLOCK", quantity: 16}, {item: "ENCHANTED_name_BLOCK", quantity: 32}, {item: "ENCHANTED_name_BLOCK", quantity: 64}, {item: "ENCHANTED_name_BLOCK", quantity: 128}], 
+
+    "COAL": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "IRON": [null, {item: "name_INGOT", quantity: 80}, {item: "name_INGOT", quantity: 160}, {item: "name_INGOT", quantity: 320}, {item: "name_INGOT", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "GOLD": [null, {item: "name_INGOT", quantity: 80}, {item: "name_INGOT", quantity: 160}, {item: "name_INGOT", quantity: 320}, {item: "name_INGOT", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "DIAMOND": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "LAPIS": [null, {item: "INK_SACK:4", quantity: 32}, {item: "INK_SACK:4", quantity: 64}, {item: "ENCHANTED_name_LAZULI", quantity: 8}, {item: "ENCHANTED_name_LAZULI", quantity: 24}, {item: "ENCHANTED_name_LAZULI", quantity: 64}, {item: "ENCHANTED_name_LAZULI", quantity: 128}, {item: "ENCHANTED_name_LAZULI", quantity: 256}, {item: "ENCHANTED_name_LAZULI", quantity: 512}, {item: "ENCHANTED_name_LAZULI_BLOCK", quantity: 8}, {item: "ENCHANTED_name_LAZULI_BLOCK", quantity: 16}, {item: "ENCHANTED_name_LAZULI_BLOCK", quantity: 32}], 
+    
+    "REDSTONE": [null, {item: "name", quantity: 128}, {item: "name", quantity: 256}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}, {item: "ENCHANTED_name_BLOCK", quantity: 16}], 
+
+    "EMERALD": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "QUARTZ": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}],  
+
+    "ENDER_STONE": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_ENDSTONE", quantity: 8}, {item: "ENCHANTED_ENDSTONE", quantity: 16}, {item: "ENCHANTED_ENDSTONE", quantity: 32}, {item: "ENCHANTED_ENDSTONE", quantity: 64}, {item: "ENCHANTED_ENDSTONE", quantity: 128}, {item: "ENCHANTED_ENDSTONE", quantity: 256}, {item: "ENCHANTED_ENDSTONE", quantity: 512}], 
+
+    "WHEAT": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "HAY_BLOCK", quantity: 96}, {item: "HAY_BLOCK", quantity: 192}, {item: "HAY_BLOCK", quantity: 384}, {item: "HAY_BLOCK", quantity: 512}, {item: "ENCHANTED_HAY_BLOCK", quantity: 8}, {item: "ENCHANTED_HAY_BLOCK", quantity: 16}, {item: "ENCHANTED_HAY_BLOCK", quantity: 32}], 
+
+    "MELON": [null, {item: "name", quantity: 256}, {item: "name", quantity: 512}, {item: "name", quantity: 1152}, {item: "name", quantity: 2304}, {item: "ENCHANTED_name", quantity: 4608}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}, {item: "ENCHANTED_name_BLOCK", quantity: 16}], 
+
+    "PUMPKIN": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
+
+    "CARROT": [null, {item: "name_ITEM", quantity: 128}, {item: "name_ITEM", quantity: 256}, {item: "name_ITEM", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_GOLDEN_name", quantity: 8}, {item: "ENCHANTED_GOLDEN_name", quantity: 16}], 
+
+    "POTATO": [null, {item: "name_ITEM", quantity: 128}, {item: "name_ITEM", quantity: 256}, {item: "name_ITEM", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_BAKED_name", quantity: 8}, {item: "ENCHANTED_BAKED_name", quantity: 16}], 
+
+    "MUSHROOM": [null, {item: "RED_name", quantity: 80}, {item: "RED_name", quantity: 160}, {item: "RED_name", quantity: 320}, {item: "RED_name", quantity: 512}, {item: "ENCHANTED_RED_name", quantity: 8}, {item: "ENCHANTED_RED_name", quantity: 16}, {item: "ENCHANTED_RED_name", quantity: 32}, {item: "ENCHANTED_RED_name", quantity: 64}, {item: "ENCHANTED_RED_name", quantity: 128}, {item: "ENCHANTED_RED_name", quantity: 256}, {item: "ENCHANTED_RED_name", quantity: 512}], 
+
+    "CACTUS": [null, {item: "name", quantity: 128}, {item: "name", quantity: 256}, {item: "name", quantity: 512}, {item: "ENCHANTED_name_GREEN", quantity: 8}, {item: "ENCHANTED_name_GREEN", quantity: 24}, {item: "ENCHANTED_name_GREEN", quantity: 64}, {item: "ENCHANTED_name_GREEN", quantity: 128}, {item: "ENCHANTED_name_GREEN", quantity: 256}, {item: "ENCHANTED_name_GREEN", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}], 
+
+    "COCOA": [null, {item: "INK_SACK:3", quantity: 80}, {item: "INK_SACK:3", quantity: 160}, {item: "INK_SACK:3", quantity: 320}, {item: "INK_SACK:3", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "ENCHANTED_COOKIE", quantity: 8}], 
+
+    "SUGAR_CANE": [null, {item: "name", quantity: 128}, {item: "name", quantity: 256}, {item: "name", quantity: 512}, {item: "ENCHANTED_SUGAR", quantity: 8}, {item: "ENCHANTED_SUGAR", quantity: 24}, {item: "ENCHANTED_SUGAR", quantity: 64}, {item: "ENCHANTED_SUGAR", quantity: 128}, {item: "ENCHANTED_SUGAR", quantity: 256}, {item: "ENCHANTED_SUGAR", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}], 
+
+    "NETHER_WARTS": [null, {item: "NETHER_STALK", quantity: 80}, {item: "NETHER_STALK", quantity: 160}, {item: "NETHER_STALK", quantity: 320}, {item: "NETHER_STALK", quantity: 512}, {item: "ENCHANTED_NETHER_STALK", quantity: 8}, {item: "ENCHANTED_NETHER_STALK", quantity: 16}, {item: "ENCHANTED_NETHER_STALK", quantity: 32}, {item: "ENCHANTED_NETHER_STALK", quantity: 64}, {item: "ENCHANTED_NETHER_STALK", quantity: 128}, {item: "ENCHANTED_NETHER_STALK", quantity: 256}, {item: "ENCHANTED_NETHER_STALK", quantity: 512}], 
+
+    "FLOWER": [null, null, null, null, null, null, null, null, null, null, null, null], 
+
+    "FISHING": [null, {item: "RAW_FISH", quantity: 64}, {item: "RAW_FISH", quantity: 128}, {item: "RAW_FISH", quantity: 256}, {item: "RAW_FISH", quantity: 512}, {item: "ENCHANTED_RAW_FISH", quantity: 8}, {item: "ENCHANTED_RAW_FISH", quantity: 24}, {item: "ENCHANTED_RAW_FISH", quantity: 64}, {item: "ENCHANTED_RAW_FISH", quantity: 128}, {item: "ENCHANTED_RAW_FISH", quantity: 256}, {item: "ENCHANTED_RAW_FISH", quantity: 512}, {item: "ENCHANTED_COOKED_FISH", quantity: 8}], 
+
+    "ZOMBIE": [null, {item: "ROTTEN_FLESH", quantity: 80}, {item: "ROTTEN_FLESH", quantity: 160}, {item: "ROTTEN_FLESH", quantity: 320}, {item: "ROTTEN_FLESH", quantity: 512}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 8}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 16}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 32}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 64}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 128}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 256}, {item: "ENCHANTED_ROTTEN_FLESH", quantity: 512}], 
+
+    "REVENANT": [null, null, null, null, null, null, null, null, null, null, null, null],
+
+    "SKELETON": [null, {item: "BONE", quantity: 80}, {item: "BONE", quantity: 160}, {item: "BONE", quantity: 320}, {item: "BONE", quantity: 512}, {item: "ENCHANTED_BONE", quantity: 8}, {item: "ENCHANTED_BONE", quantity: 16}, {item: "ENCHANTED_BONE", quantity: 32}, {item: "ENCHANTED_BONE", quantity: 64}, {item: "ENCHANTED_BONE", quantity: 128}, {item: "ENCHANTED_BONE", quantity: 256}, {item: "ENCHANTED_BONE", quantity: 512}],
+  //aaaaaaa
+    "CREEPER": [null, {item: "SULPHUR", quantity: 80}, {item: "SULPHUR", quantity: 160}, {item: "SULPHUR", quantity: 320}, {item: "SULPHUR", quantity: 512}, {item: "ENCHANTED_GUNPOWDER", quantity: 8}, {item: "ENCHANTED_GUNPOWDER", quantity: 24}, {item: "ENCHANTED_GUNPOWDER", quantity: 64}, {item: "ENCHANTED_GUNPOWDER", quantity: 128}, {item: "ENCHANTED_GUNPOWDER", quantity: 256}, {item: "ENCHANTED_GUNPOWDER", quantity: 512}, {item: "ENCHANTED_FIREWORK_ROCKET", quantity: 16}], 
+
+    "SPIDER": [null, {item: "STRING", quantity: 80}, {item: "STRING", quantity: 160}, {item: "STRING", quantity: 320}, {item: "STRING", quantity: 512}, {item: "ENCHANTED_STRING", quantity: 8}, {item: "ENCHANTED_STRING", quantity: 16}, {item: "ENCHANTED_STRING", quantity: 32}, {item: "ENCHANTED_STRING", quantity: 64}, {item: "ENCHANTED_STRING", quantity: 128}, {item: "ENCHANTED_STRING", quantity: 256}, {item: "ENCHANTED_STRING", quantity: 512}], 
+
+    "TARANTULA": [null, null, null, null, null, null, null, null, null, null, null, null], 
+
+    "CAVESPIDER": [null, {item: "SPIDER_EYE", quantity: 80}, {item: "SPIDER_EYE", quantity: 160}, {item: "SPIDER_EYE", quantity: 320}, {item: "SPIDER_EYE", quantity: 512}, {item: "ENCHANTED_SPIDER_EYE", quantity: 8}, {item: "ENCHANTED_SPIDER_EYE", quantity: 24}, {item: "ENCHANTED_SPIDER_EYE", quantity: 64}, {item: "ENCHANTED_SPIDER_EYE", quantity: 128}, {item: "ENCHANTED_SPIDER_EYE", quantity: 256}, {item: "ENCHANTED_SPIDER_EYE", quantity: 512}, {item: "ENCHANTED_FERMENTED_SPIDER_EYE", quantity: 16}], 
+
+    "BLAZE": [null, {item: "BLAZE_ROD", quantity: 80}, {item: "BLAZE_ROD", quantity: 160}, {item: "BLAZE_ROD", quantity: 320}, {item: "BLAZE_ROD", quantity: 512}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 8}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 24}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 64}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 128}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 256}, {item: "ENCHANTED_BLAZE_POWDER", quantity: 512}, {item: "ENCHANTED_BLAZE_ROD", quantity: 8}],
+
+    "MAGMA_CUBE": [null, {item: "MAGMA_CREAM", quantity: 80}, {item: "MAGMA_CREAM", quantity: 160}, {item: "MAGMA_CREAM", quantity: 320}, {item: "MAGMA_CREAM", quantity: 512}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 8}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 16}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 32}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 64}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 128}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 256}, {item: "ENCHANTED_MAGMA_CREAM", quantity: 512}], 
+
+    "ENDERMAN": [null, {item: "ENDER_PEARL", quantity: 64}, {item: "ENDER_PEARL", quantity: 128}, {item: "ENCHANTED_ENDER_PEARL", quantity: 8}, {item: "ENCHANTED_ENDER_PEARL", quantity: 24}, {item: "ENCHANTED_ENDER_PEARL", quantity: 48}, {item: "ENCHANTED_ENDER_PEARL", quantity: 96}, {item: "ENCHANTED_EYE_OF_ENDER", quantity: 8}, {item: "ENCHANTED_EYE_OF_ENDER", quantity: 24}, {item: "ENCHANTED_EYE_OF_ENDER", quantity: 48}, {item: "ENCHANTED_EYE_OF_ENDER", quantity: 96}, {item: "ENCHANTED_EYE_OF_ENDER", quantity: 192}],
+     
+    "GHAST": [null, {item: "GHAST_TEAR", quantity: 64}, {item: "GHAST_TEAR", quantity: 128}, {item: "GHAST_TEAR", quantity: 256}, {item: "GHAST_TEAR", quantity: 512}, {item: "ENCHANTED_GHAST_TEAR", quantity: 256}, {item: "ENCHANTED_GHAST_TEAR", quantity: 512}, {item: "ENCHANTED_GHAST_TEAR", quantity: 800}, {item: "ENCHANTED_GHAST_TEAR", quantity: 1600}, {item: "ENCHANTED_GHAST_TEAR", quantity: 3200}, {item: "ENCHANTED_GHAST_TEAR", quantity: 6400}, {item: "ENCHANTED_GHAST_TEAR", quantity: 12800}], 
+
+    "SLIME": [null, {item: "name_BALL", quantity: 80}, {item: "name_BALL", quantity: 160}, {item: "name_BALL", quantity: 320}, {item: "name_BALL", quantity: 512}, {item: "ENCHANTED_name_BALL", quantity: 8}, {item: "ENCHANTED_name_BALL", quantity: 24}, {item: "ENCHANTED_name_BALL", quantity: 64}, {item: "ENCHANTED_name_BALL", quantity: 128}, {item: "ENCHANTED_name_BALL", quantity: 256}, {item: "ENCHANTED_name_BALL", quantity: 512}, {item: "ENCHANTED_name_BLOCK", quantity: 8}], 
+
+    "COW": [null, {item: "RAW_BEEF", quantity: 80}, {item: "RAW_BEEF", quantity: 160}, {item: "RAW_BEEF", quantity: 320}, {item: "RAW_BEEF", quantity: 512}, {item: "ENCHANTED_RAW_BEEF", quantity: 8}, {item: "ENCHANTED_RAW_BEEF", quantity: 24}, {item: "ENCHANTED_RAW_BEEF", quantity: 64}, {item: "ENCHANTED_RAW_BEEF", quantity: 128}, {item: "ENCHANTED_RAW_BEEF", quantity: 256}, {item: "ENCHANTED_RAW_BEEF", quantity: 512}, {item: "ENCHANTED_LEATHER", quantity: 32}], 
+
+    "PIG": [null, {item: "PORK", quantity: 80}, {item: "PORK", quantity: 160}, {item: "PORK", quantity: 320}, {item: "PORK", quantity: 512}, {item: "ENCHANTED_PORK", quantity: 8}, {item: "ENCHANTED_PORK", quantity: 24}, {item: "ENCHANTED_PORK", quantity: 64}, {item: "ENCHANTED_PORK", quantity: 128}, {item: "ENCHANTED_PORK", quantity: 256}, {item: "ENCHANTED_PORK", quantity: 512}, {item: "ENCHANTED_GRILLED_PORK", quantity: 8}], 
+
+    "CHICKEN": [null, {item: "RAW_name", quantity: 80}, {item: "RAW_name", quantity: 160}, {item: "RAW_name", quantity: 320}, {item: "RAW_name", quantity: 512}, {item: "ENCHANTED_RAW_name", quantity: 8}, {item: "ENCHANTED_RAW_name", quantity: 16}, {item: "ENCHANTED_RAW_name", quantity: 32}, {item: "ENCHANTED_RAW_name", quantity: 64}, {item: "ENCHANTED_RAW_name", quantity: 128}, {item: "ENCHANTED_RAW_name", quantity: 256}, {item: "ENCHANTED_RAW_name", quantity: 512}], 
+
+    "SHEEP": [null, {item: "MUTTON", quantity: 80}, {item: "MUTTON", quantity: 160}, {item: "MUTTON", quantity: 320}, {item: "MUTTON", quantity: 512}, {item: "ENCHANTED_MUTTON", quantity: 8}, {item: "ENCHANTED_MUTTON", quantity: 24}, {item: "ENCHANTED_MUTTON", quantity: 64}, {item: "ENCHANTED_MUTTON", quantity: 128}, {item: "ENCHANTED_MUTTON", quantity: 256}, {item: "ENCHANTED_MUTTON", quantity: 512}, {item: "ENCHANTED_COOKED_MUTTON", quantity: 8}], 
+
+    "RABBIT": [null, {item: "name", quantity: 64}, {item: "name", quantity: 128}, {item: "name", quantity: 256}, {item: "name", quantity: 512}, {item: "ENCHANTED_name_FOOT", quantity: 32}, {item: "ENCHANTED_name_FOOT", quantity: 64}, {item: "ENCHANTED_name_FOOT", quantity: 128}, {item: "ENCHANTED_name_FOOT", quantity: 256}, {item: "ENCHANTED_name_FOOT", quantity: 512}, {item: "ENCHANTED_name_HIDE", quantity: 32}, {item: "ENCHANTED_name_HIDE", quantity: 64}], 
+
+    "OAK": [null, {item: "LOG", quantity: 80}, {item: "LOG", quantity: 160}, {item: "LOG", quantity: 320}, {item: "LOG", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}], 
+
+    "SPRUCE": [null, {item: "LOG:1", quantity: 80}, {item: "LOG:1", quantity: 160}, {item: "LOG:1", quantity: 320}, {item: "LOG:1", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}], 
+
+    "BIRCH": [null, {item: "LOG:2", quantity: 80}, {item: "LOG:2", quantity: 160}, {item: "LOG:2", quantity: 320}, {item: "LOG:2", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}], 
+ 
+
+    "DARK_OAK": [null, {item: "LOG_2:1", quantity: 80}, {item: "LOG_2:1", quantity: 160}, {item: "LOG_2:1", quantity: 320}, {item: "LOG_2:1", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}], 
+ 
+
+    "ACACIA": [null, {item: "LOG_2", quantity: 80}, {item: "LOG_2", quantity: 160}, {item: "LOG_2", quantity: 320}, {item: "LOG_2", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}], 
+
+
+    "JUNGLE": [null, {item: "LOG:3", quantity: 80}, {item: "LOG:3", quantity: 160}, {item: "LOG:3", quantity: 320}, {item: "LOG:3", quantity: 512}, {item: "ENCHANTED_name_LOG", quantity: 8}, {item: "ENCHANTED_name_LOG", quantity: 16}, {item: "ENCHANTED_name_LOG", quantity: 32}, {item: "ENCHANTED_name_LOG", quantity: 64}, {item: "ENCHANTED_name_LOG", quantity: 128}, {item: "ENCHANTED_name_LOG", quantity: 256}, {item: "ENCHANTED_name_LOG", quantity: 512}],
+
+  },
+  minionSlots: {
+    0: 5,
+    5: 6,
+    15: 7,
+    30: 8,
+    50: 9,
+    75: 10,
+    100: 11,
+    125: 12,
+    150: 13,
+    175: 14,
+    200: 15,
+    225: 16,
+    250: 17,
+    275: 18,
+    300: 19,
+    350: 20,
+    400: 21,
+    450: 22,
+    500: 23,
+    550: 24,
+    600: 25
   }
 }

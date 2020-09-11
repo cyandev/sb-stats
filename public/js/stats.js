@@ -2,14 +2,15 @@
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
 //helper functions
 var rarityColorMap = {
-    "COMMON": "§8",
-    "UNCOMMON": "§a",
-    "RARE": "§9",
-    "EPIC": "§5",
-    "LEGENDARY": "§6",
-    "MYTHIC": "§d",
-    "SPECIAL": "§c"
-  }
+  "COMMON": "§8",
+  "UNCOMMON": "§a",
+  "RARE": "§9",
+  "EPIC": "§5",
+  "LEGENDARY": "§6",
+  "MYTHIC": "§d",
+  "SPECIAL": "§c"
+}
+var minionNameMap = {"COBBLESTONE": "Cobbletone", "OBSIDIAN": "Obsidian", "GLOWSTONE": "Glowstone", "GRAVEL": "Gravel", "SAND": "Sand", "CLAY": "Clay", "ICE": "Ice", "SNOW": "Snow", "COAL": "Coal", "IRON": "Iron", "GOLD": "Gold", "DIAMOND": "Diamond", "LAPIS": "Lapis", "REDSTONE": "Redstone", "EMERALD": "Emerald", "QUARTZ": "Quartz", "ENDER_STONE": "Endstone", "WHEAT": "Wheat", "MELON": "Melon", "PUMPKIN": "Pumpkin", "CARROT": "Carrot", "POTATO": "Potato", "MUSHROOM": "Mushroom", "CACTUS": "Cactus", "COCOA": "Cocoa", "SUGAR_CANE": "Sugar Cane", "NETHER_WARTS": "Nether Wart", "FLOWER": "Flower", "FISHING": "Fishing", "ZOMBIE": "Zombie", "REVENANT": "Revenant", "SKELETON": "Skeleton", "CREEPER": "Creeper", "SPIDER": "Spider", "TARANTULA": "Tarantula", "CAVESPIDER": "Cave Spider", "BLAZE": "Blaze", "MAGMA_CUBE": "Magma", "ENDERMAN": "Enderman", "GHAST": "Ghast", "SLIME": "Slime", "COW": "Cow", "PIG": "Pig", "CHICKEN": "Chicken", "SHEEP": "Sheep", "RABBIT": "Rabbit", "OAK": "Oak", "SPRUCE": "Spruce", "BIRCH": "Birch", "DARK_OAK": "Dark Oak", "ACACIA": "Acacia", "JUNGLE": "Jungle"}
 /* MC TEXT FORMATTING */
 var obfuscators = [];
 var styleMap = {
@@ -347,10 +348,13 @@ function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:
   let damage = [baseDmg * damageMultiplier * extraBonus];
   //ranged damages
   if (weapon.reforge == "fabled") {
-    damage.push(damage[0] * 1.2) //normal damage, max crit (+20%)
+    damage.forEach((pt) => damage.push(pt * 1.2)) //normal damage, max crit (+20%)
   }
   if (weapon.reforge == "precise") {
-    damage.push(damage[0] * 1.1) //normal damage, headshot damage (+10%)
+    damage.forEach((pt) => damage.push(pt * 1.1)) //normal damage, headshot damage (+10%)
+  }
+  if (weapon.id == "MACHINE_GUN_BOW") { //normal damage, machine gun damage
+    damage.forEach((pt) => damage.push(pt * 0.7))
   }
   return damage
 }
@@ -639,6 +643,7 @@ document.querySelector("#item-hover").style.display = "none";
     let weaponSelector = makeInventorySelector(profileData.weapons, {cols: 12, hasHotbar: false, rarityColor:true});
     let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
+      console.log(weaponSelector.checked);
       let stats = {...weaponSelector.checked.stats};
       if (document.querySelector("#in-dungeons").checked && profileData.skills.find(x => x.name == "catacombs") && weaponSelector.checked.tags.includes("DUNGEON") ) {
         for (let stat in stats) {
@@ -806,10 +811,8 @@ document.querySelector("#item-hover").style.display = "none";
         }
       }
       armor.forEach((piece) => {
-        console.log(piece.reforge, piece.reforge == "renowned", statsBase)
         if (piece.reforge == "renowned") {
           for (let stat in statsBase) {
-            console.log(stat, statsBase[stat])
             if (stat != "dmg") statsBase[stat] *= 1.01
           }
         }
@@ -829,6 +832,54 @@ document.querySelector("#item-hover").style.display = "none";
     Inventories API Not Enabled!
     `
   }
+
+
+  /* MINION SECTION NOT COMBAT RELATED THANK GOD */
+
+  //make matrix into an actual matrix
+  let minionTable = Object.keys(profileData.minions.matrix).map(x => [x].concat(profileData.minions.matrix[x].slice(1)));
+  
+  //fill table
+  for (let row of minionTable) {
+    for (let x of row) {
+      let cell = document.createElement("div");
+      if (typeof x == "string") {
+        cell.classList.add("minionText");
+        cell.innerText = minionNameMap[x];
+      } else {
+        cell.classList.add("minionBoolCell")
+        cell.classList.add(String(x))
+      }
+      document.querySelector("#minion-table").appendChild(cell)
+    }
+  }
+
+  //fill missing list
+  for (let minion of profileData.minions.missing) {
+    let name = document.createElement("div");
+    let price = document.createElement("div");
+    name.innerText = minionNameMap[minion.name] + " " + minion.tier;
+    price.innerText = minion.price ? cleanFormatNumber(Number(minion.price)) : "???";
+    document.querySelector("#minion-upgrades").appendChild(name);
+    document.querySelector("#minion-upgrades").appendChild(price);
+  }
+
+  //calculate price till next slot
+  let nextSlotPrice = 0;
+  if (profileData.minions.missing.length >= profileData.minions.nextTier) {
+    let nextMinions = profileData.minions.missing.slice(0,profileData.minions.nextTier);
+    if (nextMinions.every(x => x.price)) {
+      nextSlotPrice = nextMinions.reduce((t,x) => t+Number(x.price), 0);
+    } else {
+      nextSlotPrice = null;
+    }
+  } else {
+    nextSlotPrice = null;
+  }
+  console.log(nextSlotPrice)
+
+  document.querySelector("#minion-extra").innerText = `Unique Minions ${profileData.minions.uniques} / ${minionTable.length * 11}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? cleanFormatNumber(nextSlotPrice) : "???"}`;
+  console.log(profileData.minions)
 
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
