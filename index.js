@@ -253,8 +253,8 @@ async function getInventoryJSON(contents,profileData) {
         output[j] = out;
 
         //check if unique accessory, if so, add to talis
-        if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("CCESSORY") && !profileData.talis[out.id]) { //ccessory instead of accessory because of crab hat
-          profileData.talis[out.id] = out;
+        if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("CCESSORY")) { //ccessory instead of accessory because of crab hat
+          if (!(profileData.talis[out.id] && profileData.talis[out.id].reforge) && out.reforge) profileData.talis[out.id] = out;
         }
         //check if defuse kit
         if (out.id == "DEFUSE_KIT") {
@@ -599,7 +599,37 @@ async function getProfileData(uuid, profile, playerData, priority) {
   } else {
     profileData.pets = [];
   }
-
+  //get stats
+  let profileStats = profileAPI.members[uuid].stats;
+  let sortedStats = {
+    "kills": [],
+    "deaths": [],
+    "dungeon_races": [],
+    misc: [],
+  }
+  for (let stat in profileStats) {
+    if (stat.startsWith("kills")) {
+      if (stat == "kills") {
+        sortedStats.kills.push("All", profileStats[stat]);
+      } else {
+        sortedStats.kills.push([stat.slice(6).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
+      }
+      continue;
+    } else if (stat.startsWith("deaths")) {
+      if (stat == "deaths") {
+        sortedStats.deaths.push("All", profileStats[stat]);
+      } else {
+        sortedStats.deaths.push([stat.slice(7).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
+      }
+      continue;
+    } else if (stat.startsWith("dungeon_hub")) {
+      sortedStats.dungeon_races.push([stat.replace("_best_time","").slice(12).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), (profileStats[stat] / 1000).toFixed(3) + " Seconds" ]);
+      continue;
+    } else {
+      sortedStats.misc.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
+    }
+  }
+  profileData.profileStats = sortedStats;
   //get static stats: unchanging ones like the ones from slayer, skills, fairy souls, etc.
   profileData.staticStats = {};
 

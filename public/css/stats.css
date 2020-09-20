@@ -521,6 +521,7 @@ body {
   justify-items: center;
   align-items: center;
 }
+
 #minion-extra {
   width: 95%;
   border: 0.1vw solid var(--white);
@@ -532,8 +533,72 @@ body {
   margin-bottom: 1vw;
 }
 
+#reforges {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  border: 0.1vw solid var(--white);
+  border-radius: 0.5vw;
+  margin-top: 1vw;
+}
 
+#optimize-button {
+  width: 85%;
+  height: auto;
+  background: var(--dark-blue);
+  border-radius: 0.5vw;
+  padding: 0.25vw;
+  text-align: center;
+  margin-top: 1vw;
+  margin-bottom: 1vw;
+  cursor: pointer;
+  font-size: 2.2vw
+}
+#optimize-output {
+  width: 85%;
+  position: relative;
+  display: none;
+}
+#optimize-output #old {
+  width: 25%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around
+}
+#optimize-output #new {
+  width: 25%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around
+}
 
+#optimize-output .dmg {
+  font-size: 2vw;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+}
+#optimize-output .dps {
+  font-size: 2vw;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+#optimize-output #changes {
+  width: 50%;
+  min-height: 8vw;
+  font-size: 2vw;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  padding: 1vw;
+}
 
 .stats-display {
   display: grid;

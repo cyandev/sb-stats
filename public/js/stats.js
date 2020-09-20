@@ -271,10 +271,12 @@ function makeStatsDisplay(label,stats) {
   statsDisplay.update = (stats) => {
     statsDisplay.stats = stats;
     statsDisplay.innerHTML = ""; //clear it out
-    let domLabel = document.createElement("div");
-    domLabel.classList.add("label");
-    domLabel.innerText = label;
-    statsDisplay.appendChild(domLabel);
+    if (label) {
+      var domLabel = document.createElement("div");
+      domLabel.classList.add("label");
+      domLabel.innerText = label;
+      statsDisplay.appendChild(domLabel);
+    }
     for (let stat in stats) {
       if (stat in statToIcon) {
         //create colored preview
@@ -640,8 +642,8 @@ document.querySelector("#item-hover").style.display = "none";
   /* COMBAT SECTION !!! REDO THIS DUMPSTER FIRE !!!*/
   //make weapon section + stat display
   if (profileData.inventories.length > 1) {
-    let weaponSelector = makeInventorySelector(profileData.weapons, {cols: 12, hasHotbar: false, rarityColor:true});
-    let weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
+    var weaponSelector = makeInventorySelector(profileData.weapons, {cols: 12, hasHotbar: false, rarityColor:true});
+    var weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
       console.log(weaponSelector.checked);
       let stats = {...weaponSelector.checked.stats};
@@ -686,14 +688,14 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
     //pet stats
     let activePet = profileData.pets.find(x => x.active);
-    let petsStats = makeStatsDisplay("Pet", activePet ? activePet.stats: {});
+    var petsStats = makeStatsDisplay("Pet", activePet ? activePet.stats: {});
     petSelector.onUpdate = () => {
       petsStats.update(petSelector.checked.stats);
       getTotalStats();
     }
     document.querySelector("#stats-separate").appendChild(petsStats);
     //potion stats
-    let potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
+    var potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
     document.querySelector("#stats-separate").appendChild(potsStats);
     for (let checkbox of document.querySelectorAll("#pot-select input")) {
       checkbox.addEventListener("click", getPotsStats);
@@ -739,7 +741,7 @@ document.querySelector("#item-hover").style.display = "none";
       getTotalStats()
     }
     //add armor stats
-    let armorStats = {};
+    var armorStats = {};
     let armorStatsDisplay = makeStatsDisplay("Armor", armorStats);
     function makeArmorStats() {
       armorStats = {
@@ -782,7 +784,7 @@ document.querySelector("#item-hover").style.display = "none";
     })
 
     //everything together
-    let totalStats = makeStatsDisplay("Total");
+    var totalStats = makeStatsDisplay("Total");
     document.querySelector("#stats-combined").appendChild(totalStats);
     function getTotalStats() { //redo this
       let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
@@ -881,6 +883,144 @@ document.querySelector("#item-hover").style.display = "none";
   document.querySelector("#minion-extra").innerText = `Unique Minions ${profileData.minions.uniques} / ${minionTable.length * 11}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? cleanFormatNumber(nextSlotPrice) : "???"}`;
   console.log(profileData.minions)
 
+  /* TALISMAN OPTIMIZER SECTION */
+  let bestTalismanScore = 0;
+  async function doTalismans() {
+    document.querySelector("#optimize-button").innerText = "Calculating..."
+    document.querySelector("#optimize-button").removeEventListener("click", doTalismans); // remove click msg
+
+    let useAs = true;
+    let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
+    function scoreFunc(stats,applyArmor=true) { //score function for the talisman optimizer
+      if (applyArmor && armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
+        for (let stat in stats) {
+          if (stat != "dmg") stats[stat] *= 1.05
+        }
+      }
+
+      armor.forEach((piece) => {
+        if (applyArmor && piece.reforge == "renowned") {
+          for (let stat in stats) {
+            if (stat != "dmg") stats[stat] *= 1.01
+          }
+        }
+      })
+      return doDamageCalc(weaponSelector.checked, armor, profileData, stats)[0] * ( useAs ? (1 + Math.min(100,stats["as"] ? stats["as"] : 0) / 100): 1 );
+    }
+
+    //get talisman base stats + rarities (REDO THIS WHEN REDOING COMBAT SECTION, getTotalStats and the following code do almost the same thing)
+    let base = {
+      "dmg": 0,
+      "str": 0,
+      "cc": 0,
+      "cd": 0,
+      "as": 0,
+      "int": 0,
+      "c": 0,
+      "u": 0,
+      "r": 0,
+      "e": 0,
+      "l": 0,
+      "m": 0,
+    }
+    let rarityToLetter = {
+      "COMMON": "c",
+      "UNCOMMON": "u",
+      "RARE": "r",
+      "EPIC": "e",
+      "LEGENDARY": "l",
+      "MYTHIC": "m",
+    }
+    let letterToRarity = {
+      "c": "Common",
+      "u": "Uncommon",
+      "r": "Rare",
+      "e": "Epic",
+      "l": "Legendary",
+      "m": "Mythic",
+    }
+    let currentReforges = {
+      "c": Array.from(REFORGES_NAMES.c, x => 0),
+      "u": Array.from(REFORGES_NAMES.u, x => 0),
+      "r": Array.from(REFORGES_NAMES.r, x => 0),
+      "e": Array.from(REFORGES_NAMES.e, x => 0),
+      "l": Array.from(REFORGES_NAMES.l, x => 0),
+      "m": Array.from(REFORGES_NAMES.m, x => 0),
+    }
+    for (let id in profileData.talis) {
+      for (let stat in profileData.talis[id].baseStats) {
+        base[stat] += profileData.talis[id].baseStats[stat];
+      }
+      base[rarityToLetter[profileData.talis[id].rarity]]++;
+      if (REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].indexOf(profileData.talis[id].reforge) != -1) {
+        currentReforges[rarityToLetter[profileData.talis[id].rarity]][REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].indexOf(profileData.talis[id].reforge)]++;
+      } else {
+        REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].push(profileData.talis[id].reforge);
+        currentReforges[rarityToLetter[profileData.talis[id].rarity]][REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].length - 1] = 1;
+      }
+    }
+
+    let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
+    for (let statMap of statsArr) {
+      for (let stat in statMap) {
+        base[stat] += Number(statMap[stat]);
+      }
+    }
+    console.log(base);
+    let winningSet = await doTalismanOptimization(base, scoreFunc); //in optimizer.js
+    console.log(winningSet);
+
+    console.log(winningSet.score, bestTalismanScore)
+    if (winningSet.score < bestTalismanScore) {
+      document.querySelector("#optimize-button").addEventListener("click", doTalismans);
+      document.querySelector("#optimize-button").innerText = "Couldn't Find Better Reforges..."
+      setTimeout(() => document.querySelector("#optimize-button").innerText = "Optimize Again!", 2500)
+      return;
+    }
+    bestTalismanScore = winningSet.score
+
+    document.querySelector("#old .dps").innerText = "Old DPS: " + scoreFunc(totalStats.stats,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#new .dps").innerText ="New DPS: " + scoreFunc(winningSet.stats,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    document.querySelector("#old .dmg").innerText = "Old DMG: " + doDamageCalc(weaponSelector.checked, armor, profileData, totalStats.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#new .dmg").innerText = "New DMG: " + doDamageCalc(weaponSelector.checked, armor, profileData, winningSet.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    document.querySelector("#new-stats").innerHTML = "";
+    document.querySelector("#old-stats").innerHTML = "";
+
+    document.querySelector("#new-stats").appendChild(makeStatsDisplay("", winningSet.stats));
+    document.querySelector("#old-stats").appendChild(makeStatsDisplay("", totalStats.stats));
+
+    let reforgeChange = {
+      "c": Array.from(REFORGES_NAMES.c, x => 0),
+      "u": Array.from(REFORGES_NAMES.u, x => 0),
+      "r": Array.from(REFORGES_NAMES.r, x => 0),
+      "e": Array.from(REFORGES_NAMES.e, x => 0),
+      "l": Array.from(REFORGES_NAMES.l, x => 0),
+      "m": Array.from(REFORGES_NAMES.m, x => 0),
+    }
+    for (let rarity in currentReforges) {
+      for (let reforge in currentReforges[rarity]) {
+        reforgeChange[rarity][reforge] = (winningSet.reforges[rarity][reforge] ? winningSet.reforges[rarity][reforge] : 0) - currentReforges[rarity][reforge]
+      }
+    }
+    console.log(base)
+    console.log(reforgeChange, currentReforges, winningSet.reforges);
+    document.querySelector("#optimize-button").addEventListener("click", doTalismans);
+    document.querySelector("#optimize-button").innerText = "Optimize Again!"
+    document.querySelector("#optimize-output").style.display = "flex";
+
+    let outputString = "";
+    for (let rarity in reforgeChange) {
+      reforgeChange[rarity].forEach((delta, i) => {
+        if (delta != 0) outputString += ` ${delta > 0 ? "+" + delta : delta} ${letterToRarity[rarity]} ${REFORGES_NAMES[rarity][i][0].toUpperCase() + REFORGES_NAMES[rarity][i].slice(1)},`
+      })
+    }
+    outputString = outputString.slice(0,outputString.length - 1);
+    document.querySelector("#changes").innerText = outputString
+    console.log(outputString)
+  }
+  document.querySelector("#optimize-button").addEventListener("click", doTalismans);
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";
