@@ -429,16 +429,13 @@ async function getProfileData(uuid, profile, playerData, priority) {
     }
   }
   if (profileData.inventories.find(x=>x.name=="inv_armor") && profileData.inventories.find(x=>x.name=="wardrobe_contents")) {
-    console.log("AAAA!")
     if (profileAPI.members[uuid].wardrobe_equipped_slots != -1) {
-      console.log("BBBBBBB")
       let armor = profileData.inventories.find(x=>x.name=="inv_armor").contents.reverse();
       let offset = Math.floor((profileAPI.members[uuid].wardrobe_equipped_slot - 1) / 9) * 9 * 3;
       for (let i = 0; i < 4; i++) {
         profileData.inventories.find(x=>x.name=="wardrobe_contents").contents[offset + profileAPI.members[uuid].wardrobe_equipped_slot - 1 + 9 * i] = armor[i];
       }
       profileData.inventories.find(x=>x.name=="inv_armor").contents.reverse()
-      console.log(profileData.inventories.find(x=>x.name=="wardrobe_contents").contents.map(x=>x.name))
     }
   }
   //skills (needs to be rewritten. some code moved from client -> server)
@@ -524,7 +521,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
         console.log("NEW PET ITEM: " + pet.heldItem)
         pet.heldItem = null; //make unknown items not exist
       }
-      let petTiers = ["common","uncommon","rare","epic","legendary","legendary"];
+      let petTiers = ["COMMON","UNCOMMON","RARE","EPIC","LEGENDARY","LEGENDARY"];
       if (pet.heldItem == "PET_ITEM_TIER_BOOST") {
         pet.tier = petTiers[petTiers.indexOf(pet.tier)+1];
       }
@@ -736,7 +733,6 @@ async function getGuildData(guildname) {
   let missedPlayersArr = guildApi.guild.members.map(x => x.uuid).filter(x => !foundPlayerUuids.includes(x));
   
   missedPlayersArr.forEach((uuid) => {
-    console.log(uuid)
     guildData.incomplete = true;
     if (!loadingUuids.includes(uuid)) {
       getPlayerData(null, 1, uuid).then(() => {
