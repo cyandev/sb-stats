@@ -207,10 +207,7 @@ async function getInventoryJSON(contents,profileData) {
               if (match) {
                 if (match.index != 0) return; //make sure a match includes the start of the string so "Bonus Attack Speed" doesnt trigger "Speed"
                 out.stats[statNames[stat]] = Number(match[1]); //the non-dungeon stat
-                out.baseStats[statNames[stat]] = Number(match[1]) - (match[3] ? Number(match[3]) : 0)
-                if (match[4] && !profileData.skills.catacombs && out.tags.includes("DUNGEON")) {
-                  profileData.skills.catacombs = Math.round((Number(match[4]) / Number(match[1]) - (out.name.split("✪").length - 1) * 0.1 - 1) * 100); //catacombs skill xp bonus = green text / gray text - stars * 0.1 - 1
-                }
+                out.baseStats[statNames[stat]] = Number(match[1]) - (match[3] ? Number(match[3]) : 0);
                 
               }
             })
@@ -350,16 +347,9 @@ async function getProfileData(uuid, profile, playerData, priority) {
   let nextTier = Object.keys(constants.minionSlots)[i] - minionsCrafted;
 
   let bonusSlots = 0;
-
-  try { //new things, could cause issues
-    let slotUpgrades = [];
-    if (profileAPI.community_upgrades && profileAPI.community_upgrades.upgrade_states) slotUpgrades = profileAPI.community_upgrades.upgrade_states.filter(x => x.upgrade == "minion_slots").sort((a,b) => b.tier - a.tier);
-    if (slotUpgrades[0]) bonusSlots = slotUpgrades[0].tier;
-  } catch (err) {
-    console.log("Getting slot upgrades failed")
-    console.log(err)
-    console.log(profileAPI.community_upgrades.upgrade_states)
-  }
+  let slotUpgrades = [];
+  if (profileAPI.community_upgrades && profileAPI.community_upgrades.upgrade_states) slotUpgrades = profileAPI.community_upgrades.upgrade_states.filter(x => x.upgrade == "minion_slots").sort((a,b) => b.tier - a.tier);
+  if (slotUpgrades[0]) bonusSlots = slotUpgrades[0].tier;
   profileData.minions = {
     matrix: craftedGens,
     uniques: minionsCrafted,
@@ -424,8 +414,8 @@ async function getProfileData(uuid, profile, playerData, priority) {
     }];
   //get inventories
   profileData.inventories = [];
-  let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor"];
-  let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag"];
+  let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor","personal_vault_contents"];
+  let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag","Personal Vault"];
   for (let i = 0; i<invNames.length; i++) { //for each inventory name
     let label = invNames[i];
     if (profileAPI.members[uuid][label]) {
@@ -438,11 +428,30 @@ async function getProfileData(uuid, profile, playerData, priority) {
       profileData.inventories.push(inventory);
     }
   }
-
-  //get skills (needs to be rewritten. some code moved from client -> server)
+  if (profileData.inventories.find(x=>x.name=="inv_armor") && profileData.inventories.find(x=>x.name=="wardrobe_contents")) {
+    console.log("AAAA!")
+    if (profileAPI.members[uuid].wardrobe_equipped_slots != -1) {
+      console.log("BBBBBBB")
+      let armor = profileData.inventories.find(x=>x.name=="inv_armor").contents.reverse();
+      let offset = Math.floor((profileAPI.members[uuid].wardrobe_equipped_slot - 1) / 9) * 9 * 3;
+      for (let i = 0; i < 4; i++) {
+        profileData.inventories.find(x=>x.name=="wardrobe_contents").contents[offset + profileAPI.members[uuid].wardrobe_equipped_slot - 1 + 9 * i] = armor[i];
+      }
+      profileData.inventories.find(x=>x.name=="inv_armor").contents.reverse()
+      console.log(profileData.inventories.find(x=>x.name=="wardrobe_contents").contents.map(x=>x.name))
+    }
+  }
+  //skills (needs to be rewritten. some code moved from client -> server)
   Object.keys(profileAPI.members[uuid]).filter(x => x.includes("experience_skill_")).forEach(skill => {
     profileData.skills[skill.slice(17)] = profileAPI.members[uuid][skill]
   })
+
+  //get dungeons skills
+  if (util.checkNested(profileAPI.members[uuid],"dungeons","dungeon_types","catacombs","experience")) profileData.skills.catacombs = profileAPI.members[uuid].dungeons.dungeon_types.catacombs.experience;
+
+  if (util.checkNested(profileAPI.members[uuid],"dungeons","selected_dungeon_class") && util.checkNested(profileAPI.members[uuid],"dungeons","player_classes",profileAPI.members[uuid].dungeons.selected_dungeon_class,"experience")) profileData.skills[profileAPI.members[uuid].dungeons.selected_dungeon_class] = profileAPI.members[uuid].dungeons.player_classes[profileAPI.members[uuid].dungeons.selected_dungeon_class].experience;
+
+  //if skills dont exist get with achievement milestones
   if (!profileData.skills.combat) {
     constants.skillNames.forEach(skillName => {
       let xp = 0;
@@ -452,11 +461,12 @@ async function getProfileData(uuid, profile, playerData, priority) {
       profileData.skills[skillName] = xp;
     })
   }
+  
   let skills = [];
   Object.keys(profileData.skills).forEach((skillName) => {
     let xpRemaining = profileData.skills[skillName];
     let level = 0;
-    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : skillName == "catacombs" ? constants.xp_table_catacombs: constants.xp_table;
+    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
     for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
       xpRemaining -= table[i];
       level = i;
@@ -485,7 +495,12 @@ async function getProfileData(uuid, profile, playerData, priority) {
     "alchemy": 3,
     "carpentry": 2,
     "runecrafting": 1,
-    "catacombs": 0
+    "catacombs": 0,
+    "healer": -1,
+    "mage": -1,
+    "berserk": -1,
+    "archer": -1,
+    "tank": -1,
   }
   skills.sort((a,b) => skillOrderer[b.name] - skillOrderer[a.name])
   profileData.skills = skills;
@@ -508,6 +523,10 @@ async function getProfileData(uuid, profile, playerData, priority) {
       if (pet.heldItem != null && !constants.petItems[pet.heldItem]) {
         console.log("NEW PET ITEM: " + pet.heldItem)
         pet.heldItem = null; //make unknown items not exist
+      }
+      let petTiers = ["common","uncommon","rare","epic","legendary","legendary"];
+      if (pet.heldItem == "PET_ITEM_TIER_BOOST") {
+        pet.tier = petTiers[petTiers.indexOf(pet.tier)+1];
       }
       let out = {
         lore: [
@@ -604,20 +623,26 @@ async function getProfileData(uuid, profile, playerData, priority) {
   let sortedStats = {
     "kills": [],
     "deaths": [],
+    "pets": [],
+    "fishing": [],
+    "jerry_event": [],
+    "mythos_event": [],
+    "races": [],
     "dungeon_races": [],
-    misc: [],
+    "auctions": [],
+    "misc": [],
   }
   for (let stat in profileStats) {
     if (stat.startsWith("kills")) {
       if (stat == "kills") {
-        sortedStats.kills.push("All", profileStats[stat]);
+        sortedStats.kills.push(["All", profileStats[stat]]);
       } else {
         sortedStats.kills.push([stat.slice(6).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
       }
       continue;
     } else if (stat.startsWith("deaths")) {
       if (stat == "deaths") {
-        sortedStats.deaths.push("All", profileStats[stat]);
+        sortedStats.deaths.push(["All", profileStats[stat]]);
       } else {
         sortedStats.deaths.push([stat.slice(7).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
       }
@@ -625,6 +650,18 @@ async function getProfileData(uuid, profile, playerData, priority) {
     } else if (stat.startsWith("dungeon_hub")) {
       sortedStats.dungeon_races.push([stat.replace("_best_time","").slice(12).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), (profileStats[stat] / 1000).toFixed(3) + " Seconds" ]);
       continue;
+    } else if (["auctions_bids","auctions_highest_bid","auctions_won","auctions_bought_common","auctions_bought_uncommon","auctions_bought_rare","auctions_bought_epic","auctions_bought_legendary","auctions_bought_mythic","auctions_bought_special","auctions_sold_common","auctions_sold_uncommon","auctions_sold_rare","auctions_sold_epic","auctions_sold_legendary","auctions_sold_special","auctions_gold_spent","auctions_gold_earned","auctions_created","auctions_fees","auctions_no_bids","auctions_completed"].includes(stat)) {
+      sortedStats.auctions.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+    } else if (["items_fished","items_fished_normal","items_fished_treasure","items_fished_large_treasure","shredder_bait","shredder_fished"].includes(stat)) {
+      sortedStats.fishing.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+    } else if (["gifts_received","most_winter_snowballs_hit","most_winter_damage_dealt","most_winter_magma_damage_dealt","gifts_given","most_winter_cannonballs_hit"].includes(stat)) {
+      sortedStats.jerry_event.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+    } else if (["chicken_race_best_time_2","foraging_race_best_time","end_race_best_time"].includes(stat)) {
+      sortedStats.races.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+    } else if (["pet_milestone_ores_mined","pet_milestone_sea_creatures_killed"].includes(stat)) {
+      sortedStats.pets.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+    } else if (stat.includes("mythos")) {
+      sortedStats.mythos_event.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
     } else {
       sortedStats.misc.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
     }

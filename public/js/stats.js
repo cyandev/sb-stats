@@ -319,11 +319,11 @@ function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:
   //dungeon skeleton sets SKELETON_TYPE
   if (weapon.tags && weapon.tags.includes("BOW")) {
     armor.forEach((piece) => {
-      if (piece && piece.id.includes("SKELETON")) {
+      if (piece.id && piece.id.includes("SKELETON")) {
         extraBonus += 0.05;
       }
     })
-    if (armor.every((piece) => piece && piece.id.includes("SKELETON_SOLDIER")) || armor.every((piece) => piece && piece.id.includes("SKELETON_MASTER"))) {
+    if (armor.every((piece) => piece.id && piece.id.includes("SKELETON_SOLDIER")) || armor.every((piece) => piece.id && piece.id.includes("SKELETON_MASTER"))) {
       extraBonus += 0.25;
     }
   }
@@ -422,6 +422,7 @@ function updateBoxContents() {
 document.querySelector("#item-hover").style.display = "none";
 
 /* Data Loading Funciton */
+
 (async () => {
   let username = window.location.href.split("/")[4];
   let profile = window.location.href.split("/").length > 4 ? window.location.href.split("/")[5] : "default"
@@ -1024,4 +1025,4 @@ document.querySelector("#item-hover").style.display = "none";
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";
-})()
+})().catch((err) => alert(err.stack));

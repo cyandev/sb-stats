@@ -85,6 +85,7 @@ async function getColoredItem(item,color) {
   })
 }
 exports.getColoredItem = getColoredItem;
+
 function cleanFormatNumber(n) {
   n = n.toFixed(0);
   if (n.length <= 3) return n;
@@ -92,3 +93,10 @@ function cleanFormatNumber(n) {
   return n.slice(0,3) / ((n.length - 3) % 3 == 0 ? 1: Math.pow(10,3 - n.length % 3)) + post[Math.floor((n.length-1) / 3)]
 }
 exports.cleanFormatNumber = cleanFormatNumber;
+
+function checkNested(obj, level,  ...rest) {
+  if (obj === undefined) return false
+  if (rest.length == 0 && obj.hasOwnProperty(level)) return true
+  return checkNested(obj[level], ...rest)
+}
+exports.checkNested = checkNested;

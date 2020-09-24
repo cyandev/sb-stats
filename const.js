@@ -1,5 +1,14 @@
 module.exports = {
   pets: { /* Adapted from leaphant/skyblock-stats, sky.lea.moe */
+    "MEGALODON": {
+      skin: "http://textures.minecraft.net/texture/a94ae433b301c7fb7c68cba625b0bd36b0b14190f20e34a7c8ee0d9de06d53b9",
+      type: "fishing",
+      baseStats: {},
+      perLevelStats: {
+        str: 0.5,
+        mf: 0.1
+      }
+    },
     "GRIFFIN": {
       "skin": "http://textures.minecraft.net/texture/4c27e3cb52a64968e60c861ef1ab84e0a0cb5f07be103ac78da67761731f00c8",
       "type": "combat",
@@ -446,6 +455,13 @@ module.exports = {
     }
   },
   petItems: {
+    WASHED_UP_SOUVENIR: {
+      name: "Washed Up Souvenir",
+      description: "§7§7Increases §3α Sea §3Creature Chance §7by §a5",
+      stats: {
+        add: {scc: 5}
+      }
+    },
     ANTIQUE_REMEDIES: {
       description: "§7§7Increases the pet's §c❁ §cStrength §7by §a80%",
       name: "Antique Remedies",
@@ -609,7 +625,7 @@ module.exports = {
     "mining": "excavator",
     "taming": "domesticator"
   },
-  excludedSkills: ["carpentry","runecrafting","catacombs"],
+  excludedSkills: ["carpentry","runecrafting","catacombs","healer","mage","berserk","archer","tank"],
   skillStats: {
     "combat": {
       stat: "cc",
@@ -630,7 +646,7 @@ module.exports = {
   },
   xp_table: [0,50,125,200,300,500,750,1000,1500,2000,3500,5000,7500,10000,15000,20000,30000,50000,75000,100000,200000,300000,400000,500000,600000,700000,800000,900000,1000000,1100000,1200000,1300000,1400000,1500000,1600000,1700000,1800000,1900000,2000000,2100000,2200000,2300000,2400000,2500000,2600000,2750000,2900000,3100000,3400000,3700000,4000000],
   xp_table_runecrafting: [0,50,100,125,160,200,250,315,400,500,625,785,1000,1250,1600,2000,2465,3125,4000,5000,6200,7800,9800,12200,15300,19050],
-  xp_table_catacombs: [0,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9],
+  xp_table_catacombs: [0,50,75,110,160,230,330,470,670,950,1340,1890,2665,3760,5260,7380,10300,14400,20000,27600,38000,52500,71500,97000,132000,180000,243000,328000,445000,600000,800000,1065000,1410000,1900000,2500000,3300000,4300000,5600000,7200000,9200000,12000000,15000000,19000000,24000000,30000000,38000000,48000000,60000000,75000000,93000000,116250000],
   xp_table_slayer: [0,5,10,185,800,4000,15000,80000,300000,600000],
   xp_table_slayer_wolf: [0,10,15,225,1250,3500,15000,80000,300000,600000],
   slayerStats: {
