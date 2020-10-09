@@ -58,5 +58,19 @@ class RequestScheduler {
     })
     return promise;
   }
+  async getFirst(url,priority=0) { //same as get but unshift instead of push
+    let resolutionFunction;
+    let promise = new Promise((res,rej) => { //make a promise to return
+      resolutionFunction = res; //put the resolution function into a wider scope
+    })
+    this.reqs[priority].unshift({
+      priority: priority,
+      method: "get",
+      url: url,
+      res: resolutionFunction,
+      timeout: 500
+    })
+    return promise;
+  }
 }
 exports.RequestScheduler = RequestScheduler;

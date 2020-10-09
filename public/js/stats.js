@@ -1,5 +1,6 @@
 // constants
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
+const catacombsReward = [0,4,8,12,16,20,25,30,35,40,45,51,57,63,69,75,82,89,96,103,110,118,126,134,142,150,159,168,177.186,195,205,215,225,235,245,256,267,278,289,300];
 //helper functions
 var rarityColorMap = {
   "COMMON": "§8",
@@ -306,8 +307,7 @@ function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:
     "bane_of_arthropods": 0.08 * enemy.spider,
     "ender_slayer": 0.12 * enemy.ender,
     "giant_killer": enemy.gk * 0.25 / (weapon.enchantments ? weapon.enchantments["giant_killer"]: 1), //capped at 25% no matter the level
-    "first_strike": 0.25,
-    "critical": 0.1,
+    "first_strike": 0.25
   }
   for (let enchant in weapon.enchantments) {
     if (enchantmentsBuffs[enchant]) {
@@ -348,6 +348,10 @@ function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:
     extraBonus *= 2
   }
   let damage = [baseDmg * damageMultiplier * extraBonus];
+  //ranged base damages
+  if (weapon.id == "LIVID_DAGGER") {
+    damage = [damage[0]*1, damage[0]*2]; //normal crit, backstab 
+  }
   //ranged damages
   if (weapon.reforge == "fabled") {
     damage.forEach((pt) => damage.push(pt * 1.2)) //normal damage, max crit (+20%)
@@ -428,7 +432,8 @@ document.querySelector("#item-hover").style.display = "none";
   let profile = window.location.href.split("/").length > 4 ? window.location.href.split("/")[5] : "default"
   let data = await (await fetch(window.location.origin + "/api/data/" + username)).json();
   if (!data) {
-    window.location.href = window.location.origin + "?err=Invalid Player!"
+    window.location.href = window.location.origin + "?err=Invalid Player!";
+    return;
   }
   username = data.name;
   console.log(data)
@@ -440,7 +445,8 @@ document.querySelector("#item-hover").style.display = "none";
     if (profileData) {
       profile = profileData.cute_name
     } else {
-      window.location.href = window.location.origin + "?err=No Profiles Found"
+      window.location.href = window.location.origin + "?err=No Profiles Found";
+      return;
     }
   }
   window.history.pushState({}, "", `/stats/${username}/${profile}`);
@@ -469,12 +475,6 @@ document.querySelector("#item-hover").style.display = "none";
     } else {
       element.querySelector(".skillBarFill").style.width = (skill.progress * 100) + "%";
       element.querySelector(".skillBarText").innerText = cleanFormatNumber(skill.xpRemaining) + " / " + cleanFormatNumber(skill.nextLevel);
-    }
-    //catacombs hide bar and make bigger text
-    if (skill.name == "catacombs") {
-      element.style.fontSize = "1.5vw";
-      element.style.lineHeight = "3vw";
-      element.querySelector(".bar").style.display = "none";
     }
     document.getElementById("skills").appendChild(element);
   })
@@ -646,11 +646,11 @@ document.querySelector("#item-hover").style.display = "none";
     var weaponSelector = makeInventorySelector(profileData.weapons, {cols: 12, hasHotbar: false, rarityColor:true});
     var weaponStats = makeStatsDisplay("Weapon", weaponSelector.checked ? weaponSelector.checked.stats: {});
     weaponSelector.onUpdate = () => {
-      console.log(weaponSelector.checked);
       let stats = {...weaponSelector.checked.stats};
       if (document.querySelector("#in-dungeons").checked && profileData.skills.find(x => x.name == "catacombs") && weaponSelector.checked.tags.includes("DUNGEON") ) {
         for (let stat in stats) {
-          stats[stat] = stats[stat] * (1+ (weaponSelector.checked.stars ? weaponSelector.checked.stars * 0.1 : 0) + profileData.skills.find(x => x.name == "catacombs").xp * 0.01 )
+          console.log(catacombsReward[profileData.skills.find(x => x.name == "catacombs").levelPure])
+          stats[stat] = stats[stat] * (1+ (weaponSelector.checked.stars ? weaponSelector.checked.stars * 0.1 : 0) + catacombsReward[profileData.skills.find(x => x.name == "catacombs").levelPure] * 0.01 )
         }
       }
       weaponStats.update(stats);
@@ -756,7 +756,7 @@ document.querySelector("#item-hover").style.display = "none";
         for (let stat in item.stats) {
           let pieceStat = Number(item.stats[stat]);
           if (document.querySelector("#in-dungeons").checked && profileData.skills.find(x => x.name == "catacombs") && item.tags.includes("DUNGEON")) {
-            pieceStat *= 1 + (item.stars ? item.stars * 0.1 : 0) + profileData.skills.find(x => x.name == "catacombs").xp * 0.01;
+            pieceStat *= 1 + (item.stars ? item.stars * 0.1 : 0) + catacombsReward[profileData.skills.find(x => x.name == "catacombs").levelPure] * 0.01;
           }
           armorStats[stat] += pieceStat;
         }
@@ -1022,6 +1022,25 @@ document.querySelector("#item-hover").style.display = "none";
     console.log(outputString)
   }
   document.querySelector("#optimize-button").addEventListener("click", doTalismans);
+
+  // profile stats pogu
+  for (let statName in profileData.profileStats) {
+    let statContainer = document.createElement("div");
+    statContainer.classList.add("sb-stats-container");
+    let header = document.createElement("div");
+    header.classList.add("sb-stats-header");
+    header.innerText = statName.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" ");
+    statContainer.appendChild(header);
+    for (let stat of profileData.profileStats[statName]) {
+      let statDiv = document.createElement("div");
+      statDiv.classList.add("sb-stats-stat");
+      statDiv.innerHTML = `<div class="label">${stat[0]}</div> <div class="value">${typeof stat[1] == "number" ? cleanFormatNumber(stat[1]) : stat[1]}</div>`;
+      statContainer.appendChild(statDiv);
+    }
+    console.log(statContainer);
+    document.querySelector("#sb-stats").appendChild(statContainer);
+  }
+
   //hide loading animation and show content
   document.querySelector("#loading").style.display = "none";
   document.querySelector("#content").style.display = "flex";

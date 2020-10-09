@@ -88,8 +88,7 @@ body {
   background: var(--dark-gray);
   font-family: Quicksand;
   color: var(--white);
-  margin: 3vw;
-  margin-top: max(3vw,6vh);
+  margin: max(3vw,6vh) 3vw 3vw 3vw;
 }
 #content {
   --width: 94vw;
@@ -229,9 +228,7 @@ body {
   background: var(--dark-white);
 }
 #inventories {
-  height: auto;
-  padding-left: 5vw;
-  padding-right: 5vw;
+  padding: 0 5vw;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -266,13 +263,11 @@ body {
   background: rgba(43,43,43,0.5)
 }
 #pets {
-  height: auto;
   width: 100%;
   display: flex;
   justify-content: center;
 }
 #slayer {
-  height: auto;
   width: 100%;
   position: relative;
 }
@@ -285,9 +280,7 @@ body {
 }
 #slayer-grid {
   display: grid;
-  grid-template-rows: 100%;
   grid-gap: 2vw;
-  padding: 0 1vw;
 }
 #slayer-grid .slayer {
   border: 0.1vw solid var(--dark-white);
@@ -300,8 +293,7 @@ body {
 .slayer .slayer-header {
   background: var(--darkish-blue);
   text-align: center;
-  font-size: 2vw;
-  line-height: 3vw;
+  font: 2vw/3vw "Quicksand";
   height: 3vw;
   width: 100%;
   border-radius: 0.5vw 0.5vw 0 0
@@ -313,8 +305,7 @@ body {
 }
 .slayer .slayer-kills > div {
   text-align: center;
-  font-size: 1.5vw;
-  line-height: 2vw;
+  font: 1.5vw/2vw "Quicksand";
   height: 2vw;
 }
 
@@ -326,8 +317,7 @@ body {
 .slayer .slayer-bar {
   width: 95%;
   height: 1.5vw;
-  line-height: 1.5vw;
-  font-size: 1.2vw;
+  font: 1.2vw/1.5vw "Quicksand";
   background: var(--dark-gray);
   border-radius: 0.5vw;
   position: relative;
@@ -335,8 +325,6 @@ body {
 }
 .slayer .slayer-bar .slayer-bar-fill {
   position: absolute;
-  top: 0;
-  left: 0;
   height: inherit;
   border-radius: 0.5vw;
   background: var(--blue);
@@ -344,9 +332,6 @@ body {
 .slayer .slayer-bar .slayer-bar-text {
   text-align: center;
   position: absolute;
-  top: 0;
-  left: 0;
-  height: inherit;
   width: 100%;
 }
 #combat {
@@ -433,7 +418,7 @@ body {
 #combat-dmg {
   border: 0.1vw solid var(--dark-white);
   border-radius: 0.5vw;
-  height: 10vw;
+  height: 7vw;
   width: 100%;
   display: flex;
   flex-wrap: wrap;
@@ -453,9 +438,9 @@ body {
 }
 #combat-dmg > div .dmg-number {
   width: 100%;
-  height: 7vw;
-  font-size: 3.5vw;
-  line-height: 7vw;
+  height: 4vw;
+  font-size: 2vw;
+  line-height: 4vw;
   text-align: center;
   display: block;
 }
@@ -599,6 +584,52 @@ body {
   align-items: center;
   padding: 1vw;
 }
+#sb-stats {
+  width: 100%;
+  height: auto;
+  font-size: 1.6vw;
+  column-count: 4;
+  padding-bottom: 0;
+}
+.sb-stats-container {
+  height: auto;
+  position: relative;
+  border: 0.1vw solid var(--white);
+  border-radius: 0.5vw;
+  padding: 0 0.5vw;
+  padding-top: 3vw;
+  margin-bottom: 1vw;
+}
+.sb-stats-stat {
+  width: 100%;
+  position: relative;
+  margin-bottom: 0.25vw;
+}
+.sb-stats-header {
+  width: 100%;
+  font-size: 2vw;
+  text-align: center;
+  background: var(--darkish-blue);
+  position: absolute;
+  height: 2.5vw;
+  left: 0;
+  top: 0;
+  border-radius: 0.5vw;
+}
+.sb-stats-stat .label {
+  max-width: 70%;
+}
+.sb-stats-stat .value {
+  position: absolute;
+  max-width: 30%;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+}
+
+
+
+
 
 .stats-display {
   display: grid;

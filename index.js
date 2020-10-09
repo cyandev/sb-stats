@@ -32,7 +32,7 @@ client.connect().then((connection) => {
 var bazaarData;
 (async () => {
   bazaarData = await getBazaarData();
-  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 120);
+  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 600);
 })();
 
 async function getPlayerData(name,priority=0,uuid) {
@@ -62,7 +62,7 @@ async function getPlayerData(name,priority=0,uuid) {
   }
   //try to get the guild
   try {
-    var guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&player=${playerAPI.uuid}`, 0)).data;
+    var guildApi = (await reqScheduler.getFirst(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&player=${uuid}`, 0)).data;
     playerData.guild = guildApi.guild.name;
   } catch (err) {
     //move on
@@ -255,7 +255,7 @@ async function getInventoryJSON(contents,profileData) {
         }
         //check if defuse kit
         if (out.id == "DEFUSE_KIT") {
-          let trapsDefused = out.lore[5].slice(19);
+          let trapsDefused = out.lore[5] ? out.lore[5].slice(19) : 0;
           let kitInt = 0;
           if (trapsDefused >= 1) {kitInt  = 1};
           if (trapsDefused >= 5) {kitInt = 2};
@@ -287,7 +287,7 @@ async function getInventoryJSON(contents,profileData) {
 
 async function getProfileData(uuid, profile, playerData, priority) {
   try {
-    var profileAPI = (await reqScheduler.get(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`,priority)).data.profile;
+    var profileAPI = (await reqScheduler.getFirst(`https://api.hypixel.net/skyblock/profile?key=${process.env.API_KEY}&profile=${profile.profile_id}`,priority)).data.profile;
   } catch (err) {
     console.log("err getting /skyblock/profile endpoint")
   }
@@ -415,7 +415,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   //get inventories
   profileData.inventories = [];
   let invNames = ["inv_contents","ender_chest_contents","wardrobe_contents","quiver","potion_bag","talisman_bag","fishing_bag","candy_inventory_contents","inv_armor","personal_vault_contents"];
-  let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag","Personal Vault"];
+  let invCleanNames = ["Inventory", "Ender Chest", "Wardrobe","Quiver","Potion Bag", "Talisman Bag","Fishing Bag","Candy Bag","Armor","Personal Vault"];
   for (let i = 0; i<invNames.length; i++) { //for each inventory name
     let label = invNames[i];
     if (profileAPI.members[uuid][label]) {
@@ -630,38 +630,87 @@ async function getProfileData(uuid, profile, playerData, priority) {
     "misc": [],
   }
   for (let stat in profileStats) {
+    try {
     if (stat.startsWith("kills")) {
       if (stat == "kills") {
         sortedStats.kills.push(["All", profileStats[stat]]);
       } else {
-        sortedStats.kills.push([stat.slice(6).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
+        let label = stat.slice(6).split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+        if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+        if (constants.statAlias[label]) label = constants.statAlias[label];
+        if (sortedStats.kills.find(x => x[0] == label)) {
+          sortedStats.kills.find(x => x[0] == label)[1] += profileStats[stat];
+        } else {
+          sortedStats.kills.push([label, profileStats[stat]]);
+        }
+
       }
-      continue;
     } else if (stat.startsWith("deaths")) {
       if (stat == "deaths") {
         sortedStats.deaths.push(["All", profileStats[stat]]);
       } else {
-        sortedStats.deaths.push([stat.slice(7).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
+        let label = stat.slice(7).split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+        if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+        if (constants.statAlias[label]) label = constants.statAlias[label]
+        sortedStats.deaths.push([label, profileStats[stat]]);
       }
       continue;
     } else if (stat.startsWith("dungeon_hub")) {
-      sortedStats.dungeon_races.push([stat.replace("_best_time","").slice(12).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), (profileStats[stat] / 1000).toFixed(3) + " Seconds" ]);
+      sortedStats.dungeon_races.push([stat.replace("_best_time","").slice(12).split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), (profileStats[stat] / 1000).toFixed(3) + "s" ]);
       continue;
     } else if (["auctions_bids","auctions_highest_bid","auctions_won","auctions_bought_common","auctions_bought_uncommon","auctions_bought_rare","auctions_bought_epic","auctions_bought_legendary","auctions_bought_mythic","auctions_bought_special","auctions_sold_common","auctions_sold_uncommon","auctions_sold_rare","auctions_sold_epic","auctions_sold_legendary","auctions_sold_special","auctions_gold_spent","auctions_gold_earned","auctions_created","auctions_fees","auctions_no_bids","auctions_completed"].includes(stat)) {
       sortedStats.auctions.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
     } else if (["items_fished","items_fished_normal","items_fished_treasure","items_fished_large_treasure","shredder_bait","shredder_fished"].includes(stat)) {
-      sortedStats.fishing.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+      let label = stat.split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+      if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+      if (constants.statAlias[label]) label = constants.statAlias[label];
+      if (sortedStats.kills.find(x => x[0] == label)) {
+        sortedStats.fishing.find(x => x[0] == label)[1] += profileStats[stat];
+      } else {
+        sortedStats.fishing.push([label, profileStats[stat]]);
+      }
     } else if (["gifts_received","most_winter_snowballs_hit","most_winter_damage_dealt","most_winter_magma_damage_dealt","gifts_given","most_winter_cannonballs_hit"].includes(stat)) {
-      sortedStats.jerry_event.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+      let label = stat.split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+      if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+      if (constants.statAlias[label]) label = constants.statAlias[label];
+      if (sortedStats.kills.find(x => x[0] == label)) {
+        sortedStats.jerry_event.find(x => x[0] == label)[1] += profileStats[stat];
+      } else {
+        sortedStats.jerry_event.push([label, profileStats[stat]]);
+      }
     } else if (["chicken_race_best_time_2","foraging_race_best_time","end_race_best_time"].includes(stat)) {
-      sortedStats.races.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+      let label = stat.split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+      if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+      if (constants.statAlias[label]) label = constants.statAlias[label];
+      if (sortedStats.kills.find(x => x[0] == label)) {
+        sortedStats.races.find(x => x[0] == label)[1] += profileStats[stat];
+      } else {
+        sortedStats.races.push([label, (profileStats[stat] / 1000).toFixed(3) + "s"]);
+      }
     } else if (["pet_milestone_ores_mined","pet_milestone_sea_creatures_killed"].includes(stat)) {
-      sortedStats.pets.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+      let label = stat.split("_").map(x => (x ? x[0].toUpperCase() + x.slice(1) : x)).join(" ");
+      if (label.startsWith("Crypt Undead")) label = "Crypt Undead";
+      if (constants.statAlias[label]) label = constants.statAlias[label];
+      if (sortedStats.kills.find(x => x[0] == label)) {
+        sortedStats.pets.find(x => x[0] == label)[1] += profileStats[stat];
+      } else {
+        sortedStats.pets.push([label, profileStats[stat]]);
+      }
     } else if (stat.includes("mythos")) {
-      sortedStats.mythos_event.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
+      if (["mythos_kills","mythos_burrows_dug_next","mythos_burrows_dug_combat","mythos_burrows_dug_treasures","mythos_burrows_chains_complete"].includes(stat)) sortedStats.mythos_event.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]])
     } else {
       sortedStats.misc.push([stat.split("_").map(x => x[0].toUpperCase() + x.slice(1)).join(" "), profileStats[stat]]);
     }
+    } catch (e) {console.log("Error with stats: ", stat, profileStats[stat], e)}
+  }
+  for (let stat in sortedStats) {
+    sortedStats[stat].sort((a,b) => {
+      if (typeof a[1] == "number") {
+        return b[1]-a[1]
+      } else {
+        return 0
+      }
+    })
   }
   profileData.profileStats = sortedStats;
   //get static stats: unchanging ones like the ones from slayer, skills, fairy souls, etc.
@@ -742,20 +791,22 @@ async function getGuildData(guildname) {
     }
   });
   guildData.members = playerDataArr.map((x,i) => {
+    try {
     let profile = x.profiles[x.currentProfile];
     return {
       name: x.name,
-      slayer: profile.slayerXp,
-      averageSkill: Number(profile.averageSkillProgress),
-      skillXp: profile.skills.reduce((t,x) => t+x.xp, 0)
+      slayer: profile ? profile.slayerXp : 0,
+      averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
+      skillXp: profile ? profile.skills.reduce((t,x) => t+x.xp, 0) : 0
     }
+    } catch (e) {console.log(e,x)};
   })
 
   guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
   guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));
   guildData.averageSkillXp = Number((guildData.members.reduce((t,x) => t+x.skillXp, 0) / guildData.members.length).toFixed(2));
 
-  await guildsCollection.replaceOne({name: guildApi.guild.name}, guildData, {upsert: true})
+  await guildsCollection.replaceOne({_id: guildData._id}, guildData, {upsert: true})
   
   return guildData;
 }

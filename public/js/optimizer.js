@@ -34,7 +34,6 @@ let REFORGES = {
   ],
   l: [
     (stats, n) => { stats.str += 8 * n; stats.cd += 8 * n }, //strong
-    (stats, n) => { stats.str += 6 * n; stats.cd += 9 * n } //shaded
   ],
   m: [
     (stats, n) => { stats.str += 12 * n; stats.cd += 12 * n }, //strong
