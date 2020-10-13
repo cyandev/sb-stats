@@ -228,7 +228,7 @@ body {
   background: var(--dark-white);
 }
 #inventories {
-  padding: 0 5vw;
+  padding: 3.6vw 5vw 1vw 5vw;
   width: 100%;
   display: flex;
   justify-content: center;

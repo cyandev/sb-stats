@@ -527,7 +527,8 @@ document.querySelector("#item-hover").style.display = "none";
 
   } else {
     let apiWarn = document.createElement("span");
-    apiWarn.innerText = "API Not Enabled!"
+    apiWarn.innerText = "Inventory API Not Enabled!"
+    apiWarn.classList.add("api-warn")
     document.querySelector("#wardrobe").appendChild(apiWarn);
   }
 
@@ -564,7 +565,8 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#labels").style.display = "none";
     document.querySelector("#inv-view-container").style.display = "none";
     let apiWarn = document.createElement("span");
-    apiWarn.innerText = "API Not Enabled!"
+    apiWarn.classList.add("api-warn")
+    apiWarn.innerText = "Inventory API Not Enabled!"
     document.querySelector("#inventories").appendChild(apiWarn);
   }
 
@@ -832,7 +834,7 @@ document.querySelector("#item-hover").style.display = "none";
   } else {
     document.querySelector("#combat").innerHTML = `
     <div class="section-label">Combat</div>
-    Inventories API Not Enabled!
+    <span class="api-warn">Inventories API Not Enabled!</span>
     `
   }
 
@@ -1021,7 +1023,7 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#changes").innerText = outputString
     console.log(outputString)
   }
-  document.querySelector("#optimize-button").addEventListener("click", doTalismans);
+  if (document.querySelector("#optimize-button")) document.querySelector("#optimize-button").addEventListener("click", doTalismans);
 
   // profile stats pogu
   for (let statName in profileData.profileStats) {
