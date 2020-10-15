@@ -2,7 +2,7 @@
 var realFs = require('fs')
 var gracefulFs = require('graceful-fs')
 gracefulFs.gracefulify(realFs)
-
+var zlib = require("zlib")
 const helmet = require("helmet")
 const express = require("express");
 var bodyParser = require('body-parser');
@@ -28,6 +28,7 @@ var guildsCollection;
 client.connect().then((connection) => {
   playersCollection = connection.db("SBStatsDB").collection("Players");
   guildsCollection = connection.db("SBStatsDB").collection("Guilds");
+  connection.db("SBStatsDB").collection("PlayersV2").stats().then(d => a = d);
 });
 var bazaarData;
 (async () => {
@@ -111,7 +112,11 @@ async function getPlayerData(name,priority=0,uuid) {
     }
   }
   console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`);
-  playersCollection.replaceOne({name: playerData.name},playerData,{upsert: true}); //add it to / update database
+  let compressedPlayerData = JSON.parse(JSON.stringify(playerData))
+  for (let profileid in compressedPlayerData.profiles) {
+    compressedPlayerData.profiles[profileid] = zlib.deflateSync(Buffer.from(JSON.stringify(compressedPlayerData.profiles[profileid]))).toString("base64")
+  }
+  playersCollection.replaceOne({name: playerData.name},compressedPlayerData,{upsert: true}); //add it to / update database
   return playerData;
 }
 
@@ -229,9 +234,9 @@ async function getInventoryJSON(contents,profileData) {
         //check if player head, if so get the skin
         if (item.tag.SkullOwner) {
           out.faces = {
-            face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=0`,
-            side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=1`,
-            top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url}&i=2`
+            face: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url.split("/")[4]}&i=0`,
+            side: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url.split("/")[4]}&i=1`,
+            top: `/img/head?skin=${JSON.parse(Buffer.from(item.tag.SkullOwner.Properties.textures[0].Value,"base64").toString()).textures.SKIN.url.split("/")[4]}&i=2`
           }
         }
 
@@ -246,12 +251,25 @@ async function getInventoryJSON(contents,profileData) {
           let bp = await util.nbtBufToJson(bpBuffer);
           out.contents = await getInventoryJSON(bp.i,profileData);
         }
-
+        if (Object.keys(out.stats).length == 0) {
+          delete out.stats;
+          delete out.baseStats;
+        }
+        if (out.count <= 1) {
+          delete out.count
+        }
         output[j] = out;
 
         //check if unique accessory, if so, add to talis
         if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("CCESSORY")) { //ccessory instead of accessory because of crab hat
-          if (!(profileData.talis[out.id] && profileData.talis[out.id].reforge) && out.reforge) profileData.talis[out.id] = out;
+          if (!(profileData.talis[out.id] && profileData.talis[out.id].reforge) && out.reforge) profileData.talis[out.id] = {
+            stats: out.stats,
+            baseStats: out.baseStats,
+            reforge: out.reforge,
+            rarity: out.rarity
+          };
+        } else {
+          delete out.baseStats;
         }
         //check if defuse kit
         if (out.id == "DEFUSE_KIT") {
@@ -301,7 +319,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   //get minions
   let craftedGens = {};
   constants.minionNames.forEach((name) => {
-    craftedGens[name] = Array.from({length:12}, x => false)
+    craftedGens[name] = Array.from({length:12}, x => 0) //use 0/1 for true/false to minify data storage
   })
   for (let uuid of Object.keys(profileAPI.members)) {
     if (profileAPI.members[uuid].crafted_generators) profileAPI.members[uuid].crafted_generators.forEach((id) => {
@@ -310,9 +328,9 @@ async function getProfileData(uuid, profile, playerData, priority) {
       let name = idNumSplit.join("_");
       if (!craftedGens[name]) {
         console.log(`Unknown minion name: ${name}`);
-        craftedGens[name] = Array.from({length:12}, x => false);
+        craftedGens[name] = Array.from({length:12}, x => 0);
       }
-      craftedGens[name][tier] = true;
+      craftedGens[name][tier] = 1;
     })
   }
 
@@ -328,11 +346,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
         } else {
           price = (bazaarData[constants.minionCrafts[name][tier].item.replace("name", name)].quick_status.buyPrice * constants.minionCrafts[name][tier].quantity).toFixed(1);
         }
-        missingMinions.push({
-          name: name,
-          tier: tier,
-          price: price
-        })
+        missingMinions.push([name,tier,price])
       } else {
         minionsCrafted++;
       }
@@ -356,14 +370,14 @@ async function getProfileData(uuid, profile, playerData, priority) {
     nextTier: nextTier,
     slots: minionSlots,
     bonusSlots: bonusSlots,
-    missing: missingMinions.sort((a,b) => a.price == b.price ? 0 : !a.price ? 1: !b.price ?  -1: a.price - b.price),
+    missing: missingMinions.sort((a,b) => a[2] == b[2] ? 0 : !a[2] ? 1: !b[2] ?  -1: a[2] - b[2]),
   }
   
   //get coin purse / bank
   if (profileAPI.banking) {
-    profileData.balance = profileAPI.banking.balance;
+    profileData.balance = Number(profileAPI.banking.balance.toFixed(0));
   }
-  profileData.purse = profileAPI.members[uuid].coin_purse ? profileAPI.members[uuid].coin_purse : 0;
+  profileData.purse = profileAPI.members[uuid].coin_purse ? Number(profileAPI.members[uuid].coin_purse.toFixed(0)) : 0;
 
   //get slayer
   if (profileAPI.members[uuid].slayer_bosses) {
@@ -540,13 +554,11 @@ async function getProfileData(uuid, profile, playerData, priority) {
           "",
           `§r${pet.tier[0] + pet.tier.slice(1).toLowerCase()} Pet`
         ],
-        id: "NULL",
         faces: {
-          face: `/img/head?skin=${constants.pets[pet.type].skin}&i=${0}`,
-          side: `/img/head?skin=${constants.pets[pet.type].skin}&i=${1}`,
-          top: `/img/head?skin=${constants.pets[pet.type].skin}&i=${2}`
+          face: `/img/head?skin=${constants.pets[pet.type].skin.split("/")[4]}&i=${0}`,
+          side: `/img/head?skin=${constants.pets[pet.type].skin.split("/")[4]}&i=${1}`,
+          top: `/img/head?skin=${constants.pets[pet.type].skin.split("/")[4]}&i=${2}`
         },
-        count: 1,
         rarity: pet.tier,
         active: pet.active,
         xp: pet.exp
@@ -792,7 +804,7 @@ async function getGuildData(guildname) {
   });
   guildData.members = playerDataArr.map((x,i) => {
     try {
-    let profile = x.profiles[x.currentProfile];
+    let profile =JSON.parse(zlib.inflateSync(Buffer.from(x.profiles[x.currentProfile],"base64")).toString());
     return {
       name: x.name,
       slayer: profile ? profile.slayerXp : 0,
@@ -850,12 +862,15 @@ async function getBazaarData() { //bazaar data
   return (await reqScheduler.get(`https://api.hypixel.net/skyblock/bazaar?key=${process.env.API_KEY}`)).data.products
 }
 /* Data API Endpoints */
-app.get("/api/data/:player", async (req,res) => {
+app.get("/api/data/:player", async (req,res) => { 
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
   if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 10) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player);
   } else {
+    for (let profileid in playerData.profiles) {
+      playerData.profiles[profileid] = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[profileid],"base64")).toString())
+    }
     console.log("sending data from db: age in ms: ", Date.now() - playerData.lastUpdated)
   }
   res.json(playerData);
@@ -898,7 +913,7 @@ app.get("/api/bazaar", (req,res) => {
 
 /* Images API */
 app.get("/img/head", async (req,res) => {
-  let img = await util.getSkinFace(req.query.skin,req.query.i);
+  let img = await util.getSkinFace("http://textures.minecraft.net/texture/" + req.query.skin, req.query.i);
   res.writeHead(200, {
      'Content-Type': 'image/png',
      'Content-Length': img.length

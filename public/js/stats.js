@@ -853,7 +853,7 @@ document.querySelector("#item-hover").style.display = "none";
         cell.innerText = minionNameMap[x];
       } else {
         cell.classList.add("minionBoolCell")
-        cell.classList.add(String(x))
+        cell.classList.add(String(Boolean(x)))
       }
       document.querySelector("#minion-table").appendChild(cell)
     }
@@ -863,8 +863,8 @@ document.querySelector("#item-hover").style.display = "none";
   for (let minion of profileData.minions.missing) {
     let name = document.createElement("div");
     let price = document.createElement("div");
-    name.innerText = minionNameMap[minion.name] + " " + minion.tier;
-    price.innerText = minion.price ? cleanFormatNumber(Number(minion.price)) : "???";
+    name.innerText = minionNameMap[minion[0]] + " " + minion[1];
+    price.innerText = minion[2] ? cleanFormatNumber(Number(minion[2])) : "???";
     document.querySelector("#minion-upgrades").appendChild(name);
     document.querySelector("#minion-upgrades").appendChild(price);
   }
@@ -873,8 +873,8 @@ document.querySelector("#item-hover").style.display = "none";
   let nextSlotPrice = 0;
   if (profileData.minions.missing.length >= profileData.minions.nextTier) {
     let nextMinions = profileData.minions.missing.slice(0,profileData.minions.nextTier);
-    if (nextMinions.every(x => x.price)) {
-      nextSlotPrice = nextMinions.reduce((t,x) => t+Number(x.price), 0);
+    if (nextMinions.every(x => x[2])) {
+      nextSlotPrice = nextMinions.reduce((t,x) => t+Number(x[[2]]), 0);
     } else {
       nextSlotPrice = null;
     }
