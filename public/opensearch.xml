@@ -1,0 +1,9 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>SB Stats</ShortName>
+  <Description>A site for viewing and optimizing stats for Hypixel Skyblock</Description>
+  <Image width="16" height="16" type="image/x-icon">[https://sbstats.me/img/favicon.png]</Image>
+  <Url type="text/html" method="get" template="sbstats.me/stats/{searchTerms}">
+  </Url>
+  <moz:SearchForm>[https://sbstats.me/stats/]</moz:SearchForm>
+</OpenSearchDescription>
