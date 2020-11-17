@@ -6,8 +6,9 @@ module.exports = {
       baseStats: {},
       perLevelStats: {
         str: 0.5,
-        mf: 0.1
-      }
+        mf: 0.1,
+        fer: 0.05,
+      },
     },
     "GRIFFIN": {
       "skin": "http://textures.minecraft.net/texture/4c27e3cb52a64968e60c861ef1ab84e0a0cb5f07be103ac78da67761731f00c8",
@@ -71,7 +72,8 @@ module.exports = {
       "type": "foraging",
       "baseStats": {},
       "perLevelStats": {
-        spd: 0.5
+        spd: 0.5,
+        fer: 0.1,
       }
     },
     "PIGMAN": {
@@ -80,7 +82,8 @@ module.exports = {
       "baseStats": {},
       "perLevelStats": {
         str: 0.5,
-        def: 0.5
+        def: 0.5,
+        fer: 0.05,
       }
     },
     "RABBIT": {
@@ -198,7 +201,8 @@ module.exports = {
       "perLevelStats": {
         cd: 0.5,
         str: 0.1,
-        cc: 0.05
+        cc: 0.05,
+        fer: 0.1
       }
     },
     "LION": {
@@ -326,7 +330,8 @@ module.exports = {
       "baseStats": {},
       "perLevelStats": {
         hp: 1,
-        int: 0.7
+        int: 0.7,
+        fer: 0.05,
       }
     },
     "JELLYFISH": {
@@ -405,7 +410,8 @@ module.exports = {
       "baseStats": {},
       "perLevelStats": {
         str: 0.4,
-        "as": 0.15
+        "as": 0.15,
+        fer: 0.05,
       }
     },
     "TARANTULA": {
@@ -831,6 +837,74 @@ module.exports = {
     "End Race Best Time": "End Race",
     "Chicken Race Best Time 2": "Chicken Race",
     "Foraging Race Best Time": "Foraging Race"
-    
+  },
+  talismanClassifiers: {
+    "SPEED_TALISMAN": "SPEED",
+    "SPEED_RING": "SPEED",
+    "SPEED_ARTIFACT": "SPEED",
+    "FEATHER_TALISMAN": "FEATHER",
+    "FEATHER_RING": "FEATHER",
+    "FEATHER_ARTIFACT": "FEATHER",
+    "BROKEN_PIGGY_BANK": "PIGGY",
+    "CRACKED_PIGGY_BANK": "PIGGY",
+    "PIGGY_BANK": "PIGGY",
+    "POTION_AFFINITY_TALISMAN": "POTION_AFFINITY",
+    "RING_POTION_AFFINITY": "POTION_AFFINITY",
+    "ARTIFACT_POTION_AFFINITY": "POTION_AFFINITY",
+    "HEALING_TALISMAN": "HEALING",
+    "HEALING_TALISMAN": "HEALING",
+    "HEALING_RING": "HEALING",
+    "SEA_CREATURE_TALISMAN": "SEA_CREATURE",
+    "SEA_CREATURE_RING": "SEA_CREATURE",
+    "SEA_CREATURE_ARTIFACT": "SEA_CREATURE",
+    "PERSONAL_COMPACTOR_4000": "PERSONAL_COMPACTOR",
+    "PERSONAL_COMPACTOR_5000": "PERSONAL_COMPACTOR",
+    "PERSONAL_COMPACTOR_6000": "PERSONAL_COMPACTOR",
+    "ZOMBIE_TALISMAN": "ZOMBIE",
+    "ZOMBIE_RING": "ZOMBIE",
+    "ZOMBIE_ARTIFACT": "ZOMBIE",
+    "INTIMIDATION_TALISMAN": "INTIMIDATION",
+    "INTIMIDATION_RING": "INTIMIDATION",
+    "INTIMIDATION_ARTIFACT": "INTIMIDATION",
+    "BAT_TALISMAN": "BAT",
+    "BAT_RING": "BAT",
+    "BAT_ARTIFACT": "BAT",
+    "CANDY_TALISMAN": "CANDY",
+    "CANDY_RING": "CANDY",
+    "CANDY_ARTIFACT": "CANDY",
+    "BEASTMASTER_CREST_COMMON": "BEASTMASTER_CREST",
+    "BEASTMASTER_CREST_UNCOMMON": "BEASTMASTER_CREST",
+    "BEASTMASTER_CREST_RARE": "BEASTMASTER_CREST",
+    "BEASTMASTER_CREST_EPIC": "BEASTMASTER_CREST",
+    "BEASTMASTER_CREST_LEGENDARY": "BEASTMASTER_CREST",
+    "SPIDER_TALISMAN": "SPIDER",
+    "SPIDER_RING": "SPIDER",
+    "SPIDER_ARTIFACT": "SPIDER",
+    "WOLF_TALISMAN": "WOLF",
+    "WOLF_RING": "WOLF",
+    "RED_CLAW_TALISMAN": "RED_CLAW",
+    "RED_CLAW_RING": "RED_CLAW",
+    "RED_CLAW_ARTIFACT": "RED_CLAW",
+    "HUNTER_TALISMAN": "HUNTER",
+    "HUNTER_RING": "HUNTER",
+    "SHADY_RING": "LUCIUS",
+    "CROOKED_ARTIFACT": "LUCIUS",
+    "SEAL_OF_THE_FAMILY": "LUCIUS",
+    "CAT_TALISMAN": "DUNGEON_HUB",
+    "LYNX_TALISMAN": "DUNGEON_HUB",
+    "CHEETAH_TALISMAN": "DUNGEON_HUB",
+    "CAMPFIRE_TALISMAN_.+": "CAMPFIRE",
+    "WEDDING_RING_.+": "ROMERO",
+    "SCARF_STUDIES": "SCARF",
+    "SCARF_THESIS": "SCARF",
+    "SCARF_GRIMOIRE": "SCARF",
+    "TREASURE_TALISMAN": "TREASURE",
+    "TREASURE_RING": "TREASURE",
+    "TREASURE_ARTIFACT": "TREASURE",
+    "RAGGEDY_SHARK_TOOTH_NECKLACE": "SHARK",
+    "DULL_SHARK_TOOTH_NECKLACE": "SHARK",
+    "HONED_SHARK_TOOTH_NECKLACE": "SHARK",
+    "SHARP_SHARK_TOOTH_NECKLACE": "SHARK",
+    "RAZOR_SHARP_SHARK_TOOTH_NECKLACE": "SHARK",
   }
 }

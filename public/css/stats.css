@@ -349,6 +349,21 @@ body {
   line-height: 3.5vw;
   font-size: 2vw;
 }
+#weapon-select .inv-view {
+  max-height: 17.5vw;
+  overflow-y: auto;
+  padding-right: 1vw;
+}
+#weapon-select .inv-view::-webkit-scrollbar {
+  width: 1vw;
+}
+#weapon-select .inv-view::-webkit-scrollbar-button {
+  display: none;
+}
+#weapon-select .inv-view::-webkit-scrollbar-thumb {
+  border-radius: 0.5vw;
+  background: var(--white);
+}
 #combat-stats-dmg-wrapper {
   width: 100%;
   display: flex;
@@ -356,7 +371,7 @@ body {
   justify-content: space-around;
 }
 #combat-stats {
-  height:21.5vw;
+  height:26vw;
   width: 100%;
   margin-bottom: 1vw;
   border: 0.1vw solid var(--dark-white);
@@ -425,7 +440,7 @@ body {
   justify-content: space-around;
 }
 #combat-dmg > div {
-  width: 20vw;
+  width: 33%;
   height: 10vw;
 }
 #combat-dmg > div .dmg-header {

@@ -11,7 +11,7 @@ var http = require('http').createServer(app);
 var port = process.env.PORT || 8080;
 
 app.use(helmet());
-app.use(bodyParser.urlencoded()); 
+app.use(bodyParser.urlencoded());
 
 let axios = require("axios")
 const minecraftItems = require('minecraft-items')
@@ -199,8 +199,9 @@ async function getInventoryJSON(contents,profileData) {
           "Defense": "def", 
           "Speed": "spd", 
           "Intelligence": "int", 
-          "True Defense": "td", 
-          "Sea Creature Chance": "scc"
+          "True Defense": "td",
+          "Sea Creature Chance": "scc",
+          "Ferocity": "fer"
         }
         out.stats = {}; //stats w/ reforges
         out.baseStats = {}; //stats w/o reforges
@@ -208,7 +209,7 @@ async function getInventoryJSON(contents,profileData) {
           Object.keys(statNames).forEach((stat) => {
             out.lore.forEach((loreLine) => {
               loreLine = loreLine.split(/§./).join(""); //strip formatting
-              let match = loreLine.match(RegExp( stat + String.raw`: ([+-\d\.]+)( HP|\%)?(?: \(\w+ ([+-\d\.]+)\2\) *)?(?: \([+-\d\.]+\2\) *)?(?:\(([+-\d\.]+)\2?\))?`)); //match with crazy regexp
+              let match = loreLine.match(RegExp( stat + String.raw`: ([+-\d\.]+)( HP|\%)?(?: \(\w+ ([+-\d\.]+)\2\) *)?(?: \([+-\d\.]+\2\) *)?(?:\(([+-\d\.]+)\2?\))?`)); //match with crazy regexp !!!SIMPLIFLY THIS, WE DONT CARE ABOUT THE DUNGEON STATS LISTED HERE ANYMORE!!!
               if (match) {
                 if (match.index != 0) return; //make sure a match includes the start of the string so "Bonus Attack Speed" doesnt trigger "Speed"
                 out.stats[statNames[stat]] = Number(match[1]); //the non-dungeon stat
@@ -262,11 +263,27 @@ async function getInventoryJSON(contents,profileData) {
 
         //check if unique accessory, if so, add to talis
         if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("CCESSORY")) { //ccessory instead of accessory because of crab hat
-          if (!(profileData.talis[out.id] && profileData.talis[out.id].reforge) && out.reforge) profileData.talis[out.id] = {
+          let rarities = {
+            COMMON: 0,
+            UNCOMMON: 1,
+            RARE: 2,
+            EPIC: 3,
+            LEGENDARY: 4,
+            MYTHIC: 5,
+          }
+          Object.keys(constants.talismanClassifiers).forEach((filter) => {
+            if (RegExp("^" + filter + "$").test(out.id)) {
+              out.type = constants.talismanClassifiers[filter];
+            }
+          })
+          if (!out.type) out.type = out.id;
+
+          if (!profileData.talis[out.type] || rarities[out.rarity] > rarities[profileData.talis[out.type].rarity]) profileData.talis[out.type] = {
             stats: out.stats,
             baseStats: out.baseStats,
             reforge: out.reforge,
-            rarity: out.rarity
+            rarity: out.rarity,
+            type: out.type
           };
         } else {
           delete out.baseStats;
@@ -561,7 +578,8 @@ async function getProfileData(uuid, profile, playerData, priority) {
         },
         rarity: pet.tier,
         active: pet.active,
-        xp: pet.exp
+        xp: pet.exp,
+        id: pet.type
       }
       //get the pet's level
       let remainingXp = pet.exp;

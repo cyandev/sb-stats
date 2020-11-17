@@ -96,6 +96,7 @@ class TalismanSet {
       cd: this.base.cd,
       "as": this.base["as"],
       int: this.base.int,
+      fer: this.base.fer,
       stones: true
     }
     //add talisman reforges

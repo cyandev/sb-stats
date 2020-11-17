@@ -1,6 +1,138 @@
 // constants
 const excludedSkills = ["carpentry","runecrafting","catacombs"];
 const catacombsReward = [0,4,8,12,16,20,25,30,35,40,45,51,57,63,69,75,82,89,96,103,110,118,126,134,142,150,159,168,177.186,195,205,215,225,235,245,256,267,278,289,300];
+//pet damage/stat bonus functions
+function boostArmorStatsIfSet(ratio, set, armor, stats) {
+  if (armor.every((piece) => piece.id.includes(set))) {
+      armor.forEach((piece) => {
+        for (let stat in stats) {
+          stats[stat] += piece.stats[stat] ? piece.stats[stat] * ratio : 0
+        }
+      })
+    }
+}
+var petFuncs = { /* ONLY COMBAT RELEVANT PERKS ADDED SO FAR */
+  MEGALODON(pet,weapon,armor,stats,enemy) {
+    boostArmorStatsIfSet(pet.level * 0.002, "SHARK_SCALE", armor, stats);
+  },
+  GRIFFIN(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY") {
+      stats.str *= 1 + 0.0014 * pet.level
+    }
+  },
+  BLAZE(pet,weapon,armor,stats,enemy) {
+    boostArmorStatsIfSet(pet.level * 0.004, "BLAZE", armor, stats);
+    // ADD CASE FOR HPBS
+  },
+  JERRY(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY" && weapon.id == "ASPECT_OF_THE_JERRY") stats.dmg += 0.1 * pet.level
+  },
+  PIGMAN(pet,weapon,armor,stats,enemy) {
+    if (weapon.id == "PIGMAN_SWORD") {
+      stats.dmg += 0.4 * pet.level;
+      stats.str += 0.25 * pet.level
+    }
+  },
+  WITHER_SKELETON(pet,weapon,armor,stats,enemy) {
+    // intentionally ignoring the last perk, will add it when I add "useAs" to this function
+  },
+  MAGMA_CUBE(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY") boostArmorStatsIfSet(pet.level * 0.01, "EMBER", armor, stats);
+  },
+  FLYING_FISH(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY") boostArmorStatsIfSet(pet.level * 0.003, "DIVER", armor, stats);
+  },
+  LION(pet,weapon,armor,stats,enemy) { // intentionally ignoring second perk
+    switch (pet.rarity) {
+      case "LEGENDARY":
+        stats.dmg += 0.2 * pet.level;
+        break;
+      case "EPIC":
+        stats.dmg += 0.15 * pet.level;
+        break;
+      case "RARE":
+        stats.dmg += 0.1 * pet.level;
+        break;
+      case "UNCOMMON":
+        stats.dmg += 0.05 * pet.level;
+        break;
+      case "COMMON":
+        stats.dmg += 0.03 * pet.level;
+        break;
+    }
+  },
+  PARROT(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY") stats.str += 5 + 0.25 * pet.level
+  },
+  ENDER_DRAGON(pet,weapon,armor,stats,enemy) {
+    if (weapon.id == "ASPECT_OF_THE_DRAGONS") {
+      stats.str += 0.5 * pet.level;
+      stats.str += 0.3 * pet.level;
+    }
+    if (pet.rarity == "LEGENDARY") {
+      for (let stat in stats) {
+        if (!["dmg","ratio"].includes(stat)) stats[stat] *= 1 + 0.001 * pet.level
+      }
+    }
+  },
+  SQUID(pet,weapon,armor,stats,enemy) {
+    if (weapon.id == "INK_WAND") {
+      if (pet.rarity == "RARE") {
+        stats.dmg += 0.3 * pet.level;
+        stats.str += 0.1 * pet.level;
+      }
+      if (pet.rarity == "EPIC" || pet.rarity == "LEGENDARY") {
+        stats.dmg += 0.4 * pet.level;
+        stats.str = 0.2 * pet.level
+      }
+    }
+  },
+  SKELETON(pet,weapon,armor,stats,enemy) {
+    if (weapon.tags.includes("BOW")) {
+      switch (pet.rarity) {
+        case "LEGENDARY":
+          stats.ratio *= 1 + 0.002 * pet.level;
+          break;
+        case "EPIC":
+          stats.ratio *= 1 + 0.002 * pet.level;
+          break;
+        case "RARE":
+          stats.ratio *= 1 + 0.0015 * pet.level;
+          break;
+        case "UNCOMMON":
+          stats.ratio *= 1 + 0.0015 * pet.level;
+          break;
+        case "COMMON":
+          stats.ratio *= 1 + 0.001 * pet.level;
+          break;
+      }
+    }
+  },
+  ZOMBIE(pet,weapon,armor,stats,enemy) { //omitted for now
+  },
+  HOUND(pet,weapon,armor,stats,enemy) {
+    if (pet.rarity == "LEGENDARY") stats["as"] *= 1 + 0.001 * pet.level
+  },
+  TIGER(pet,weapon,armor,stats,enemy) {
+    switch (pet.rarity) {
+      case "LEGENDARY":
+        stats.fer *= (1 + 0.01 * pet.level);
+        break;
+      case "EPIC":
+        stats.fer *= (1 + 0.01 * pet.level);
+        break;
+      case "RARE":
+        stats.fer *= (1 + 0.005 * pet.level);
+        break;
+      case "UNCOMMON":
+        stats.fer *= (1 + 0.001 * pet.level);
+        break;
+      case "COMMON":
+        stats.fer *= (1 + 0.001 * pet.level);
+        break;
+    }
+  }
+}
 //helper functions
 var rarityColorMap = {
   "COMMON": "§8",
@@ -257,7 +389,8 @@ function makeStatsDisplay(label,stats) {
     "cd": "☠",
     "dmg": "",
     "str": "❁",
-    "int": "✎"
+    "int": "✎",
+    "fer": "⫽",
   }
   let statToColor = {
     "as": "var(--yellow)",
@@ -265,7 +398,8 @@ function makeStatsDisplay(label,stats) {
     "cd": "var(--blue)",
     "dmg": "#000000",
     "str": "var(--red)",
-    "int": "var(--cyan)"
+    "int": "var(--cyan)",
+    "fer": "var(--red)"
   }
   let statsDisplay = document.createElement("div");
   statsDisplay.classList.add("stats-display");
@@ -295,10 +429,12 @@ function makeStatsDisplay(label,stats) {
   statsDisplay.update(stats);
   return statsDisplay;
 }
-function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
+function doDamageCalc(petRatio,weapon,armor,pet,profileData,stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
   stats = Object.assign({},stats);
-  //variable stat increases by a #
+  //stats that dont appear in stats menu
+  if (armor[0] && armor[0].id == "TARANTULA_HELMET") stats.str += Math.floor(stats.cd/10);
 
+  
   let baseDmg = (5 + stats.dmg + Math.floor(stats.str / 5)) * (1 + stats.str / 100) * (1 + stats.cd / 100);
   let damageMultiplier = 1 + profileData.skills.find(skill => skill.name=="combat").levelPure * 0.04;
   let enchantmentsBuffs = {
@@ -315,7 +451,8 @@ function doDamageCalc(weapon,armor,profileData, stats,enemy={undead:false,ender:
     }
   }
   //add fancy damage bonuses
-  let extraBonus = 1
+  let extraBonus = petRatio;
+  if (enemy.undead) console.log(extraBonus)
   //dungeon skeleton sets SKELETON_TYPE
   if (weapon.tags && weapon.tags.includes("BOW")) {
     armor.forEach((piece) => {
@@ -676,6 +813,7 @@ document.querySelector("#item-hover").style.display = "none";
       "cc": 0,
       "cd": 0,
       "as": 0,
+      "fer": 0,
       "int": 0,
     }
     talisArr.forEach(tali => {
@@ -753,6 +891,7 @@ document.querySelector("#item-hover").style.display = "none";
         "cd": 0,
         "as": 0,
         "int": 0,
+        "fer": 0
       }
       profileData.inventories.find((x) => x.name == "inv_armor").contents.forEach((item) => {
         for (let stat in item.stats) {
@@ -798,36 +937,48 @@ document.querySelector("#item-hover").style.display = "none";
         "cd": 0,
         "as": 0,
         "int": 0,
+        "fer": 0,
       }
+      //add the stats from talismans, armor, selected weapon if it exists, potions, and pets
       let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
       for (let statMap of stats) {
         for (let stat in statMap) {
           statsBase[stat] += Number(statMap[stat]);
         }
       }
+      //delete all stats with a value of "0"
       for( let stat in statsBase) {
         if (statsBase[stat] == 0) {
           delete statsBase[stat];
         }
       }
+
+      //check if every armor is sup, if so add full set bonus
       if (armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
         for (let stat in statsBase) {
           if (stat != "dmg") statsBase[stat] *= 1.05
         }
       }
+
+      //check each armor piece, if its renowned apply the bonus
       armor.forEach((piece) => {
         if (piece.reforge == "renowned") {
           for (let stat in statsBase) {
             if (stat != "dmg") statsBase[stat] *= 1.01
           }
         }
-      })
+      });
 
+      statsBase.ratio = 1;
+      if (petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,statsBase); // apply pet stats, need to extract pet dmg ratio out of stats now
+      petRatio = statsBase.ratio;
+      delete statsBase.ratio;
+      
       totalStats.update(statsBase);
       if (weaponSelector.checked) {
-        document.querySelector("#zealot-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{ender:true,gk:true}).map(x => cleanFormatNumber(x)).join("-");
-        document.querySelector("#crypt-ghoul-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{undead:true}).map(x => cleanFormatNumber(x)).join("-");
-        document.querySelector("#spider-dmg-number").innerText = doDamageCalc(weaponSelector.checked, armor, profileData, statsBase,{spider:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#zealot-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{ender:true,gk:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#crypt-ghoul-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{undead:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#spider-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{spider:true}).map(x => cleanFormatNumber(x)).join("-");
       }
     }
     getTotalStats();
@@ -891,10 +1042,9 @@ document.querySelector("#item-hover").style.display = "none";
   async function doTalismans() {
     document.querySelector("#optimize-button").innerText = "Calculating..."
     document.querySelector("#optimize-button").removeEventListener("click", doTalismans); // remove click msg
-
-    let useAs = true;
     let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
-    function scoreFunc(stats,applyArmor=true) { //score function for the talisman optimizer
+
+    function scoreFunc(stats,applyPet=true,applyArmor=true,useAs=true) { //score function for the talisman optimizer
       if (applyArmor && armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
         for (let stat in stats) {
           if (stat != "dmg") stats[stat] *= 1.05
@@ -908,7 +1058,12 @@ document.querySelector("#item-hover").style.display = "none";
           }
         }
       })
-      return doDamageCalc(weaponSelector.checked, armor, profileData, stats)[0] * ( useAs ? (1 + Math.min(100,stats["as"] ? stats["as"] : 0) / 100): 1 );
+      stats.ratio = 1;
+      if (applyPet && petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,stats); // apply pet stats, need to extract pet dmg ratio out of stats now
+      petRatio = stats.ratio;
+      delete stats.ratio;
+
+      return doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, stats)[0] * ( useAs ? (1 + Math.min(100,stats["as"] ? stats["as"] : 0) / 100): 1 ) * (useAs ? (1 + (stats.fer ? stats.fer : 0) / 100): 1) / 0.5 //an attack every 0.4sec
     }
 
     //get talisman base stats + rarities (REDO THIS WHEN REDOING COMBAT SECTION, getTotalStats and the following code do almost the same thing)
@@ -919,6 +1074,7 @@ document.querySelector("#item-hover").style.display = "none";
       "cd": 0,
       "as": 0,
       "int": 0,
+      "fer": 0,
       "c": 0,
       "u": 0,
       "r": 0,
@@ -950,6 +1106,8 @@ document.querySelector("#item-hover").style.display = "none";
       "l": Array.from(REFORGES_NAMES.l, x => 0),
       "m": Array.from(REFORGES_NAMES.m, x => 0),
     }
+    console.log("stats0", Object.assign({},base))
+    // populate base with info on current talismans
     for (let id in profileData.talis) {
       for (let stat in profileData.talis[id].baseStats) {
         base[stat] += profileData.talis[id].baseStats[stat];
@@ -958,18 +1116,19 @@ document.querySelector("#item-hover").style.display = "none";
       if (REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].indexOf(profileData.talis[id].reforge) != -1) {
         currentReforges[rarityToLetter[profileData.talis[id].rarity]][REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].indexOf(profileData.talis[id].reforge)]++;
       } else {
-        REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].push(profileData.talis[id].reforge);
+        REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].push(String(profileData.talis[id].reforge));
         currentReforges[rarityToLetter[profileData.talis[id].rarity]][REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].length - 1] = 1;
       }
     }
-
+    console.log("stats1", Object.assign({},base))
+    //add armor, weapon if it exists, pots, and pets stats to the base
     let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
     for (let statMap of statsArr) {
       for (let stat in statMap) {
         base[stat] += Number(statMap[stat]);
       }
     }
-    console.log(base);
+    console.log("stats2", Object.assign({},base))
     let winningSet = await doTalismanOptimization(base, scoreFunc); //in optimizer.js
     console.log(winningSet);
 
@@ -982,11 +1141,10 @@ document.querySelector("#item-hover").style.display = "none";
     }
     bestTalismanScore = winningSet.score
 
-    document.querySelector("#old .dps").innerText = "Old DPS: " + scoreFunc(totalStats.stats,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    document.querySelector("#new .dps").innerText ="New DPS: " + scoreFunc(winningSet.stats,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-    document.querySelector("#old .dmg").innerText = "Old DMG: " + doDamageCalc(weaponSelector.checked, armor, profileData, totalStats.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    document.querySelector("#new .dmg").innerText = "New DMG: " + doDamageCalc(weaponSelector.checked, armor, profileData, winningSet.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#old .dps").innerText = "Old DPS: " + scoreFunc(totalStats.stats,false,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#new .dps").innerText ="New DPS: " + scoreFunc(winningSet.stats,false,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#old .dmg").innerText = "Old DMG: " + doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, totalStats.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    document.querySelector("#new .dmg").innerText = "New DMG: " + doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, winningSet.stats)[0].toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
     document.querySelector("#new-stats").innerHTML = "";
     document.querySelector("#old-stats").innerHTML = "";
@@ -994,6 +1152,8 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#new-stats").appendChild(makeStatsDisplay("", winningSet.stats));
     document.querySelector("#old-stats").appendChild(makeStatsDisplay("", totalStats.stats));
 
+
+    //get the reforge change (-1 reforgex +1 reforgey)
     let reforgeChange = {
       "c": Array.from(REFORGES_NAMES.c, x => 0),
       "u": Array.from(REFORGES_NAMES.u, x => 0),
@@ -1007,8 +1167,6 @@ document.querySelector("#item-hover").style.display = "none";
         reforgeChange[rarity][reforge] = (winningSet.reforges[rarity][reforge] ? winningSet.reforges[rarity][reforge] : 0) - currentReforges[rarity][reforge]
       }
     }
-    console.log(base)
-    console.log(reforgeChange, currentReforges, winningSet.reforges);
     document.querySelector("#optimize-button").addEventListener("click", doTalismans);
     document.querySelector("#optimize-button").innerText = "Optimize Again!"
     document.querySelector("#optimize-output").style.display = "flex";
