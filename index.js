@@ -484,17 +484,16 @@ async function getProfileData(uuid, profile, playerData, priority) {
     constants.skillNames.forEach(skillName => {
       let xp = 0;
       for (let i = 0; i <= playerData.achievements["skyblock_" + constants.skillNamesToAchievements[skillName]]; i++) {
-        xp+= constants.xp_table[i];
+        xp+= constants.xp_table[i] ? constants.xp_table[i] : 0;
       }
       profileData.skills[skillName] = xp;
     })
   }
-  
   let skills = [];
   Object.keys(profileData.skills).forEach((skillName) => {
     let xpRemaining = profileData.skills[skillName];
     let level = 0;
-    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
+    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : skillName == "farming" ? constants.xp_table_60 : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
     for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
       xpRemaining -= table[i];
       level = i;
@@ -510,6 +509,10 @@ async function getProfileData(uuid, profile, playerData, priority) {
       nextLevel: table[level + 1]
     })
   })
+  if (profileData.cute_name == "Apple") {
+    console.log(skills)
+    console.log(profileData.skills) 
+  }
   
   //sort skills into skylea order
   let skillOrderer = {
