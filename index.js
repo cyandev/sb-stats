@@ -509,10 +509,6 @@ async function getProfileData(uuid, profile, playerData, priority) {
       nextLevel: table[level + 1]
     })
   })
-  if (profileData.cute_name == "Apple") {
-    console.log(skills)
-    console.log(profileData.skills) 
-  }
   
   //sort skills into skylea order
   let skillOrderer = {
@@ -558,6 +554,9 @@ async function getProfileData(uuid, profile, playerData, priority) {
       let petTiers = ["COMMON","UNCOMMON","RARE","EPIC","LEGENDARY","LEGENDARY"];
       if (pet.heldItem == "PET_ITEM_TIER_BOOST") {
         pet.tier = petTiers[petTiers.indexOf(pet.tier)+1];
+      }
+      if (pet.heldItem == "PET_ITEM_VAMPIRE_FANG") {
+        pet.tier = "MYTHIC";
       }
       let out = {
         lore: [

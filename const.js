@@ -450,17 +450,87 @@ module.exports = {
       UNCOMMON: 6,
       RARE: 11,
       EPIC: 15,
-      LEGENDARY: 19
+      LEGENDARY: 19,
+      MYTHIC: 19
     },
     total: {
       COMMON: 5624785,
       UNCOMMON: 8644220,
       RARE: 12626665,
       EPIC: 18608500,
-      LEGENDARY: 25353230
+      LEGENDARY: 25353230,
+      MYTHIC: 25353230
     }
   },
   petItems: {
+    PET_ITEM_VAMPIRE_FANG: {
+      name: "Vampire Fang",
+      description: "§7§7Upgrades a Bat pet from §7§6Legendary §7to §dMythic §d§7adding a bonus perk and bonus"
+    },
+    PET_ITEM_SPOOKY_CUPCAKE: {
+      name: "Spooky Cupcake",
+      description: "§7§7Increases §c❁ Strength §7by §7§a30 §7and §f✦ Speed §7by §a20",
+      stats: {
+        add: {str: 30, spd: 20}
+      }
+    },
+    SERRATED_CLAWS: {
+      name: "Serrated Claws",
+      description: "§7§7Increases §9☠ Crit Damage §7by §7§a25",
+      stats: {
+        add: {cd: 25}
+      }
+    },
+    BIGGER_TEETH: {
+      name: "Bigger Teeth",
+      description: "§7§7Increases §9☣ Crit Chance §7by §7§a10",
+      stats: {
+        add: {cc: 10}
+      }
+    },
+    REINFORCED_SCALES: {
+      name: "Reinforced Scales",
+      description: "§7§7Increases §a❈ Defense §7by §7§a40",
+      stats: {
+        add: {def: 40}
+      }
+    },
+    GOLD_CLAWS: {
+      name: "Gold Claws",
+      description: "§7§7Increases the pet's §9☠ Crit §9Damage §7by §a50% §7and §9☣ Crit §9Chance §7by §a50%",
+      stats: {
+        multiply: {cc: 1.5, cd:1.5}
+      }
+    },
+    ALL_SKILLS_SUPER_BOOST: {
+      name: "All Skills Exp Super-Boost",
+      description: "§7§7Gives +§a20% §7pet exp for all §7skills"
+    },
+    DWARF_TURTLE_SHELMET: {
+      name: "Dwarf Turtle Shelmet",
+      description: "§7§7Makes the pet's owner immune §7to knockback"
+    },
+    MINOS_RELIC: {
+      name: "Minos Relic",
+      description: "§7§7Increases all pet stats by §7§a33.3%§7",
+      stats: {multiply: {
+        str: 1.33,
+        cd: 1.33,
+        cc: 1.33,
+        "as": 1.33,
+        int: 1.33,
+        dmg: 1.33,
+        scc: 1.33,
+        mf: 1.33
+      }}
+    },
+    CROCHET_TIGER_PLUSHIE: {
+      name: "Crochet Tiger Plusie",
+      description: "§7§7Increases §e⚔ Bonus Attack §eSpeed §7by §a35",
+      stats: {
+        add: {"as": 35}
+      }
+    },
     WASHED_UP_SOUVENIR: {
       name: "Washed Up Souvenir",
       description: "§7§7Increases §3α Sea §3Creature Chance §7by §a5",
