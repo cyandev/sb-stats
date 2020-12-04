@@ -493,7 +493,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   Object.keys(profileData.skills).forEach((skillName) => {
     let xpRemaining = profileData.skills[skillName];
     let level = 0;
-    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : skillName == "farming" ? constants.xp_table_60 : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
+    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : ["farming", "enchanting"].includes(skillName) ? constants.xp_table_60 : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
     for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
       xpRemaining -= table[i];
       level = i;

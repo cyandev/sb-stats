@@ -17,7 +17,8 @@ var petFuncs = { /* ONLY COMBAT RELEVANT PERKS ADDED SO FAR */
   },
   GRIFFIN(pet,weapon,armor,stats,enemy) {
     if (pet.rarity == "LEGENDARY") {
-      stats.str *= 1 + 0.0014 * pet.level
+      console.log("GRIFFIN", 1 + 0.0015 * pet.level, stats.str)
+      stats.str *= 1 + 0.0015 * pet.level
     }
   },
   BLAZE(pet,weapon,armor,stats,enemy) {
