@@ -200,10 +200,8 @@ function doTalismanOptimization(base,scoreFunction) {
     function cb(generation, cont, n) {
       if (generation[0].getScore() > winner.getScore()) {
         winner = generation[0];
-        console.log("new winner!")
       }
       if (!cont) {
-        console.log("lineage finished with " + n + " generations");
         finished++;
         if (finished == totalLineages) res(winner);
       }

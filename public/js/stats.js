@@ -444,7 +444,8 @@ function doDamageCalc(petRatio,weapon,armor,pet,profileData,stats,enemy={undead:
     "bane_of_arthropods": 0.08 * enemy.spider,
     "ender_slayer": 0.12 * enemy.ender,
     "giant_killer": enemy.gk * 0.25 / (weapon.enchantments ? weapon.enchantments["giant_killer"]: 1), //capped at 25% no matter the level
-    "first_strike": 0.25
+    "first_strike": 0.25,
+    "power":  0.08,
   }
   for (let enchant in weapon.enchantments) {
     if (enchantmentsBuffs[enchant]) {
@@ -836,6 +837,17 @@ document.querySelector("#item-hover").style.display = "none";
       getTotalStats();
     }
     document.querySelector("#stats-separate").appendChild(petsStats);
+    //cake stats
+    var cakeStats = makeStatsDisplay("Cakes",{fer:2,int:5,str:2})
+    document.querySelector("#stats-separate").appendChild(cakeStats);
+    document.querySelector("#cakes-active").addEventListener("click", () => {
+      if (document.querySelector("#cakes-active").checked) {
+        cakeStats.update({fer:2,int:5,str:2})
+      } else {
+        cakeStats.update({fer:0,int:0,str:0})
+      }
+      getTotalStats()
+    })
     //potion stats
     var potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
     document.querySelector("#stats-separate").appendChild(potsStats);
@@ -941,7 +953,7 @@ document.querySelector("#item-hover").style.display = "none";
         "fer": 0,
       }
       //add the stats from talismans, armor, selected weapon if it exists, potions, and pets
-      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
+      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats, cakeStats.stats]);
       for (let statMap of stats) {
         for (let stat in statMap) {
           statsBase[stat] += Number(statMap[stat]);
@@ -1041,11 +1053,11 @@ document.querySelector("#item-hover").style.display = "none";
   /* TALISMAN OPTIMIZER SECTION */
   let bestTalismanScore = 0;
   async function doTalismans() {
-    document.querySelector("#optimize-button").innerText = "Calculating..."
-    document.querySelector("#optimize-button").removeEventListener("click", doTalismans); // remove click msg
+    document.querySelector("#optimize-label").innerText = "Calculating..."
     let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
 
     function scoreFunc(stats,applyPet=true,applyArmor=true,useAs=true) { //score function for the talisman optimizer
+      if (weaponSelector.checked.tags.includes("BOW")) useAs = false; //disable attack speed with bows
       if (applyArmor && armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
         for (let stat in stats) {
           if (stat != "dmg") stats[stat] *= 1.05
@@ -1107,7 +1119,6 @@ document.querySelector("#item-hover").style.display = "none";
       "l": Array.from(REFORGES_NAMES.l, x => 0),
       "m": Array.from(REFORGES_NAMES.m, x => 0),
     }
-    console.log("stats0", Object.assign({},base))
     // populate base with info on current talismans
     for (let id in profileData.talis) {
       for (let stat in profileData.talis[id].baseStats) {
@@ -1121,26 +1132,24 @@ document.querySelector("#item-hover").style.display = "none";
         currentReforges[rarityToLetter[profileData.talis[id].rarity]][REFORGES_NAMES[rarityToLetter[profileData.talis[id].rarity]].length - 1] = 1;
       }
     }
-    console.log("stats1", Object.assign({},base))
     //add armor, weapon if it exists, pots, and pets stats to the base
-    let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats]);
+    let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats, cakeStats.stats]);
     for (let statMap of statsArr) {
       for (let stat in statMap) {
         base[stat] += Number(statMap[stat]);
       }
     }
-    console.log("stats2", Object.assign({},base))
     let winningSet = await doTalismanOptimization(base, scoreFunc); //in optimizer.js
     console.log(winningSet);
 
-    console.log(winningSet.score, bestTalismanScore)
+    console.log(winningSet.score, bestTalismanScore);
     if (winningSet.score < bestTalismanScore) {
-      document.querySelector("#optimize-button").addEventListener("click", doTalismans);
-      document.querySelector("#optimize-button").innerText = "Couldn't Find Better Reforges..."
-      setTimeout(() => document.querySelector("#optimize-button").innerText = "Optimize Again!", 2500)
+      if (document.querySelector("#optimize-switch input").checked == true) {
+        setTimeout(doTalismans, 0); //do it again, settimeout so js doesnt die
+      }
       return;
-    }
-    bestTalismanScore = winningSet.score
+    };
+    bestTalismanScore = winningSet.score;
 
     document.querySelector("#old .dps").innerText = "Old DPS: " + scoreFunc(totalStats.stats,false,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     document.querySelector("#new .dps").innerText ="New DPS: " + scoreFunc(winningSet.stats,false,false).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -1168,8 +1177,6 @@ document.querySelector("#item-hover").style.display = "none";
         reforgeChange[rarity][reforge] = (winningSet.reforges[rarity][reforge] ? winningSet.reforges[rarity][reforge] : 0) - currentReforges[rarity][reforge]
       }
     }
-    document.querySelector("#optimize-button").addEventListener("click", doTalismans);
-    document.querySelector("#optimize-button").innerText = "Optimize Again!"
     document.querySelector("#optimize-output").style.display = "flex";
 
     let outputString = "";
@@ -1180,9 +1187,20 @@ document.querySelector("#item-hover").style.display = "none";
     }
     outputString = outputString.slice(0,outputString.length - 1);
     document.querySelector("#changes").innerText = outputString
-    console.log(outputString)
+    console.log(outputString);
+
+    if (document.querySelector("#optimize-switch input").checked == true) {
+      setTimeout(doTalismans, 0); //do it again, settimeout so js doesnt die
+    }
   }
-  if (document.querySelector("#optimize-button")) document.querySelector("#optimize-button").addEventListener("click", doTalismans);
+  if (document.querySelector("#optimize-switch input")) document.querySelector("#optimize-switch input").addEventListener("click", () => {
+    if (document.querySelector("#optimize-switch input").checked) {
+      doTalismans();
+    } else {
+      bestTalismanScore = 0; //reset the score
+      document.querySelector("#optimize-label").innerText = "Talisman Optimizer (Experimental)"
+    }
+  });
 
   // profile stats pogu
   for (let statName in profileData.profileStats) {

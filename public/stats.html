@@ -78,6 +78,9 @@
             <div class="pot">
               Dungeon <input type="number" id="dungeon-pot-num" min=1 max=4 value=4> Pot <input type="checkbox" id="dungeon-pot">
             </div>
+            <div class="pot">
+              Cakes Active <input type="checkbox" id="cakes-active" checked>
+            </div>
           </div>
           <div id="combat-dmg">
             <div id="zealot-dmg">
@@ -98,7 +101,13 @@
           Weapon:
         </div>
         <div id="reforges">
-          <div id="optimize-button">Optimize Talismans! (Experimental)</div>
+          <div id="optimize-header">
+            <div id="optimize-label">Talisman Optimizer (Experimental)</div>
+            <label id="optimize-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+          </div>
           <div id="optimize-output">
             <div id="old">
               <div class="dps"></div>

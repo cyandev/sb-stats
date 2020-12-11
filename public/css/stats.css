@@ -543,8 +543,14 @@ body {
   border-radius: 0.5vw;
   margin-top: 1vw;
 }
-
-#optimize-button {
+#optimize-header {
+  width: 85%;
+  height: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+#optimize-label {
   width: 85%;
   height: auto;
   background: var(--dark-blue);
@@ -553,9 +559,52 @@ body {
   text-align: center;
   margin-top: 1vw;
   margin-bottom: 1vw;
-  cursor: pointer;
-  font-size: 2.2vw
+  font-size: 2.2vw;
 }
+#optimize-switch {
+  position: relative;
+  display: inline-block;
+  width: 8vw;
+  height: auto;
+  margin: 1vw 0;
+}
+#optimize-switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+#optimize-switch .slider {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--dark-gray);
+  transition: 0.4s;
+  border-radius: 0.5vw;
+}
+#optimize-switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 80%;
+  width: 3.5vw;
+  left: 0.5vw;
+  top: 10%;
+  background: var(--white);
+  transition: 0.4s;
+  border-radius: 0.5vw;
+}
+#optimize-switch input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+#optimize-switch input:checked + .slider {
+  background: var(--dark-blue);
+}
+#optimize-switch input:checked + .slider:before {
+  transform: translateX(3.5vw);
+}
+
 #optimize-output {
   width: 85%;
   position: relative;
