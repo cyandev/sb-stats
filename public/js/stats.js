@@ -383,6 +383,7 @@ function makeInventorySelector(contents,opt) {
   }
   return view;
 }
+
 function makeStatsDisplay(label,stats) {
   let statToIcon = {
     "as": "⚔",
@@ -404,7 +405,30 @@ function makeStatsDisplay(label,stats) {
   }
   let statsDisplay = document.createElement("div");
   statsDisplay.classList.add("stats-display");
-  statsDisplay.update = (stats) => {
+  statsDisplay.innerStats = stats;
+  statsDisplay.stats = statsDisplay.innerStats;
+  statsDisplay.dependers = [];
+  statsDisplay.dependencies = []; //all of the other statsDisplays that are summed in this one
+  statsDisplay.addDependency = (other) => {
+    statsDisplay.dependencies.push(other);
+    other.dependers.push(statsDisplay);
+    other.onupdate.push(statsDisplay.update);
+    statsDisplay.update();
+  }
+  statsDisplay.update = () => {statsDisplay.onupdate.forEach(f => f())}; //stats has changed, change it and call all onupdate funcs
+  statsDisplay.onupdate = [() => {
+    console.log("updated " + label)
+    let stats = {};
+    for (let other of statsDisplay.dependencies.concat({stats: statsDisplay.innerStats})) {
+      for (let stat in other.stats) {
+        if (!stats[stat]) {
+          stats[stat] = other.stats[stat];
+        } else {
+          stats[stat] += other.stats[stat];
+        }
+      }
+    }
+    console.log(stats)
     statsDisplay.stats = stats;
     statsDisplay.innerHTML = ""; //clear it out
     if (label) {
@@ -421,13 +445,18 @@ function makeStatsDisplay(label,stats) {
         icon.style.background = statToColor[stat];
         icon.innerText = statToIcon[stat] + " " + stat.toUpperCase();
         statsDisplay.appendChild(icon);
-        let number = document.createElement("div");
-        number.innerText = Math.round(stats[stat]);
+        let number = document.createElement("input");
+        number.type = "number"
+        number.value = Math.round(stats[stat]);
+        number.addEventListener("input", () => {
+          statsDisplay.stats[stat] = Number(number.value);
+          statsDisplay.dependers.forEach(d => d.update());
+        })
         statsDisplay.appendChild(number);
       }
     }
-  }
-  statsDisplay.update(stats);
+  }];
+  statsDisplay.update();
   return statsDisplay;
 }
 function doDamageCalc(petRatio,weapon,armor,pet,profileData,stats,enemy={undead:false,ender:false,spider:false,gk:false}) {
@@ -646,7 +675,6 @@ document.querySelector("#item-hover").style.display = "none";
 
       //remake armor stats
       makeArmorStats();
-      getTotalStats();
     }
     console.log(wardrobeSelector.children);
     wardrobeSelector.style.gridAutoRows = "6vw";
@@ -794,8 +822,9 @@ document.querySelector("#item-hover").style.display = "none";
           stats[stat] = stats[stat] * (1+ (weaponSelector.checked.stars ? weaponSelector.checked.stars * 0.1 : 0) + catacombsReward[profileData.skills.find(x => x.name == "catacombs").levelPure] * 0.01 )
         }
       }
-      weaponStats.update(stats);
-      getTotalStats()
+      weaponStats.innerStats = stats;
+      console.log(weaponStats.innerStats)
+      weaponStats.update();
     }
     document.querySelector("#weapon-select").appendChild(weaponSelector);
     //add static stats, the ones that dont change based on dungeon/non-dungeon
@@ -805,9 +834,12 @@ document.querySelector("#item-hover").style.display = "none";
       "skills": "Skills",
       "slayer": "Slayer"
     }
+    let staticStatDisplays = [];
     for (let stat in profileData.staticStats) {
-      document.querySelector("#stats-separate").appendChild(makeStatsDisplay(staticStatToName[stat], profileData.staticStats[stat]))
+      staticStatDisplays.push(makeStatsDisplay(staticStatToName[stat], profileData.staticStats[stat]))
     }
+    staticStatDisplays.forEach(d => document.querySelector("#stats-separate").appendChild(d));
+
     //add talisman stats
     let talisArr = Object.keys(profileData.talis).map(x => profileData.talis[x]);
     let talisStats = {
@@ -828,13 +860,14 @@ document.querySelector("#item-hover").style.display = "none";
         delete talisStats[stat];
       }
     }
-    document.querySelector("#stats-separate").appendChild(makeStatsDisplay("Accessories", talisStats));
+    let talismanStats = makeStatsDisplay("Accessories", talisStats)
+    document.querySelector("#stats-separate").appendChild(talismanStats);
     //pet stats
     let activePet = profileData.pets.find(x => x.active);
     var petsStats = makeStatsDisplay("Pet", activePet ? activePet.stats: {});
     petSelector.onUpdate = () => {
-      petsStats.update(petSelector.checked.stats);
-      getTotalStats();
+      petsStats.innerStats = petSelector.checked.stats;
+      petsStats.update();
     }
     document.querySelector("#stats-separate").appendChild(petsStats);
     //cake stats
@@ -842,11 +875,11 @@ document.querySelector("#item-hover").style.display = "none";
     document.querySelector("#stats-separate").appendChild(cakeStats);
     document.querySelector("#cakes-active").addEventListener("click", () => {
       if (document.querySelector("#cakes-active").checked) {
-        cakeStats.update({fer:2,int:5,str:2})
+        cakeStats.innerStats = {fer:2,int:5,str:2}
       } else {
-        cakeStats.update({fer:0,int:0,str:0})
+        cakeStats.innerStats = {fer:0,int:0,str:0}
       }
-      getTotalStats()
+      cakeStats.update();
     })
     //potion stats
     var potsStats = makeStatsDisplay("Potions",{str:0,cc:0,cd:0});
@@ -891,14 +924,13 @@ document.querySelector("#item-hover").style.display = "none";
         stats.cc += 25; //crit
         stats.cd += 80 //crit + spirit
       }
-      potsStats.update(stats)
-      getTotalStats()
+      potsStats.innerStats = stats;
+      potsStats.update();
     }
     //add armor stats
-    var armorStats = {};
-    let armorStatsDisplay = makeStatsDisplay("Armor", armorStats);
-    function makeArmorStats() {
-      armorStats = {
+    var armorStatsDisplay = makeStatsDisplay("Armor", {});
+    function makeArmorStats() { //get rid of this crap
+      let armorStats = {
         "str": 0,
         "cc": 0,
         "cd": 0,
@@ -920,7 +952,8 @@ document.querySelector("#item-hover").style.display = "none";
           delete armorStats[stat];
         }
       }
-      armorStatsDisplay.update(armorStats);
+      armorStatsDisplay.innerStats = armorStats;
+      armorStatsDisplay.update();
     }
     makeArmorStats();
 
@@ -934,67 +967,91 @@ document.querySelector("#item-hover").style.display = "none";
       setTimeout(() => {
         makeArmorStats();
         weaponSelector.onUpdate();
-        getTotalStats();
       },1)
     })
 
-    //everything together
+    //total stats
     var totalStats = makeStatsDisplay("Total");
-    document.querySelector("#stats-combined").appendChild(totalStats);
-    function getTotalStats() { //redo this
+    totalStats.addDependency(armorStatsDisplay);
+    totalStats.addDependency(weaponStats);
+    totalStats.addDependency(talismanStats);
+    totalStats.addDependency(cakeStats);
+    totalStats.addDependency(potsStats);
+    totalStats.addDependency(petsStats);
+    staticStatDisplays.forEach(d => totalStats.addDependency(d));
+    totalStats.onupdate.unshift(() => {
+      totalStats.innerStats = {};
+      let stats = {};
+      for (let other of totalStats.dependencies) {
+        for (let stat in other.stats) {
+          if (!stats[stat]) {
+            stats[stat] = other.stats[stat];
+          } else {
+            stats[stat] += other.stats[stat];
+          }
+        }
+      }
+
+      // find stats for only totalstats, the ones affected by full set bonus, pet ability, etc.
       let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
-      let statsBase = {
-        "dmg": 0,
-        "str": 0,
-        "cc": 0,
-        "cd": 0,
-        "as": 0,
-        "int": 0,
-        "fer": 0,
-      }
-      //add the stats from talismans, armor, selected weapon if it exists, potions, and pets
-      let stats = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([talisStats, armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats, cakeStats.stats]);
-      for (let statMap of stats) {
-        for (let stat in statMap) {
-          statsBase[stat] += Number(statMap[stat]);
-        }
-      }
-      //delete all stats with a value of "0"
-      for( let stat in statsBase) {
-        if (statsBase[stat] == 0) {
-          delete statsBase[stat];
-        }
-      }
 
-      //check if every armor is sup, if so add full set bonus
+      //sup and renowned
       if (armor.every((piece) => piece.id && piece.id.includes("SUPERIOR"))) {
-        for (let stat in statsBase) {
-          if (stat != "dmg") statsBase[stat] *= 1.05
+        for (let stat in stats) {
+          if (stat != "dmg") {
+            if (!totalStats.innerStats[stat]) {
+              totalStats.innerStats[stat] = stats * 0.05;
+            } else {
+              totalStats.innerStats[stat] += stats * 0.05;
+            }
+          }
         }
       }
-
-      //check each armor piece, if its renowned apply the bonus
       armor.forEach((piece) => {
         if (piece.reforge == "renowned") {
-          for (let stat in statsBase) {
-            if (stat != "dmg") statsBase[stat] *= 1.01
+          for (let stat in stats) {
+            if (stat != "dmg") {
+              if (!totalStats.innerStats[stat]) {
+                totalStats.innerStats[stat] = stats[stat] * 0.01;
+              } else {
+                totalStats.innerStats[stat] += stats[stat] * 0.01;
+              }
+            }
           }
         }
       });
 
-      statsBase.ratio = 1;
-      if (petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,statsBase); // apply pet stats, need to extract pet dmg ratio out of stats now
-      petRatio = statsBase.ratio;
-      delete statsBase.ratio;
-      
-      totalStats.update(statsBase);
+      //pet ability stats + ratio
+      let sumStats = {...stats}; //sum stats = stats + full set + pet ability bonus (eventually) - stats (even more eventually)
+      for (let stat in totalStats.innerStats) {
+        sumStats[stat] += totalStats.innerStats[stat];
+      }
+      console.log(totalStats.innerStats,sumStats);
+
+      sumStats.ratio = 1;
+      if (petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,sumStats); // + pet ability bonus
+      petRatio = sumStats.ratio; //get flat damage multiplier from pet
+      delete sumStats.ratio;
+
+      console.log(sumStats);
+      for (let stat in stats) {
+        sumStats[stat] -= stats[stat]; // - stats
+      }
+      console.log(sumStats);
+      totalStats.innerStats = sumStats;
+    })
+    let updateDmg = () => {
+      let armor = profileData.inventories.find((x) => x.name == "inv_armor").contents;
       if (weaponSelector.checked) {
-        document.querySelector("#zealot-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{ender:true,gk:true}).map(x => cleanFormatNumber(x)).join("-");
-        document.querySelector("#crypt-ghoul-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{undead:true}).map(x => cleanFormatNumber(x)).join("-");
-        document.querySelector("#spider-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, statsBase,{spider:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#zealot-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, totalStats.stats,{ender:true,gk:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#crypt-ghoul-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, totalStats.stats,{undead:true}).map(x => cleanFormatNumber(x)).join("-");
+        document.querySelector("#spider-dmg-number").innerText = doDamageCalc(petRatio, weaponSelector.checked, armor, petSelector.checked, profileData, totalStats.stats,{spider:true}).map(x => cleanFormatNumber(x)).join("-");
       }
     }
-    getTotalStats();
+    totalStats.onupdate.push(updateDmg)
+    totalStats.dependers.push({update: updateDmg})
+    document.querySelector("#stats-combined").appendChild(totalStats);
+    totalStats.update();
   } else {
     document.querySelector("#combat").innerHTML = `
     <div class="section-label">Combat</div>
@@ -1048,7 +1105,6 @@ document.querySelector("#item-hover").style.display = "none";
   console.log(nextSlotPrice)
 
   document.querySelector("#minion-extra").innerText = `Unique Minions ${profileData.minions.uniques} / ${minionTable.length * 11}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? cleanFormatNumber(nextSlotPrice) : "???"}`;
-  console.log(profileData.minions)
 
   /* TALISMAN OPTIMIZER SECTION */
   let bestTalismanScore = 0;
@@ -1133,18 +1189,17 @@ document.querySelector("#item-hover").style.display = "none";
       }
     }
     //add armor, weapon if it exists, pots, and pets stats to the base
-    let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats, cakeStats.stats]);
+    let statsArr = Object.keys(profileData.staticStats).map(x => profileData.staticStats[x]).concat([armorStatsDisplay.stats, weaponSelector.checked ? weaponStats.stats: {}, potsStats.stats, petsStats.stats, cakeStats.stats]);
     for (let statMap of statsArr) {
       for (let stat in statMap) {
         base[stat] += Number(statMap[stat]);
       }
     }
     let winningSet = await doTalismanOptimization(base, scoreFunc); //in optimizer.js
-    console.log(winningSet);
-
+     if (!document.querySelector("#optimize-switch input").checked) return
     console.log(winningSet.score, bestTalismanScore);
     if (winningSet.score < bestTalismanScore) {
-      if (document.querySelector("#optimize-switch input").checked == true) {
+      if (document.querySelector("#optimize-switch input").checked) {
         setTimeout(doTalismans, 0); //do it again, settimeout so js doesnt die
       }
       return;
@@ -1187,7 +1242,6 @@ document.querySelector("#item-hover").style.display = "none";
     }
     outputString = outputString.slice(0,outputString.length - 1);
     document.querySelector("#changes").innerText = outputString
-    console.log(outputString);
 
     if (document.querySelector("#optimize-switch input").checked == true) {
       setTimeout(doTalismans, 0); //do it again, settimeout so js doesnt die
@@ -1216,7 +1270,6 @@ document.querySelector("#item-hover").style.display = "none";
       statDiv.innerHTML = `<div class="label">${stat[0]}</div> <div class="value">${typeof stat[1] == "number" ? cleanFormatNumber(stat[1]) : stat[1]}</div>`;
       statContainer.appendChild(statDiv);
     }
-    console.log(statContainer);
     document.querySelector("#sb-stats").appendChild(statContainer);
   }
 

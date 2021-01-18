@@ -30,10 +30,17 @@ client.connect().then((connection) => {
   guildsCollection = connection.db("SBStatsDB").collection("Guilds");
   connection.db("SBStatsDB").collection("PlayersV2").stats().then(d => a = d);
 });
+
 var bazaarData;
 (async () => {
   bazaarData = await getBazaarData();
-  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 600);
+  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 60 * 60);
+})();
+
+var auctionData;
+(async () => {
+  auctionData = await getAuctionData();
+  setInterval(async () => auctionData = await getAuctionData(), 1000 * 60 * 60);
 })();
 
 async function getPlayerData(name,priority=0,uuid) {
@@ -493,7 +500,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   Object.keys(profileData.skills).forEach((skillName) => {
     let xpRemaining = profileData.skills[skillName];
     let level = 0;
-    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : ["farming", "enchanting"].includes(skillName) ? constants.xp_table_60 : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
+    let table = skillName == "runecrafting" ? constants.xp_table_runecrafting : ["farming", "enchanting","mining"].includes(skillName) ? constants.xp_table_60 : ["catacombs","mage","healer","archer","berserk","tank"].includes(skillName) ? constants.xp_table_catacombs: constants.xp_table;
     for (let i = 0; i < table.length && xpRemaining >= table[i]; i++) {
       xpRemaining -= table[i];
       level = i;
@@ -877,10 +884,33 @@ async function calculateGuilds() {
   ]).toArray()
 }
 
-async function getBazaarData() { //bazaar data
+async function getBazaarData() {
   console.log("updating bazaar products...")
   return (await reqScheduler.get(`https://api.hypixel.net/skyblock/bazaar?key=${process.env.API_KEY}`)).data.products
 }
+
+async function getAuctionData() {
+  let items = [];
+  console.log("loading BIN auctions...");
+  let firstReq = (await reqScheduler.get(`https://api.hypixel.net/skyblock/auctions?key=${process.env.API_KEY}`,1)).data;
+  let totalPages = firstReq.totalPages;
+  for (let i = 0; i <= totalPages; i++) { //the real number of pages is totalPages+1, totalPages is just the highest index
+    let page = (await reqScheduler.get(`https://api.hypixel.net/skyblock/auctions?key=${process.env.API_KEY}&page=${i}`,1)).data.auctions;
+    page = page.filter(x => x.bin); //only care about BIN auctions
+    items = items.concat(page);
+    console.log(`fetched BIN auctions ${i+1} / ${totalPages + 1}`);
+  }
+  let priceMap = {};
+  for (let item of items) {
+    if (priceMap[item.item_name]) {
+      if (priceMap[item.item_name] > item.starting_bid) priceMap[item.item_name] = item.starting_bid
+    } else {
+      priceMap[item.item_name] = item.starting_bid
+    }
+  }
+  return priceMap;
+}
+
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => { 
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
@@ -929,6 +959,9 @@ app.get("/api/dbinfo", async (req,res) => {
 
 app.get("/api/bazaar", (req,res) => {
   res.json(bazaarData);
+})
+app.get("/api/auction", (req,res) => {
+  res.json(auctionData);
 })
 
 /* Images API */

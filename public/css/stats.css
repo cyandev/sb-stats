@@ -353,6 +353,7 @@ body {
   max-height: 17.5vw;
   overflow-y: auto;
   padding-right: 1vw;
+  padding-bottom: 1vw;
 }
 #weapon-select .inv-view::-webkit-scrollbar {
   width: 1vw;
@@ -692,9 +693,6 @@ body {
 }
 
 
-
-
-
 .stats-display {
   display: grid;
   width: 10vw;
@@ -707,6 +705,17 @@ body {
   margin: 0.25vw 0;
   border-radius: 0.5vw;
   font-size: 1.35vw
+}
+.stats-display > input {
+  height: 2vw;
+  margin: 0.25vw 0;
+  border-radius: 0.5vw;
+  font-size: 1.35vw;
+  background: none;
+  text-align: center;
+  border: none;
+  font: inherit;
+  color: inherit;
 }
 .stats-display .label {
   grid-column: 1 / -1;

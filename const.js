@@ -923,7 +923,6 @@ module.exports = {
     "RING_POTION_AFFINITY": "POTION_AFFINITY",
     "ARTIFACT_POTION_AFFINITY": "POTION_AFFINITY",
     "HEALING_TALISMAN": "HEALING",
-    "HEALING_TALISMAN": "HEALING",
     "HEALING_RING": "HEALING",
     "SEA_CREATURE_TALISMAN": "SEA_CREATURE",
     "SEA_CREATURE_RING": "SEA_CREATURE",
@@ -985,5 +984,296 @@ module.exports = {
     "BAT_PERSON_ARTIFACT": "BAT_PERSON",
     "WITHER_ARTIFACT": "WITHER",
     "WITHER_RELIC": "WITHER"
+  },
+  talismans: {
+    "FARMING_TALISMAN": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["WHEAT",45],
+          ["SEEDS",4]
+        ]
+      }
+    },
+    "VACCIENE_TALISMAN": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["WHEAT",45],
+          ["SEEDS",4]
+        ]
+      }
+    },
+    "FARMER_ORB": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_PUMPKIN",8],
+          ["ENCHANTED_GLOWSTONE",1]
+        ]
+      }
+    },
+    "NIGHT_VISION_CHARM": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_BROWN_MUSHROOM",4],
+          ["ENCHANTED_RED_MUSHROOM",4]
+        ]
+      }
+    },
+    "SPEED": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["SUGAR_CANE",108]
+        ]
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_SUGAR",96]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_SUGAR_CANE",48]
+        ]
+      }
+    },
+    "FEATHER": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["FEATHER",108]
+        ]
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_FEATHER",7]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_FEATHER",64]
+        ]
+      }
+    },
+    "PIGGY": {
+      UNCOMMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_PORK",40],
+          ["LOG_2:1",2] //chest = 2 log
+        ]
+      }
+    },
+    "POTION_AFFINITY": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["NETHER_STALK",144]
+        ]
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_NETHER_STALK",8]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_NETHER_STALK",256]
+        ]
+      }
+    },
+    "HASTE_RING": {
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_COBBLESTONE",256]
+        ]
+      }
+    },
+    "EXPERIENCE_ARTIFACT": {
+      EPIC: {
+        bazaar_ingredients: [
+          ["ENCHANTED_LAPIS_LAZULI_BLOCK", 9]
+        ]
+      }
+    },
+    "COIN_TALISMAN": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["EMERALD",20],
+          ["GOLD_INGOT",5]
+        ]
+      }
+    },
+    "MAGNETIC_TALISMAN": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["EMERALD",128],
+          ["REDSTONE",32]
+        ]
+      }
+    },
+    "EMERALD_RING": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_EMERALD",32]
+        ]
+      },
+    },
+    "NIGHT_CRYSTAL": {
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_QUARTZ",4],
+          ["ENCHANTED_QUARTZ_BLOCK",1]
+        ]
+      },
+    },
+    "DAY_CRYSTAL": {
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_QUARTZ",4],
+          ["ENCHANTED_QUARTZ_BLOCK",1]
+        ]
+      },
+    },
+    "GRAVITY_TALISMAN": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["OBSIDIAN",144]
+        ]
+      },
+    },
+    "FIRE_TALISMAN": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_BLAZE_POWDER",9]
+        ]
+      },
+    },
+    "LAVA_TALISMAN": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_MAGMA_CREAM",9]
+        ]
+      },
+    },
+    "WOOD_AFFINITY_TALISMAN": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_OAK_LOG",1]
+        ]
+      },
+    },
+    "HEALING": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["LILYPAD",144]
+        ]
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_LILYPAD",4]
+        ]
+      },
+    },
+    "BAIT_RING": {
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_INK_SAC",288]
+        ]
+      },
+    },
+    "SEA_CREATURE": {
+      COMMON: {
+        bazaar_ingredients: [
+          ["SPONGE",18]
+        ]
+      },
+      UNCOMON: {
+        bazaar_ingredients: [
+          ["SPONGE",6],
+          ["ENCHANTED_SPONGE",2]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_SPONGE",8]
+        ]
+      },
+    },
+    "PERSONAL_COMPACTOR": {
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["ENCHANTED_REDSTONE_BLOCK",7],
+          ["SUPER_COMPACTOR_3000",1]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["ENCHANTED_REDSTONE_BLOCK",14]
+        ]
+      },
+      EPIC: {
+        bazaar_ingredients: [
+          ["ENCHANTED_REDSTONE_BLOCK",28]
+        ]
+      },
+      LEGENDARY: {
+        bazaar_ingredients: [
+          ["ENCHANTED_REDSTONE_BLOCK",56]
+        ]
+      },
+    },
+    "ZOMBIE": {
+      COMMON: {
+        coins: 500
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["REVENANT_FLESH",64]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["REVENANT_VISCERA",48],
+          ["ENCHANTED_IRON",32],
+          ["ENCHANTED_DIAMOND",16]
+        ]
+      },
+    },
+    "SKELETON_TALISMAN": {
+      COMMON: {
+        coins: 500
+      }
+    },
+    "VILLAGE_AFFINITY_TALISMAN": {
+      COMMON: {
+        coins: 2500
+      }
+    },
+    "MINE_AFFINITY_TALISMAN": {
+      COMMON: {
+        coins: 2500
+      }
+    },
+    "INTIMIDATION": {
+      COMMON: {
+        coins: 500
+      },
+      UNCOMMON: {
+        bazaar_ingredients: [
+          ["GREEN_CANDY",100]
+        ]
+      },
+      RARE: {
+        bazaar_ingredients: [
+          ["PURPLE_CANDY",100]
+        ]
+      },
+    },
+    "SCAVENGER_TALSIMAN": {
+      COMMON: {
+        coins: 10000
+      }
+    },
+    "BITS_TALISMAN": {
+      RARE: {
+        auction_ingredients: ["Bits Talisman", 1]
+      }
+    }
   }
 }
