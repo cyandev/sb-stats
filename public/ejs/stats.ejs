@@ -1,5 +1,15 @@
 <html>
   <head>
+    <title>SB Stats</title>
+    <meta property="og:site_name" content="SBStats">
+
+    <meta property="og:type" content="profile">
+    <meta property="og:title" content="<%=player%><% if (typeof profile != 'undefined') {%> - <%=profile%><%}%>">
+    <meta property="og:description" content="<% if (typeof description != 'undefined') {%> <%=description%> <%} else {%> <%='This profile is not yet loaded. Try again soon.'%> <%}%>">
+    <% if (typeof image != 'undefined') {%>
+      <meta property="og:image" content="<%=image%>">
+    <%}%>
+    
     <link rel='search' type='application/opensearchdescription+xml' title='SB Stats' href='/opensearch.xml' />
     <link href="/css/stats.css" rel="stylesheet" type="text/css" />
     <link href="/css/inventory.css" rel="stylesheet" type="text/css" />
@@ -7,7 +17,6 @@
     <link id="favicon" rel="shortcut icon" type="image/png" href="/img/favicon.png" />
     <img src="/img/items.png" class="itemImg">
     <img src="/img/items.webp" class="itemImg">
-    <title>SB Stats</title>
   </head>
   <body>
     <!-- Header -->
