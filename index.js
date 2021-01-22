@@ -365,7 +365,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
     for (let tier = 1; tier <= 11; tier++) {
       if (!craftedGens[name][tier]) {
         let price;
-        if (!constants.minionCrafts[name][tier]) {
+        if (!constants.minionCrafts[name] || !constants.minionCrafts[name][tier]) {
           price = null;
         } else {
           price = (bazaarData[constants.minionCrafts[name][tier].item.replace("name", name)].quick_status.buyPrice * constants.minionCrafts[name][tier].quantity).toFixed(1);
