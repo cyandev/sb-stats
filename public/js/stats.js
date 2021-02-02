@@ -89,7 +89,7 @@ var petFuncs = { /* ONLY COMBAT RELEVANT PERKS ADDED SO FAR */
     }
   },
   SKELETON(pet,weapon,armor,stats,enemy) {
-    if (weapon.tags.includes("BOW")) {
+    if (weapon && weapon.tags.includes("BOW")) {
       switch (pet.rarity) {
         case "LEGENDARY":
           stats.ratio *= 1 + 0.002 * pet.level;
@@ -624,10 +624,13 @@ document.querySelector("#item-hover").style.display = "none";
 
   //load basic stats
   if (profileData.balance) {
-    document.querySelector("#stats-text").innerText += `Bank: ${cleanFormatNumber(profileData.balance)}, `
+    document.querySelector("#stats-text").innerText += `Bank: ${cleanFormatNumber(profileData.balance)}, `;
   }
-  document.querySelector("#stats-text").innerText += `Purse: ${cleanFormatNumber(profileData.purse)}, `
-  document.querySelector("#stats-text").innerText += `Fairy Souls: ${profileData.fairy_souls}, `
+  document.querySelector("#stats-text").innerText += `Purse: ${cleanFormatNumber(profileData.purse)}, `;
+  document.querySelector("#stats-text").innerText += `Fairy Souls: ${profileData.fairy_souls}, `;
+  document.querySelector("#stats-text").innerText += `Weight: ${profileData.weight.totalWeight.toFixed(3)} (${profileData.weight.skillWeight.toFixed(0)} Skill, ${profileData.weight.catacombsWeight.toFixed(0)} Cata, ${profileData.weight.slayerWeight.toFixed(0)} Slayer), `
+  document.querySelector("#stats-text").innerText += `Skill Average: ${profileData.averageSkillProgress}, `;
+  document.querySelector("#stats-text").innerText += `True Skill Average: ${profileData.averageSkillPure}`
 
   //load skills
   profileData.skills.forEach((skill) => {
@@ -646,11 +649,6 @@ document.querySelector("#item-hover").style.display = "none";
     }
     document.getElementById("skills").appendChild(element);
   })
-
-  //add avg skill lvl to basic stats
-  document.querySelector("#stats-text").innerText += `Skill Average: ${profileData.averageSkillProgress}, `;
-  document.querySelector("#stats-text").innerText += `True Skill Average: ${profileData.averageSkillPure}`
-
 
   //load armor
   document.querySelector("#armor-inv").appendChild(makeInventoryViewer(profileData.inventories.find((x) => x.name == "inv_armor").contents.reverse(), {cols: 1, hasHotbar: false, rarityColor: true}));

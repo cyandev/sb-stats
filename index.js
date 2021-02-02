@@ -50,6 +50,7 @@ var auctionData;
 
 async function getPlayerData(name,priority=0,uuid) {
   let start = Date.now()
+
   let playerData = {lastUpdated: start};
   if (name && !uuid) {
     try {
@@ -57,10 +58,11 @@ async function getPlayerData(name,priority=0,uuid) {
     } catch (err) {
       return false;
     }
-    if (!uuid) { //catch no uuid
+    if (!uuid) { //no uuid
       return false;
     }
   }
+
   try {
     var playerAPI = (await reqScheduler.get(`https://api.hypixel.net/player?key=${process.env.API_KEY}&uuid=${uuid}`, priority)).data.player; // /player api request
   } catch (err) {
@@ -80,6 +82,8 @@ async function getPlayerData(name,priority=0,uuid) {
   } catch (err) {
     //move on
   }
+
+  //get general hypixel info for player
   playerData.uuid = playerAPI.uuid;
   playerData.name = playerAPI.displayname;
   playerData.nameLower = playerData.name.toLowerCase();
@@ -108,8 +112,12 @@ async function getPlayerData(name,priority=0,uuid) {
       playerData.color = "var(--cyan)"
     } 
   }
-  //get achievement data
+
+  //get skyblock achievement data for player
   playerData.achievements = Object.keys(playerAPI.achievements).filter(x => x.includes("skyblock_")).reduce((t,x) => {t[x] = playerAPI.achievements[x]; return t },{});
+
+
+  //get sb profiles for player
   let profiles = playerAPI.stats.SkyBlock.profiles
   let profilesArr = Object.keys(profiles).reduce((o,x) => o.concat(profiles[x]), []); //make into array of {profile_id, cute_name} objects
 
@@ -123,28 +131,21 @@ async function getPlayerData(name,priority=0,uuid) {
       lastUpdated = playerData.profiles[profile.profile_id].last_save;
     }
   }
+
+  if (playerData.profiles[playerData.currentProfile]) playerData.weight = playerData.profiles[playerData.currentProfile].weight;
+
   console.log(`Got player data in ${(Date.now() - start) / 1000} seconds`);
+
+
+  //copy player data + compress profiles
   let compressedPlayerData = JSON.parse(JSON.stringify(playerData))
   for (let profileid in compressedPlayerData.profiles) {
     compressedPlayerData.profiles[profileid] = zlib.deflateSync(Buffer.from(JSON.stringify(compressedPlayerData.profiles[profileid]))).toString("base64")
   }
-  playersCollection.replaceOne({name: playerData.name},compressedPlayerData,{upsert: true}); //add it to / update database
+  playersCollection.replaceOne({name: playerData.name},compressedPlayerData,{upsert: true}); //add new compressed data to db
   return playerData;
 }
 
-/*
-Inventory Item:
-{
-  name,
-  lore,
-  id (opt),
-  icon (opt),
-  count, 
-  faces (opt),
-  rarity (opt, req'd soon)
-}
-inventory contents is arr of Inventory Items
-*/
 async function getInventoryJSON(contents,profileData) {
   let output = [];
   for (let j = 0; j < contents.length; j++) {
@@ -339,6 +340,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
     console.log("err getting /skyblock/profile endpoint")
   }
   let profileData = {};
+
   //get basic info
   profileData.id = profile.profile_id;
   profileData.cute_name = profile.cute_name
@@ -414,12 +416,12 @@ async function getProfileData(uuid, profile, playerData, priority) {
     profileData.slayerXp = 0;
     Object.keys(profileAPI.members[uuid].slayer_bosses).forEach((boss) => {
       profileData.slayer[boss] = {
-        xp: profileAPI.members[uuid].slayer_bosses[boss].xp ? profileAPI.members[uuid].slayer_bosses[boss].xp : 0,
+        xp: profileAPI.members[uuid].slayer_bosses[boss].xp || 0,
         boss_kills: {
-          tier1: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_0 ? profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_0 : 0,
-          tier2: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_1 ? profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_1 : 0,
-          tier3: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_2 ? profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_2 : 0,
-          tier4: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_3 ? profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_3 : 0,
+          tier1: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_0 || 0,
+          tier2: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_1 || 0,
+          tier3: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_2 || 0,
+          tier4: profileAPI.members[uuid].slayer_bosses[boss].boss_kills_tier_3 || 0,
         }
       }
       profileData.slayerXp += profileData.slayer[boss].xp
@@ -487,9 +489,13 @@ async function getProfileData(uuid, profile, playerData, priority) {
   })
 
   //get dungeons skills
-  if (util.checkNested(profileAPI.members[uuid],"dungeons","dungeon_types","catacombs","experience")) profileData.skills.catacombs = profileAPI.members[uuid].dungeons.dungeon_types.catacombs.experience;
-
-  if (util.checkNested(profileAPI.members[uuid],"dungeons","selected_dungeon_class") && util.checkNested(profileAPI.members[uuid],"dungeons","player_classes",profileAPI.members[uuid].dungeons.selected_dungeon_class,"experience")) profileData.skills[profileAPI.members[uuid].dungeons.selected_dungeon_class] = profileAPI.members[uuid].dungeons.player_classes[profileAPI.members[uuid].dungeons.selected_dungeon_class].experience;
+  
+  if (util.checkNested(profileAPI.members[uuid],"dungeons","dungeon_types","catacombs","experience")) {
+    profileData.skills.catacombs = profileAPI.members[uuid].dungeons.dungeon_types.catacombs.experience;
+  }
+  if (util.checkNested(profileAPI.members[uuid],"dungeons","selected_dungeon_class") && util.checkNested(profileAPI.members[uuid],"dungeons","player_classes",profileAPI.members[uuid].dungeons.selected_dungeon_class,"experience")) {
+    profileData.skills[profileAPI.members[uuid].dungeons.selected_dungeon_class] = profileAPI.members[uuid].dungeons.player_classes[profileAPI.members[uuid].dungeons.selected_dungeon_class].experience;
+  }
 
   //if skills dont exist get with achievement milestones
   if (!profileData.skills.combat) {
@@ -548,6 +554,16 @@ async function getProfileData(uuid, profile, playerData, priority) {
 
   profileData.averageSkillProgress = (filteredSkills.reduce((t,x) => t+x.levelProgress,0) / filteredSkills.length).toFixed(2);
   profileData.averageSkillPure = (filteredSkills.reduce((t,x) => t+x.levelPure,0) / filteredSkills.length).toFixed(2);
+
+
+  //get weight
+  try {
+    profileData.weight = util.getWeight(profileData);
+  } catch (e) {
+    console.log(profileData.slayer)
+    console.log(e)
+  }
+  
 
   //get pets
   profileData.pets = profileAPI.members[uuid].pets;
@@ -818,15 +834,16 @@ async function getGuildData(guildname) {
   guildData._id = guildApi.guild._id;
   guildData.name = guildApi.guild.name;
   guildData.players = guildApi.guild.members.length;
-  guildData.tag = {};
-  guildData.tag.text = guildApi.guild.tag;
-  guildData.tag.color = guildApi.guild.tagColor;
-  let playerDataArr = await playersCollection.find({uuid: {$in: guildApi.guild.members.map(x => x.uuid)}}).toArray();
-  let foundPlayerUuids = playerDataArr.map(x => x.uuid);
-  let missedPlayersArr = guildApi.guild.members.map(x => x.uuid).filter(x => !foundPlayerUuids.includes(x));
-  
-  missedPlayersArr.forEach((uuid) => {
-    guildData.incomplete = true;
+  guildData.tag = {
+    text: guildApi.guild.tag,
+    color: guildApi.guild.tagColor
+  };
+  let playersData = await playersCollection.find({uuid: {$in: guildApi.guild.members.map(x => x.uuid)}}).toArray(); //find all the players currently in DB
+  let foundUuids = playersData.map(x => x.uuid);
+  let missingUuids = guildApi.guild.members.map(x => x.uuid).filter(x => !foundUuids.includes(x));
+  if (missingUuids.length > 0) guildData.incomplete = true;
+
+  missingUuids.forEach((uuid) => {
     if (!loadingUuids.includes(uuid)) {
       getPlayerData(null, 1, uuid).then(() => {
         loadingUuids.splice(loadingUuids.indexOf(uuid),1);
@@ -834,21 +851,24 @@ async function getGuildData(guildname) {
       loadingUuids.push(uuid);
     }
   });
-  guildData.members = playerDataArr.map((x,i) => {
+  guildData.members = playersData.map((x,i) => {
     try {
     let profile =JSON.parse(zlib.inflateSync(Buffer.from(x.profiles[x.currentProfile],"base64")).toString());
     return {
       name: x.name,
       slayer: profile ? profile.slayerXp : 0,
+      catacombs: profile ? (profile.skills.find(x => x.name == "catacombs").levelProgress || 0) : 0,
       averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
-      skillXp: profile ? profile.skills.reduce((t,x) => t+x.xp, 0) : 0
+      weight: profile ? profile.weight.totalWeight : 0,
     }
     } catch (e) {console.log(e,x)};
   })
+  guildData.members.sort((a,b) => b.weight - a.weight);
 
   guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
   guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));
-  guildData.averageSkillXp = Number((guildData.members.reduce((t,x) => t+x.skillXp, 0) / guildData.members.length).toFixed(2));
+  guildData.averageWeight = Number((guildData.members.reduce((t,x) => t+x.weight, 0) / guildData.members.length).toFixed(2));
+  guildData.averageCatacombs = Number((guildData.members.reduce((t,x) => t+x.catacombs, 0) / guildData.members.length).toFixed(2));
 
   await guildsCollection.replaceOne({_id: guildData._id}, guildData, {upsert: true})
   
@@ -949,8 +969,11 @@ async function makeEjsData(isImportant,player,profile) {
   
   
   let description = "";
+  //add weight to description
+  description += `Weight: ${profileData.weight.totalWeight.toFixed(0)} (${profileData.weight.skillWeight.toFixed(0)} Skill, ${profileData.weight.slayerWeight.toFixed(0)} Slayer, ${profileData.weight.catacombsWeight.toFixed(0)} Cata)\n\n`
+
   //add skills to description
-  description += `Skills (True Avg ${profileData.averageSkillPure}, w/ Progress ${profileData.averageSkillProgress}):\n`
+  description += `Skills (${profileData.averageSkillPure} True, ${profileData.averageSkillProgress} w/ Progress):\n`
   let skillEmojiTitles = {
     "taming": "🐾 Taming",
     "farming": "🌾 Farming",
@@ -970,15 +993,15 @@ async function makeEjsData(isImportant,player,profile) {
     "berserk": "🩸 Berserker"
   }
   for (let i = 0; i<profileData.skills.length; i+=2) {
-    description += (skillEmojiTitles[profileData.skills[i].name] ? skillEmojiTitles[profileData.skills[i].name] : profileData.skills[i+1].name) + ": " + profileData.skills[i].levelProgress.toFixed(2);
+    description += (skillEmojiTitles[profileData.skills[i].name] ? skillEmojiTitles[profileData.skills[i].name] : profileData.skills[i+1].name) + " " + profileData.skills[i].levelProgress.toFixed(2);
     if (profileData.skills[i+1]) {
-      description += " — "
+      description += " "
       description += (skillEmojiTitles[profileData.skills[i+1].name] ? skillEmojiTitles[profileData.skills[i+1].name] : profileData.skills[i+1].name) + ": " + profileData.skills[i+1].levelProgress.toFixed(2) + "\n";
     }
   }
 
   //add slayer to description
-  description += `\n🗡️ Slayer [${profileData.slayer.zombie.level}-${profileData.slayer.spider.level}-${profileData.slayer.wolf.level}] (${util.cleanFormatNumber(profileData.slayerXp)} xp)\n`;
+  description += `\n🗡️ Slayer [${profileData.slayer.zombie.level}-${profileData.slayer.spider.level}-${profileData.slayer.wolf.level}] (${util.cleanFormatNumber(profileData.slayerXp)} XP)\n`;
 
   //add coins to description
   description += `💰 Coins: ${util.cleanFormatNumber(profileData.balance + profileData.purse)}\n`;

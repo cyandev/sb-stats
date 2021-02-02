@@ -100,3 +100,24 @@ function checkNested(obj, level,  ...rest) {
   return checkNested(obj[level], ...rest)
 }
 exports.checkNested = checkNested;
+
+function getWeight(profileData) {
+  let skillWeight = Math.pow(profileData.averageSkillProgress * 10, 0.5 + profileData.averageSkillProgress / 100);
+
+  let catacombsWeight = Math.pow((profileData.skills.find(x => x.name == "catacombs") || {levelProgress:0}).levelProgress, 2) / 8.3333333333333333;
+
+  let slayerXp = Object.keys(profileData.slayer).map(x=>profileData.slayer[x].xp).reduce((t,x) => t+x,0);
+  let slayerOverflow = 3000000 - slayerXp
+  let slayerWeight = slayerOverflow > 0 ? slayerXp / 12000 : (slayerXp + slayerOverflow) / 12000
+  if (slayerOverflow < 0) {
+    slayerWeight += Math.pow((slayerOverflow * -1) / 18000, 0.9)
+  }
+  return {
+    skillWeight,
+    catacombsWeight,
+    slayerWeight,
+    totalWeight: skillWeight + catacombsWeight + slayerWeight
+  }
+}
+
+exports.getWeight = getWeight;
