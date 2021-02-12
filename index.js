@@ -26,17 +26,18 @@ const constants = require("./const.js");
 let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //make a 500ms delay between requests to always be at the 120 reqs/min rate limit
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = `mongodb+srv://admin:${process.env.MONGO_PASSWORD}@cluster0.bjpjk.mongodb.net/SBStatsDB?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://admin:${process.env.MONGO_PASSWORD}@cluster0.bjpjk.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true});
 var playersCollection;
 var guildsCollection;
 client.connect().then((connection) => {
-  playersCollection = connection.db("SBStatsDB").collection("Players");
-  guildsCollection = connection.db("SBStatsDB").collection("Guilds");
+  playersCollection = connection.db(process.env.DB_NAME).collection("Players");
+  guildsCollection = connection.db(process.env.DB_NAME).collection("Guilds");
   
   prunePlayers();
   pruneGuilds();
   refreshOldestPlayer();
+  require("./discordBot.js")(getPlayerData);
 });
 
 var bazaarData;
@@ -52,9 +53,18 @@ var auctionData;
 })();
 
 async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
-  let start = Date.now()
+  //check if there is recent data in the DB, if there is return it
+  let playerData = await playersCollection.findOne({nameLower: name.toLowerCase()});
+  if (playerData && Date.now() - playerData.lastUpdated > 1000 * 60 * 120) {
+    for (let profileid in playerData.profiles) {
+        playerData.profiles[profileid] = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[profileid],"base64")).toString());
+    }
+    return playerData;
+  }
+  
+  let start = Date.now();
 
-  let playerData = {lastUpdated: start};
+  playerData = {lastUpdated: start};
 
   /*
   Keep track of user-requested (or internal guild tracking requested) players so we can delete those who never get reqests from db
@@ -906,7 +916,7 @@ async function getGuildData(guildname,userRequested,priority=0) {
     return {
       name: x.name,
       slayer: profile ? profile.slayerXp : 0,
-      catacombs: profile ? (profile.skills.find(x => x.name == "catacombs").levelProgress || 0) : 0,
+      catacombs: profile ? (profile.skills.find(x => x.name == "catacombs") ? profile.skills.find(x => x.name == "catacombs").levelProgress: 0) : 0,
       averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
       weight: profile ? profile.weight.total.all : 0,
     }
@@ -963,7 +973,7 @@ async function makeEjsData(isImportant,player,profile) {
   let playerData = await playersCollection.findOne({nameLower: player.toLowerCase()});
   let profileData;
 
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 60 * 60 * 24) {
+  if (!playerData || playerData.lastUpdated < Date.now() - 1000 * 60 * 15) {
     if (isImportant) { //if its coming from a user agent that displays description
       playerData = await getPlayerData(player, true);
       if (profile) {
@@ -1009,7 +1019,7 @@ async function makeEjsData(isImportant,player,profile) {
     "archer": "🏹 Archer",
     "healer": "❤️ Healer",
     "tank": "🛡️ Tank",
-    "berserk": "🩸 Berserker"
+    "berserk": "🩸 Berserker",
   }
   for (let i = 0; i<profileData.skills.length; i+=2) {
     description += (skillEmojiTitles[profileData.skills[i].name] ? skillEmojiTitles[profileData.skills[i].name] : profileData.skills[i+1].name) + " " + profileData.skills[i].levelProgress.toFixed(2);
@@ -1025,7 +1035,7 @@ async function makeEjsData(isImportant,player,profile) {
   //add coins to description
   description += `💰 Coins: ${util.cleanFormatNumber(profileData.balance + profileData.purse)}\n`;
 
-  return {player: player, profile:profileData.cute_name, description:description, image:`https://crafatar.com/renders/head/${mojangData.id}`};
+  return {player: player, profile:profileData.cute_name, description:description, image:`https://crafatar.com/renders/head/${mojangData.id}?overlay`};
   } catch (e) {
     console.log(e);
     return {player: "", description: "Error Fetching Data"}
@@ -1035,7 +1045,7 @@ async function makeEjsData(isImportant,player,profile) {
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => { 
   let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 10) { //re-get more than 120 second old profiles
+  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 60 * 120) { //re-get more than 120 second old profiles
     console.log("updating data in db")
     playerData = await getPlayerData(req.params.player, true);
   } else {
