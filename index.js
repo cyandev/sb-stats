@@ -489,9 +489,9 @@ async function getProfileData(uuid, profile, playerData, priority) {
   })
 
   //get dungeons skills
-  
   if (util.checkNested(profileAPI.members[uuid],"dungeons","dungeon_types","catacombs","experience")) {
     profileData.skills.catacombs = profileAPI.members[uuid].dungeons.dungeon_types.catacombs.experience;
+    profileData.dungeons = profileAPI.members[uuid].dungeons;
   }
   if (util.checkNested(profileAPI.members[uuid],"dungeons","selected_dungeon_class") && util.checkNested(profileAPI.members[uuid],"dungeons","player_classes",profileAPI.members[uuid].dungeons.selected_dungeon_class,"experience")) {
     profileData.skills[profileAPI.members[uuid].dungeons.selected_dungeon_class] = profileAPI.members[uuid].dungeons.player_classes[profileAPI.members[uuid].dungeons.selected_dungeon_class].experience;
@@ -838,7 +838,14 @@ async function getGuildData(guildname) {
     text: guildApi.guild.tag,
     color: guildApi.guild.tagColor
   };
-  let playersData = await playersCollection.find({uuid: {$in: guildApi.guild.members.map(x => x.uuid)}}).toArray(); //find all the players currently in DB
+  let playersData = await playersCollection.find({
+    uuid: {
+      $in: guildApi.guild.members.map(x => x.uuid)
+    },
+    lastUpdated: {
+      $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
+    }
+    }).toArray(); //find all the players currently in DB
   let foundUuids = playersData.map(x => x.uuid);
   let missingUuids = guildApi.guild.members.map(x => x.uuid).filter(x => !foundUuids.includes(x));
   if (missingUuids.length > 0) guildData.incomplete = true;
@@ -853,15 +860,15 @@ async function getGuildData(guildname) {
   });
   guildData.members = playersData.map((x,i) => {
     try {
-    let profile =JSON.parse(zlib.inflateSync(Buffer.from(x.profiles[x.currentProfile],"base64")).toString());
+    var profile =JSON.parse(zlib.inflateSync(Buffer.from(x.profiles[x.currentProfile],"base64")).toString());
     return {
       name: x.name,
       slayer: profile ? profile.slayerXp : 0,
       catacombs: profile ? (profile.skills.find(x => x.name == "catacombs").levelProgress || 0) : 0,
       averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
-      weight: profile ? profile.weight.totalWeight : 0,
+      weight: profile ? profile.weight.total.all : 0,
     }
-    } catch (e) {console.log(e,x)};
+    } catch (e) {console.log(e)};
   })
   guildData.members.sort((a,b) => b.weight - a.weight);
 
@@ -970,7 +977,7 @@ async function makeEjsData(isImportant,player,profile) {
   
   let description = "";
   //add weight to description
-  description += `Weight: ${profileData.weight.totalWeight.toFixed(0)} (${profileData.weight.skillWeight.toFixed(0)} Skill, ${profileData.weight.slayerWeight.toFixed(0)} Slayer, ${profileData.weight.catacombsWeight.toFixed(0)} Cata)\n\n`
+  description += `Weight: ${profileData.weight.total.all.toFixed(0)} (${profileData.weight.skills.all.toFixed(0)} Skill, ${profileData.weight.slayer.all.toFixed(0)} Slayer, ${profileData.weight.dungeons.all.toFixed(0)} Cata)\n\n`
 
   //add skills to description
   description += `Skills (${profileData.averageSkillPure} True, ${profileData.averageSkillProgress} w/ Progress):\n`

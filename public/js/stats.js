@@ -628,7 +628,7 @@ document.querySelector("#item-hover").style.display = "none";
   }
   document.querySelector("#stats-text").innerText += `Purse: ${cleanFormatNumber(profileData.purse)}, `;
   document.querySelector("#stats-text").innerText += `Fairy Souls: ${profileData.fairy_souls}, `;
-  document.querySelector("#stats-text").innerText += `Weight: ${profileData.weight.totalWeight.toFixed(3)} (${profileData.weight.skillWeight.toFixed(0)} Skill, ${profileData.weight.catacombsWeight.toFixed(0)} Cata, ${profileData.weight.slayerWeight.toFixed(0)} Slayer), `
+  document.querySelector("#stats-text").innerText += `Weight: ${profileData.weight.total.all.toFixed(3)} (${profileData.weight.skills.all.toFixed(0)} Skill, ${profileData.weight.dungeons.all.toFixed(0)} Cata, ${profileData.weight.slayer.all.toFixed(0)} Slayer), `
   document.querySelector("#stats-text").innerText += `Skill Average: ${profileData.averageSkillProgress}, `;
   document.querySelector("#stats-text").innerText += `True Skill Average: ${profileData.averageSkillPure}`
 

@@ -1,5 +1,13 @@
 module.exports = {
   pets: { /* Adapted from leaphant/skyblock-stats, sky.lea.moe */
+    "MITHRIL_GOLEM": {
+      skin: "http://textures.minecraft.net/texture/c1b2dfe8ed5dffc5b1687bc1c249c39de2d8a6c3d90305c95f6d1a1a330a0b1",
+      type: "mining",
+      baseStats: {},
+      perLevelStats: {
+        td: 0.5
+      },
+    },
     "MEGALODON": {
       skin: "http://textures.minecraft.net/texture/a94ae433b301c7fb7c68cba625b0bd36b0b14190f20e34a7c8ee0d9de06d53b9",
       type: "fishing",
