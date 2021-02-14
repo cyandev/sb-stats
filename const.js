@@ -471,9 +471,13 @@ module.exports = {
     }
   },
   petItems: {
+    PET_ITEM_TOY_JERRY: {
+      name: "Jerry 3D Glasses",
+      description: "§7§7Upgrades a Jerry pet from §7§6Legendary §7to §dMythic§7 and §7granting it a new perk!"
+    },
     PET_ITEM_VAMPIRE_FANG: {
       name: "Vampire Fang",
-      description: "§7§7Upgrades a Bat pet from §7§6Legendary §7to §dMythic §d§7adding a bonus perk and bonus"
+      description: "§7§7Upgrades a Bat pet from §7§6Legendary §7to §dMythic §d§7adding a bonus perk and bonus stats!"
     },
     PET_ITEM_SPOOKY_CUPCAKE: {
       name: "Spooky Cupcake",
@@ -743,8 +747,10 @@ module.exports = {
       cd: [0,0,0,0,0,1,1,3,3,3]
     }
   },
-  minionNames: ["COBBLESTONE", "OBSIDIAN", "GLOWSTONE", "GRAVEL", "SAND", "CLAY", "ICE", "SNOW", "COAL", "IRON", "GOLD", "DIAMOND", "LAPIS", "REDSTONE", "EMERALD", "QUARTZ", "ENDER_STONE", "WHEAT", "MELON", "PUMPKIN", "CARROT", "POTATO", "MUSHROOM", "CACTUS", "COCOA", "SUGAR_CANE", "NETHER_WARTS", "FLOWER", "FISHING", "ZOMBIE", "REVENANT", "SKELETON", "CREEPER", "SPIDER", "TARANTULA", "CAVESPIDER", "BLAZE", "MAGMA_CUBE", "ENDERMAN", "GHAST", "SLIME", "COW", "PIG", "CHICKEN", "SHEEP", "RABBIT", "OAK", "SPRUCE", "BIRCH", "DARK_OAK", "ACACIA", "JUNGLE"],
+  minionNames: ["MITHRIL", "COBBLESTONE", "OBSIDIAN", "GLOWSTONE", "GRAVEL", "SAND", "CLAY", "ICE", "SNOW", "COAL", "IRON", "GOLD", "DIAMOND", "LAPIS", "REDSTONE", "EMERALD", "QUARTZ", "ENDER_STONE", "WHEAT", "MELON", "PUMPKIN", "CARROT", "POTATO", "MUSHROOM", "CACTUS", "COCOA", "SUGAR_CANE", "NETHER_WARTS", "FLOWER", "FISHING", "ZOMBIE", "REVENANT", "SKELETON", "CREEPER", "SPIDER", "TARANTULA", "CAVESPIDER", "BLAZE", "MAGMA_CUBE", "ENDERMAN", "GHAST", "SLIME", "COW", "PIG", "CHICKEN", "SHEEP", "RABBIT", "OAK", "SPRUCE", "BIRCH", "DARK_OAK", "ACACIA", "JUNGLE"],
   minionCrafts: {
+    "MITHRIL": [null, {item: "name_ORE", quantity: 80}, {item: "name_ORE", quantity: 160}, {item: "name_ORE", quantity: 320}, {item: "name_ORE", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "REFINED_name", quantity: 8}],
+
     "COBBLESTONE": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
 
     "OBSIDIAN": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 
@@ -991,7 +997,11 @@ module.exports = {
     "BAT_PERSON_RING": "BAT_PERSON",
     "BAT_PERSON_ARTIFACT": "BAT_PERSON",
     "WITHER_ARTIFACT": "WITHER",
-    "WITHER_RELIC": "WITHER"
+    "WITHER_RELIC": "WITHER",
+    "TITANIUM_TALISMAN": "TITANIUM",
+    "TITANIUM_RING": "TITANIUM",
+    "TITANIUM_ARTIFACT": "TITANIUM",
+    "TITANIUM_RELIC": "TITANIUM",
   },
   talismans: {
     "FARMING_TALISMAN": {
