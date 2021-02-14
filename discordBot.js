@@ -1,5 +1,8 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
+
+let util = require("./util.js");
+
 const emojiTitles = {
     "taming": "🐾 Taming",
     "farming": "🌾 Farming",
@@ -20,7 +23,16 @@ const emojiTitles = {
     "zombie": "🧟 Revenant",
     "spider": "🕸️ Tarantula",
     "wolf": "🐺 Sven",
-  }
+}
+const minionNames = {"MITHRIL": "Mithril", "COBBLESTONE": "Cobbletone", "OBSIDIAN": "Obsidian", "GLOWSTONE": "Glowstone", "GRAVEL": "Gravel", "SAND": "Sand", "CLAY": "Clay", "ICE": "Ice", "SNOW": "Snow", "COAL": "Coal", "IRON": "Iron", "GOLD": "Gold", "DIAMOND": "Diamond", "LAPIS": "Lapis", "REDSTONE": "Redstone", "EMERALD": "Emerald", "QUARTZ": "Quartz", "ENDER_STONE": "Endstone", "WHEAT": "Wheat", "MELON": "Melon", "PUMPKIN": "Pumpkin", "CARROT": "Carrot", "POTATO": "Potato", "MUSHROOM": "Mushroom", "CACTUS": "Cactus", "COCOA": "Cocoa", "SUGAR_CANE": "Sugar Cane", "NETHER_WARTS": "Nether Wart", "FLOWER": "Flower", "FISHING": "Fishing", "ZOMBIE": "Zombie", "REVENANT": "Revenant", "SKELETON": "Skeleton", "CREEPER": "Creeper", "SPIDER": "Spider", "TARANTULA": "Tarantula", "CAVESPIDER": "Cave Spider", "BLAZE": "Blaze", "MAGMA_CUBE": "Magma", "ENDERMAN": "Enderman", "GHAST": "Ghast", "SLIME": "Slime", "COW": "Cow", "PIG": "Pig", "CHICKEN": "Chicken", "SHEEP": "Sheep", "RABBIT": "Rabbit", "OAK": "Oak", "SPRUCE": "Spruce", "BIRCH": "Birch", "DARK_OAK": "Dark Oak", "ACACIA": "Acacia", "JUNGLE": "Jungle"};
+
+const reactions = {
+  LOADING: "809845615889743912",
+  NO: "❌",
+  YES: "✅"
+}
+
+
 module.exports = (getPlayerData) => {
   console.log("launching discord bot...")
   client.on("message", (message) => {
@@ -39,10 +51,11 @@ module.exports = (getPlayerData) => {
         commandPos = commandPos[arg];
         if (typeof commandPos == "function") {
           commandPos(message, ...args.slice(i+1));
-          break;
+          return;
         }
       } else {
-        message.channel.send(`Argument '${arg}' not understood`)
+        message.channel.send(`Argument '${arg}' not understood`);
+        return;
       }
     }
   }
@@ -50,11 +63,9 @@ module.exports = (getPlayerData) => {
   const appMethods = {
     async getWeight(message, player, profile) {
       if (!player) {
-        message.channel.send("You must provide a username! `s%weight [username]`");
-        message.react("❌");
-        return;
+        player = message.author.username
       }
-      let reaction = message.react("809845615889743912");
+      let reaction = message.react(reactions.LOADING);
       let response = await message.channel.send(`Fetching weight for ${player}...`);
       let playerData = await getPlayerData(player, true, 0);
       let {name,weight, uuid} = playerData;
@@ -68,7 +79,7 @@ module.exports = (getPlayerData) => {
 
       if (weight) {
         var weightOutput = new Discord.MessageEmbed().setColor("#4f6280")
-          .setTitle(`${name}`) 
+          .setTitle(`${name} - Weight`) 
           .setURL(`https://sbstats.me/stats/${name}/${profile || ""}`)
           .setDescription(`**Weight: ${weight.total.all.toFixed(3)} (${weight.skills.all.toFixed(0)} Skill, ${weight.slayer.all.toFixed(0)} Slayer, ${weight.dungeons.all.toFixed(0)} Dungeon)**`)
           .setThumbnail(`https://crafatar.com/renders/head/${uuid}?overlay`)
@@ -96,24 +107,88 @@ module.exports = (getPlayerData) => {
         }
         (await response).edit("\u200B");
         (await reaction).remove();
-        message.react("✅");
+        message.react(reactions.YES);
       } else {
         var weightOutput = "Invalid player username!";
         (await reaction).remove();
-        message.react("❌");
+        message.react(reactions.NO);
       }
       (await response).edit(weightOutput);
     },
+    async getMinionInfo(message, player, profile) {
+      try {
+        //get playerData and name
+        if (!player) {
+          player = message.author.username;
+        }
+        var reaction = message.react(reactions.LOADING);
+        var response = await message.channel.send(`Fetching minions for ${player}...`);
+        let playerData = await getPlayerData(player, true, 0);
+        if (!playerData) throw `Invalid player username!`
+        let {name,uuid} = playerData;
+
+        //get profile data
+        if (profile) {
+          var profileData = Object.keys(playerData.profiles).map(x=>playerData.profiles[x]).find(x=>x.cute_name.toLowerCase() == profile.toLowerCase());
+          if (!profileData) throw "Invalid profile name!"
+        } else {
+          var profileData = playerData.profiles[playerData.currentProfile];
+        }
+        //calculate price till next slot
+        let nextSlotPrice = 0;
+        if (profileData.minions.missing.length >= profileData.minions.nextTier) {
+          let nextMinions = profileData.minions.missing.slice(0,profileData.minions.nextTier);
+          if (nextMinions.every(x => x[2])) {
+            nextSlotPrice = nextMinions.reduce((t,x) => t+Number(x[[2]]), 0);
+          } else {
+            nextSlotPrice = null;
+          }
+        } else {
+          nextSlotPrice = null;
+        }
+
+        //build response MessageEmbed
+        var embed = new Discord.MessageEmbed().setColor("#4f6280")
+          .setTitle(`${name} - Minions`)
+          .setDescription(`**Unique Minions: ${profileData.minions.uniques}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? util.cleanFormatNumber(nextSlotPrice) : "None"}**`)
+          .setURL(`https://sbstats.me/stats/${name}/${profile || ""}`)
+          .setThumbnail(`https://crafatar.com/renders/head/${uuid}?overlay`)
+          .setFooter("view more stats at https://sbstats.me");
+
+        //build next slot field
+        let nextSlotDescription = "\u200B";
+        if (nextSlotPrice) {
+          for (let minionUpgrade of profileData.minions.missing.slice(0,Math.min(profileData.minions.nextTier,10))) {
+            nextSlotDescription += `${minionNames[minionUpgrade[0]]} ${minionUpgrade[1]} - ${util.cleanFormatNumber(Number(minionUpgrade[2]))}\n`
+          }
+        }
+
+        embed.addField("__**Cheapest Minions to Next Slot:**__", nextSlotDescription);
+
+        (await response).edit("\u200B");
+        (await reaction).remove();
+        message.react(reactions.YES);
+        (await response).edit(embed);
+
+      } catch (e) {
+        if (typeof e == "string") {
+          (await reaction).remove();
+          (await response).edit(e);
+          message.react(reactions.NO);
+        }
+      }
+    },
+
     async help(message) {
       message.channel.send(
         `\u200B
         **SBStats Discord Bot Help:**
         \`s%help\`: Displays this message
-        \`s%weight [username]\`: Get's a skyblock player's weight per the senither guild leaderboard algorithm
+        \`s%weight [username] [profile]\`: Get's a skyblock player's weight per the senither guild leaderboard algorithm
+        \`s%minions [username] [profile]\`: Get's a skyblock player's minions, cost towards next slot, and cheapest missing minions
         `
       );
     },
-    async getStatSummary(message, player, profile) {}
   }
 
   const commandsObject = {
@@ -121,5 +196,7 @@ module.exports = (getPlayerData) => {
     "we": appMethods.getWeight,
     "w": appMethods.getWeight,
     "help": appMethods.help,
+    "minions": appMethods.getMinionInfo,
+    "m": appMethods.getMinionInfo
   }
 }

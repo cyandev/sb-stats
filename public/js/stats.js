@@ -1102,7 +1102,7 @@ document.querySelector("#item-hover").style.display = "none";
   }
   console.log(nextSlotPrice)
 
-  document.querySelector("#minion-extra").innerText = `Unique Minions ${profileData.minions.uniques} / ${minionTable.length * 11}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? cleanFormatNumber(nextSlotPrice) : "???"}`;
+  document.querySelector("#minion-extra").innerText = `Unique Minions ${profileData.minions.uniques}, Minion Slots: ${profileData.minions.slots + profileData.minions.bonusSlots}, Cost of Next Slot: ${nextSlotPrice ? cleanFormatNumber(nextSlotPrice) : "???"}`;
 
   /* TALISMAN OPTIMIZER SECTION */
   let bestTalismanScore = 0;
