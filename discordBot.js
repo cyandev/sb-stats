@@ -48,14 +48,28 @@ module.exports = (getPlayerData) => {
   }
 
   const appMethods = {
-    async getWeight(message, player) {
+    async getWeight(message, player, profile) {
+      if (!player) {
+        message.channel.send("You must provide a username! `s%weight [username]`");
+        message.react("❌");
+        return;
+      }
       let reaction = message.react("809845615889743912");
       let response = await message.channel.send(`Fetching weight for ${player}...`);
-      let {name,weight, uuid} = await getPlayerData(player, true, 0);
+      let playerData = await getPlayerData(player, true, 0);
+      let {name,weight, uuid} = playerData;
+      if (profile) {
+        let profileData = Object.keys(playerData.profiles).map(x=>playerData.profiles[x]).find(x=>x.cute_name.toLowerCase() == profile.toLowerCase());
+        if (profileData) {
+          weight = profileData.weight;
+          profile = profileData.cute_name;
+        }
+      }
+
       if (weight) {
         var weightOutput = new Discord.MessageEmbed().setColor("#4f6280")
           .setTitle(`${name}`) 
-          .setURL(`https://sbstats.me/stats/${name}`)
+          .setURL(`https://sbstats.me/stats/${name}/${profile || ""}`)
           .setDescription(`**Weight: ${weight.total.all.toFixed(3)} (${weight.skills.all.toFixed(0)} Skill, ${weight.slayer.all.toFixed(0)} Slayer, ${weight.dungeons.all.toFixed(0)} Dungeon)**`)
           .setThumbnail(`https://crafatar.com/renders/head/${uuid}?overlay`)
           .setFooter("view more stats at https://sbstats.me");
@@ -95,14 +109,16 @@ module.exports = (getPlayerData) => {
         `\u200B
         **SBStats Discord Bot Help:**
         \`s%help\`: Displays this message
-        \`s%weight [username]\`, \`s%w [username]\`: Get's a skyblock player's weight per the senither guild leaderboard algorithm
+        \`s%weight [username]\`: Get's a skyblock player's weight per the senither guild leaderboard algorithm
         `
       );
-    }
+    },
+    async getStatSummary(message, player, profile) {}
   }
 
   const commandsObject = {
     "weight": appMethods.getWeight,
+    "we": appMethods.getWeight,
     "w": appMethods.getWeight,
     "help": appMethods.help,
   }
