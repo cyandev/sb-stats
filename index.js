@@ -54,7 +54,7 @@ var auctionData;
 
 async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
   //check if there is recent data in the DB, if there is return it
-  let playerData = await playersCollection.findOne({nameLower: name.toLowerCase()});
+  let playerData = await playersCollection.findOne({nameLower: name ? name.toLowerCase() : ""});
   if (playerData && Date.now() - playerData.lastUpdated > 1000 * 60 * 120) {
     for (let profileid in playerData.profiles) {
         playerData.profiles[profileid] = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[profileid],"base64")).toString());
