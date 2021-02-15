@@ -37,7 +37,7 @@ class RequestScheduler {
         setTimeout(() => {
           this.reqs[req.priority].push(req);
         },req.timeout)
-        console.log("error requesting to url " + req.url, err)
+        console.log("error requesting to url " + req.url)
       }
     }
   }
@@ -54,7 +54,7 @@ class RequestScheduler {
       method: "get",
       url: url,
       res: resolutionFunction,
-      timeout: 500
+      timeout: 2000
     })
     return promise;
   }
@@ -68,7 +68,7 @@ class RequestScheduler {
       method: "get",
       url: url,
       res: resolutionFunction,
-      timeout: 500
+      timeout: 2000
     })
     return promise;
   }
