@@ -36,7 +36,7 @@ client.connect().then((connection) => {
   
   prunePlayers();
   pruneGuilds();
-  refreshOldestPlayer();
+  refreshOldestPlayers();
   require("./discordBot.js")(getPlayerData);
 });
 
@@ -55,7 +55,8 @@ var auctionData;
 async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
   //check if there is recent data in the DB, if there is return it
   let playerData = await playersCollection.findOne({nameLower: name ? name.toLowerCase() : ""});
-  if (playerData && Date.now() - playerData.lastUpdated > 1000 * 60 * 120) {
+  if (playerData && playerData.lastUpdated > Date.now() - 1000 * 60 * 5) {
+    console.log("got player data from db")
     for (let profileid in playerData.profiles) {
         playerData.profiles[profileid] = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[profileid],"base64")).toString());
     }
@@ -84,6 +85,7 @@ async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
     try {
       uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + name)).data.id; //get uuid from mojang
     } catch (err) {
+      console.log(err)
       return false;
     }
     if (!uuid) { //no uuid
@@ -856,7 +858,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
 var loadingUuids = [];
 async function getGuildData(guildname,userRequested,priority=0) {
 
-  
+  console.log(`fetching guild ${guildname}...`);
   let guildData = {incomplete: false};
   
   if (!userRequested) {
@@ -869,7 +871,17 @@ async function getGuildData(guildname,userRequested,priority=0) {
   } else {
     guildData.lastRequested = Date.now()
   }
-  
+    // playersCollection.updateMany({
+  //   uuid: {
+  //     $in: guildApi.guild.members.map(x => x.uuid)
+  //   },
+  //   lastUpdated: {
+  //     $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
+  //   }
+  // }, {
+  //   $set: {lastRequested: Date.now()}
+  // });
+
   let guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&name=${guildname}`, priority)).data;
   if (!guildApi.success) return false;
   //get name, tag, and tagcolor
@@ -880,26 +892,35 @@ async function getGuildData(guildname,userRequested,priority=0) {
     text: guildApi.guild.tag,
     color: guildApi.guild.tagColor
   };
-  let playersData = await playersCollection.find({
+  guildData.members=[],
+  console.log("got guild api")
+  let playersDataCursor = playersCollection.find({
     uuid: {
       $in: guildApi.guild.members.map(x => x.uuid)
     },
     lastUpdated: {
       $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
     }
-  }).toArray(); //find all the players currently in DB
-  await playersCollection.updateMany({
-    uuid: {
-      $in: guildApi.guild.members.map(x => x.uuid)
-    },
-    lastUpdated: {
-      $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
-    }
-  }, {
-    $set: {lastRequested: Date.now()}
   }); //find all the players currently in DB
-  let foundUuids = playersData.map(x => x.uuid);
+  while (await playersDataCursor.hasNext()) {
+    console.log('fetching next guild player...')
+    let playerData = await playersDataCursor.next();
+    try {
+      var profile =JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[playerData.currentProfile],"base64")).toString());
+      guildData.members.push({
+        name: playerData.name,
+        uuid: playerData.uuid,
+        slayer: profile ? profile.slayerXp : 0,
+        catacombs: profile ? (profile.skills.find(x => x.name == "catacombs") ? profile.skills.find(x => x.name == "catacombs").levelProgress: 0) : 0,
+        averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
+        weight: profile ? profile.weight.total.all : 0,
+      })
+    } catch (e) {console.log(e)};
+  };
+  console.log("done with that shit")
+  let foundUuids = guildData.members.map(x => x.uuid);
   let missingUuids = guildApi.guild.members.map(x => x.uuid).filter(x => !foundUuids.includes(x));
+  console.log(`missing ${missingUuids.length} players`)
   if (missingUuids.length > 0) guildData.incomplete = true;
 
   missingUuids.forEach((uuid) => {
@@ -910,25 +931,14 @@ async function getGuildData(guildname,userRequested,priority=0) {
       loadingUuids.push(uuid);
     }
   });
-  guildData.members = playersData.map((x,i) => {
-    try {
-    var profile =JSON.parse(zlib.inflateSync(Buffer.from(x.profiles[x.currentProfile],"base64")).toString());
-    return {
-      name: x.name,
-      slayer: profile ? profile.slayerXp : 0,
-      catacombs: profile ? (profile.skills.find(x => x.name == "catacombs") ? profile.skills.find(x => x.name == "catacombs").levelProgress: 0) : 0,
-      averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
-      weight: profile ? profile.weight.total.all : 0,
-    }
-    } catch (e) {console.log(e)};
-  })
+
   guildData.members.sort((a,b) => b.weight - a.weight);
 
   guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
   guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));
   guildData.averageWeight = Number((guildData.members.reduce((t,x) => t+x.weight, 0) / guildData.members.length).toFixed(2));
   guildData.averageCatacombs = Number((guildData.members.reduce((t,x) => t+x.catacombs, 0) / guildData.members.length).toFixed(2));
-
+  console.log("updating guild data in db");
   await guildsCollection.replaceOne({_id: guildData._id}, guildData, {upsert: true})
   
   return guildData;
@@ -1010,7 +1020,7 @@ async function makeEjsData(isImportant,player,profile) {
     "combat": "⚔️ Combat",
     "foraging": "🌲 Foraging",
     "fishing": "🎣 Fishing",
-    "enchanting": "📘 Encanting",
+    "enchanting": "📘 Enchanting",
     "alchemy": "⚗️ Alchemy",
     "carpentry": "🪑 Carpentry",
     "runecrafting": "🌌 Runecrafting",
@@ -1044,16 +1054,7 @@ async function makeEjsData(isImportant,player,profile) {
 
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => { 
-  let playerData = await playersCollection.findOne({nameLower: req.params.player.toLowerCase()});
-  if (!playerData || Date.now() - playerData.lastUpdated > 1000 * 60 * 120) { //re-get more than 120 second old profiles
-    console.log("updating data in db")
-    playerData = await getPlayerData(req.params.player, true);
-  } else {
-    for (let profileid in playerData.profiles) {
-      playerData.profiles[profileid] = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[profileid],"base64")).toString())
-    }
-    console.log("sending data from db: age in ms: ", Date.now() - playerData.lastUpdated)
-  }
+  let playerData = await getPlayerData(req.params.player, true);
   res.json(playerData);
 });
 
@@ -1207,8 +1208,11 @@ async function pruneGuilds() {
 
 setInterval(pruneGuilds, 1000 * 60 * 60);
 
-async function refreshOldestPlayer() {
-  let oldest = (await playersCollection.find().sort({lastUpdated: 1}).limit(1).toArray())[0];
-  await getPlayerData(oldest.name, false, 2, oldest.uuid, false);
-  setTimeout(refreshOldestPlayer, 500); //pause 500 ms then do it again
+async function refreshOldestPlayers(limit=10) {
+  let oldestArr = await playersCollection.find({lastUpdated: {$lt: Date.now() - 1000 * 60 * 10}}).sort({lastUpdated: 1}).limit(limit).toArray();
+  for (let oldest of oldestArr) {
+    await getPlayerData(oldest.name, false, 2, oldest.uuid, false);
+    await new Promise(res => setTimeout(res, 500));
+  }
+  setTimeout(refreshOldestPlayers, 5000); //pause 1s then do it again
 }

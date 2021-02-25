@@ -10,7 +10,7 @@ const emojiTitles = {
     "combat": "⚔️ Combat",
     "foraging": "🌲 Foraging",
     "fishing": "🎣 Fishing",
-    "enchanting": "📘 Encanting",
+    "enchanting": "📘 Enchanting",
     "alchemy": "⚗️ Alchemy",
     "carpentry": "🪑 Carpentry",
     "runecrafting": "🌌 Runecrafting",
