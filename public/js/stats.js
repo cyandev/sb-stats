@@ -1027,7 +1027,7 @@ document.querySelector("#item-hover").style.display = "none";
       console.log(totalStats.innerStats,sumStats);
 
       sumStats.ratio = 1;
-      if (petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,sumStats); // + pet ability bonus
+      if (petSelector.checked && petFuncs[petSelector.checked.id]) petFuncs[petSelector.checked.id](petSelector.checked,weaponSelector.checked,armor,sumStats); // + pet ability bonus
       petRatio = sumStats.ratio; //get flat damage multiplier from pet
       delete sumStats.ratio;
 

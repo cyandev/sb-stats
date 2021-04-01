@@ -8,6 +8,15 @@ module.exports = {
         td: 0.5
       },
     },
+    "GRANDMA_WOLF": {
+      skin: "http://textures.minecraft.net/texture/4e794274c1bb197ad306540286a7aa952974f5661bccf2b725424f6ed79c7884",
+      type: "combat",
+      baseStats: {},
+      perLevelStats: {
+        str: 0.25,
+        hp: 1
+      }
+    },
     "MEGALODON": {
       skin: "http://textures.minecraft.net/texture/a94ae433b301c7fb7c68cba625b0bd36b0b14190f20e34a7c8ee0d9de06d53b9",
       type: "fishing",
