@@ -190,25 +190,42 @@ function getWeight(profileData) {
   }
 
   const slayerWeights = {
-    zombie: 2208,
-    spider: 2118,
-    wolf: 1962,
+    zombie: {
+    divider: 2208,
+    modifier: 0.15,
+    },
+    spider: {
+      divider: 2118,
+      modifier: 0.08,
+    },
+    wolf: {
+      divider: 1962,
+      modifier: 0.015,
+    },
   }
 
   //get slayer weights
   for (let slayerName in profileData.slayer) {
-    let divider = slayerWeights[slayerName];
+    let slayerWeight = slayerWeights[slayerName];
     let experience = profileData.slayer[slayerName].xp;
 
     if (experience <= 1000000) {
       weight.slayer[slayerName] = {
-        weight: experience == 0 ? 0 : experience / divider,
+        weight: experience == 0 ? 0 : experience / slayerWeight.divider,
         overflow: 0,
       }
     } else {
-      let base = 1000000 / divider
+      let base = 1000000 / slayerWeight.divider
       let remaining = experience - 1000000
-      let overflow = Math.pow(remaining / (divider * 1.5), 0.942)
+      let modifier = slayerWeight.modifier
+      let overflow = 0
+
+      while (remaining > 0) {
+        let left = Math.min(remaining, 1000000)
+        overflow += Math.pow(left / (slayerWeight.divider * (1.5 + modifier)), 0.942)
+        modifier += slayerWeight.modifier
+        remaining -= left
+      }
 
       weight.slayer[slayerName] = {
         weight: base + overflow,
