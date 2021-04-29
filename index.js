@@ -380,7 +380,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   //get minions
   let craftedGens = {};
   constants.minionNames.forEach((name) => {
-    craftedGens[name] = Array.from({length:12}, x => 0) //use 0/1 for true/false to minify data storage
+    craftedGens[name] = Array.from({length:13}, x => 0) //use 0/1 for true/false to minify data storage
   })
   for (let uuid of Object.keys(profileAPI.members)) {
     if (profileAPI.members[uuid].crafted_generators) profileAPI.members[uuid].crafted_generators.forEach((id) => {
@@ -399,7 +399,7 @@ async function getProfileData(uuid, profile, playerData, priority) {
   let missingMinions = []
   let minionsCrafted = 0;
   for (let name in craftedGens) {
-    for (let tier = 1; tier <= 11; tier++) {
+    for (let tier = 1; tier <= 12; tier++) {
       if (!craftedGens[name][tier]) {
         let price;
         if (!constants.minionCrafts[name] || !constants.minionCrafts[name][tier]) {
