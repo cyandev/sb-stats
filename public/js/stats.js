@@ -3,7 +3,8 @@ const excludedSkills = ["carpentry","runecrafting","catacombs"];
 const catacombsReward = [0,4,8,12,16,20,25,30,35,40,45,51,57,63,69,75,82,89,96,103,110,118,126,134,142,150,159,168,177.186,195,205,215,225,235,245,256,267,278,289,300];
 //pet damage/stat bonus functions
 function boostArmorStatsIfSet(ratio, set, armor, stats) {
-  if (armor.every((piece) => piece.id.includes(set))) {
+  console.log(armor)
+  if (armor.every((piece) => piece.id && piece.id.includes(set))) {
       armor.forEach((piece) => {
         for (let stat in stats) {
           stats[stat] += piece.stats[stat] ? piece.stats[stat] * ratio : 0
