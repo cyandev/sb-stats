@@ -1,7 +1,7 @@
-module.exports = ((reqScheduler) => {
-    var auctionData;
-    (async () => {auctionData = await getAuctionData()});
-
+var initd = false;
+var auctionData;
+var reqScheduler;
+module.exports = ((reqSchedulerNew) => {
     async function getAuctionData() {
         let items = [];
         console.log("loading BIN auctions...");
@@ -22,9 +22,13 @@ module.exports = ((reqScheduler) => {
           }
         }
         return priceMap;
-      }
+    }
 
-    setInterval(async () => auctionData = await getAuctionData(), 1000 * 60 * 60);
+    if (!initd) {
+        reqScheduler = reqSchedulerNew;
+        (async () => {auctionData = await getAuctionData()});
+        setInterval(async () => auctionData = await getAuctionData(), 1000 * 60 * 60);
+    }
 
     return {
         async data() {
