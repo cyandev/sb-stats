@@ -1,7 +1,7 @@
 let nbt = require("prismarine-nbt");
 let jimp = require("jimp");
 let fs = require("fs");
-const constants = require("./const.js");
+const constants = require("./constants.js");
 
 //head images stored as base64 encoded JSON object at item.SkullOwner.Properties.Textures.value
 function nbtToJson(base64) {
