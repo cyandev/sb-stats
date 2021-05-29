@@ -1,4 +1,4 @@
-module.exports = (async (reqScheduler) => {
+module.exports = ((reqScheduler) => {
   const { MongoClient } = require('mongodb');
 
   //old db uri: mongodb+srv://admin:${process.env.MONGO_PASSWORD}@cluster0.bjpjk.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority
@@ -42,7 +42,7 @@ module.exports = (async (reqScheduler) => {
     setTimeout(refreshOldestPlayers, 5000); //pause then do it again
   }
 
-  module.exports = {
+  return {
     async getGuilds() {
       if (await dbLoaded) return guildsCollection;
     },
