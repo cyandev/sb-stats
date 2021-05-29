@@ -46,7 +46,7 @@ class RequestScheduler {
    */
   async get(url,priority=0) { //make an axios-like request that adheres to the delay specified in the constructor
     let resolutionFunction;
-    let promise = new Promise((res,rej) => { //make a promise to return
+    let promise = new Promise((res) => { //make a promise to return
       resolutionFunction = res; //put the resolution function into a wider scope
     })
     this.reqs[priority].push({
@@ -60,7 +60,7 @@ class RequestScheduler {
   }
   async getFirst(url,priority=0) { //same as get but unshift instead of push
     let resolutionFunction;
-    let promise = new Promise((res,rej) => { //make a promise to return
+    let promise = new Promise((res) => { //make a promise to return
       resolutionFunction = res; //put the resolution function into a wider scope
     })
     this.reqs[priority].unshift({

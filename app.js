@@ -1,11 +1,11 @@
-let zlib = require("zlib");
-let axios = require("axios");
-let minecraftItems = require('minecraft-items');
+/* eslint-disable */
+const zlib = require("zlib");
+const axios = require("axios");
+const minecraftItems = require('minecraft-items');
+const express = require("express");
 
-
-let express = require("express");
-let port = process.env.PORT || 8080;
-let app = express();
+const port = process.env.PORT || 8080;
+const app = express();
 
 //json body and url encoded body parsing
 app.use(express.json());
@@ -19,22 +19,20 @@ app.set('view engine', 'ejs');
 
 let util = require("./util.js");
 const constants = require("./constants.js");
-let reqScheduler = new require("./src/requestScheduler.js")(500) //create request scheduler
+let reqScheduler = new (require("./src/requestScheduler.js"))(500) //create request scheduler
 let db = require("./src/db.js");
 
 // TODO: Readd Discord Bot
 
+//bazaar and auction management
+let bazaar = require("./src/skyblock/bazaar.js")(reqScheduler);
+let auctions = require("./src/skyblock/auctions.js")(reqScheduler);
 
 
-var auctionData;
-(async () => {
-  auctionData = await getAuctionData();
-  setInterval(async () => auctionData = await getAuctionData(), 1000 * 60 * 60);
-})();
 
 async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
   //check if there is recent data in the DB, if there is return it
-  let playerData = await playersCollection.findOne({nameLower: name ? name.toLowerCase() : ""});
+  let playerData = await (await db.getPlayers()).findOne({nameLower: name ? name.toLowerCase() : ""});
   if (playerData && playerData.lastUpdated > Date.now() - 1000 * 60 * 5) {
     console.log("got player data from db")
     for (let profileid in playerData.profiles) {
@@ -51,7 +49,7 @@ async function getPlayerData(name,userRequested,priority=0,uuid,log=true) {
   Keep track of user-requested (or internal guild tracking requested) players so we can delete those who never get reqests from db
   */
   if (!userRequested) {
-    let previous = playersCollection.findOne({uuid: uuid});
+    let previous = (await db.getPlayers()).findOne({uuid: uuid});
     if (previous) {
       playerData.lastRequested = previous.lastRequested || Date.now();
     } else {
@@ -315,16 +313,16 @@ async function getInventoryJSON(contents,profileData) {
         if (out.id == "DEFUSE_KIT") {
           let trapsDefused = out.lore[5] ? out.lore[5].slice(19) : 0;
           let kitInt = 0;
-          if (trapsDefused >= 1) {kitInt  = 1};
-          if (trapsDefused >= 5) {kitInt = 2};
-          if (trapsDefused >= 10) {kitInt = 3};
-          if (trapsDefused >= 15) {kitInt = 4};
-          if (trapsDefused >= 20) {kitInt = 5};
-          if (trapsDefused >= 25) {kitInt = 6};
-          if (trapsDefused >= 30) {kitInt = 7};
-          if (trapsDefused >= 35) {kitInt = 8};
-          if (trapsDefused >= 40) {kitInt = 9};
-          if (trapsDefused >= 45) {kitInt = 10};
+          if (trapsDefused >= 1) {kitInt  = 1}
+          if (trapsDefused >= 5) {kitInt = 2}
+          if (trapsDefused >= 10) {kitInt = 3}
+          if (trapsDefused >= 15) {kitInt = 4}
+          if (trapsDefused >= 20) {kitInt = 5}
+          if (trapsDefused >= 25) {kitInt = 6}
+          if (trapsDefused >= 30) {kitInt = 7}
+          if (trapsDefused >= 35) {kitInt = 8}
+          if (trapsDefused >= 40) {kitInt = 9}
+          if (trapsDefused >= 45) {kitInt = 10}
           if (!profileData.defuseKitInt || kitInt > profileData.defuseKitInt) {
             profileData.defuseKitInt = kitInt;
           }
@@ -339,7 +337,7 @@ async function getInventoryJSON(contents,profileData) {
     } catch (err) {
       console.log("item caused error:",item,mcItem,out,err)
     }
-  };
+  }
   return output;
 }
 
@@ -928,30 +926,6 @@ async function calculateGuilds() {
   return await guildsCollection.find({}).sort({averageWeight: -1}).limit(50).toArray()
 }
 
-
-
-async function getAuctionData() {
-  let items = [];
-  console.log("loading BIN auctions...");
-  let firstReq = (await reqScheduler.get(`https://api.hypixel.net/skyblock/auctions?key=${process.env.API_KEY}`,1)).data;
-  let totalPages = firstReq.totalPages;
-  for (let i = 0; i <= totalPages; i++) { //the real number of pages is totalPages+1, totalPages is just the highest index
-    let page = (await reqScheduler.get(`https://api.hypixel.net/skyblock/auctions?key=${process.env.API_KEY}&page=${i}`,1)).data.auctions;
-    page = page.filter(x => x.bin); //only care about BIN auctions
-    items = items.concat(page);
-    console.log(`fetched BIN auctions ${i+1} / ${totalPages + 1}`);
-  }
-  let priceMap = {};
-  for (let item of items) {
-    if (priceMap[item.item_name]) {
-      if (priceMap[item.item_name] > item.starting_bid) priceMap[item.item_name] = item.starting_bid
-    } else {
-      priceMap[item.item_name] = item.starting_bid
-    }
-  }
-  return priceMap;
-}
-
 //link preview ejs description maker
 async function makeEjsData(isImportant,player,profile) {
   try {
@@ -1113,8 +1087,6 @@ app.use((req, res) => {
     res.sendFile(__dirname + "/public" + req.url);
 })
 
-//server go listen
-
-http.listen(port, () => {
+app.listen(port, () => {
   console.log('listening...');
 })

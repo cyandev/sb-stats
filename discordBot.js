@@ -76,9 +76,9 @@ module.exports = (getPlayerData) => {
           profile = profileData.cute_name;
         }
       }
-
+      var weightOutput;
       if (weight) {
-        var weightOutput = new Discord.MessageEmbed().setColor("#4f6280")
+        weightOutput = new Discord.MessageEmbed().setColor("#4f6280")
           .setTitle(`${name} - Weight`) 
           .setURL(`https://sbstats.me/stats/${name}/${profile || ""}`)
           .setDescription(`**Weight: ${weight.total.all.toFixed(3)} (${weight.skills.all.toFixed(0)} Skill, ${weight.slayer.all.toFixed(0)} Slayer, ${weight.dungeons.all.toFixed(0)} Dungeon)**`)
@@ -109,7 +109,7 @@ module.exports = (getPlayerData) => {
         (await reaction).remove();
         message.react(reactions.YES);
       } else {
-        var weightOutput = "Invalid player username!";
+        weightOutput = "Invalid player username!";
         (await reaction).remove();
         message.react(reactions.NO);
       }
@@ -128,11 +128,12 @@ module.exports = (getPlayerData) => {
         let {name,uuid} = playerData;
 
         //get profile data
+        var profileData;
         if (profile) {
-          var profileData = Object.keys(playerData.profiles).map(x=>playerData.profiles[x]).find(x=>x.cute_name.toLowerCase() == profile.toLowerCase());
+          profileData = Object.keys(playerData.profiles).map(x=>playerData.profiles[x]).find(x=>x.cute_name.toLowerCase() == profile.toLowerCase());
           if (!profileData) throw "Invalid profile name!"
         } else {
-          var profileData = playerData.profiles[playerData.currentProfile];
+          profileData = playerData.profiles[playerData.currentProfile];
         }
         //calculate price till next slot
         let nextSlotPrice = 0;
