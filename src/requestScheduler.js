@@ -11,7 +11,7 @@ class RequestScheduler {
     this.extraRequests = 0;
     this.reqsRemaining = 120;
     setInterval(() => {this.makeRequest()}, delay);
-    this.reqs = Array.from({length: 3}, () => []);
+    this.reqs = Array.from({length: priorityLevels}, () => []);
   }
   async makeRequest() {
     if (this.extraRequests < 0) { //if the extra-requests system over-corrected
@@ -73,4 +73,4 @@ class RequestScheduler {
     return promise;
   }
 }
-exports.RequestScheduler = RequestScheduler;
+module.exports = RequestScheduler;

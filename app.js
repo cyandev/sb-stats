@@ -19,16 +19,12 @@ app.set('view engine', 'ejs');
 
 let util = require("./util.js");
 const constants = require("./constants.js");
-let reqScheduler = new (require("./requestScheduler.js").RequestScheduler)(500) //create request scheduler
+let reqScheduler = new require("./src/requestScheduler.js")(500) //create request scheduler
 let db = require("./src/db.js");
 
 // TODO: Readd Discord Bot
 
-var bazaarData;
-(async () => {
-  bazaarData = await getBazaarData();
-  setInterval(async () => bazaarData = await getBazaarData(), 1000 * 60 * 60);
-})();
+
 
 var auctionData;
 (async () => {
@@ -932,10 +928,7 @@ async function calculateGuilds() {
   return await guildsCollection.find({}).sort({averageWeight: -1}).limit(50).toArray()
 }
 
-async function getBazaarData() {
-  console.log("updating bazaar products...")
-  return (await reqScheduler.get(`https://api.hypixel.net/skyblock/bazaar?key=${process.env.API_KEY}`)).data.products
-}
+
 
 async function getAuctionData() {
   let items = [];
