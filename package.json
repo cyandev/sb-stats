@@ -2,23 +2,19 @@
   "name": "sb-stats",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "start \"\" /d \"C:/Program Files/MongoDB/Server/4.4/bin\" mongod.exe --dbpath D:/mongodb & node app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "ejs": "^3.1.5",
     "express": "^4.17.1",
-    "graceful-fs": "^4.2.4",
-    "helmet": "^4.1.0",
     "jimp": "^0.14.0",
     "minecraft-items": "^0.4.3",
     "mongodb": "^3.6.0",
