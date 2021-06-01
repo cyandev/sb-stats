@@ -207,6 +207,7 @@ function getWeight(profileData) {
   //get slayer weights
   for (let slayerName in profileData.slayer) {
     let slayerWeight = slayerWeights[slayerName];
+    if (!slayerWeight) continue;
     let experience = profileData.slayer[slayerName].xp;
 
     if (experience <= 1000000) {
