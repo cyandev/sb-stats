@@ -466,7 +466,7 @@ function doDamageCalc(petRatio,weapon,armor,pet,profileData,stats,enemy={undead:
   if (armor[0] && armor[0].id == "TARANTULA_HELMET") stats.str += Math.floor(stats.cd/10);
 
   
-  let baseDmg = (5 + stats.dmg + Math.floor(stats.str / 5)) * (1 + stats.str / 100) * (1 + stats.cd / 100);
+  let baseDmg = (5 + stats.dmg) * (1 + stats.str / 100) * (1 + stats.cd / 100);
   let damageMultiplier = 1 + profileData.skills.find(skill => skill.name=="combat").levelPure * 0.04;
   let enchantmentsBuffs = {
     "sharpness": 0.05,
