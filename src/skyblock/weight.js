@@ -106,7 +106,7 @@ module.exports = async (profile) => {
     for (let slayerName in profile.slayer) {
         let slayerWeight = slayerWeights[slayerName];
         let experience = profile.slayer[slayerName].xp;
-
+        if (!slayerWeight) continue;
         if (experience <= 1000000) {
             weight.slayer[slayerName] = {
                 weight: experience == 0 ? 0 : experience / slayerWeight.divider,
