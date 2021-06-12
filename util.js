@@ -202,6 +202,10 @@ function getWeight(profileData) {
       divider: 1962,
       modifier: 0.015,
     },
+    enderman: {
+      divider: 1430,
+      modifier: 0.017,
+    },
   }
 
   //get slayer weights
