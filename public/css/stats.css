@@ -306,22 +306,29 @@ body {
   border-radius: 0.5vw 0.5vw 0 0
 }
 .slayer .slayer-kills {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
   width: 95%;
   margin: 1vw 0;
 }
 .slayer .slayer-kills > div {
   text-align: center;
   font: 1.35vw/2vw "Quicksand";
-  height: 2vw;
+  flex-grow: 1;
+  height: 4vw;
+  width: 20%;
 }
 .slayer .slayer-kills .slayer-kills-label {
   font: 1.25vw/2vw "Quicksand"
 }
 
-.slayer .slayer-kills .slayer-kills-header {
+.slayer .slayer-kills-header {
+  font: 1.35vw/2vw "Quicksand";
   grid-column: 1 / -1;
-  margin-bottom: 1vw;
+  padding-top: 1vw;
+  height: 2vw;
 }
 
 .slayer .slayer-bar {
