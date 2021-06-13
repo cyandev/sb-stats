@@ -21,7 +21,6 @@ module.exports = ((reqScheduler) => {
         }
 
         if (!oldPlayerData || refreshBasicInfo) { //if we need to build player data from scratch
-            console.log("making new basic info...")
             if (query.name && !query.uuid) { //find uuid from mojang api
                 query.uuid = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + query.name)).data.id; //get uuid from mojang
                 if (!query.uuid) {
@@ -74,11 +73,9 @@ module.exports = ((reqScheduler) => {
                 }
             }
         } else { //keep old playerAPI info as it's recent
-            console.log("keeping old basic info...")
             delete oldPlayerData._id;
             playerData = Object.assign({}, oldPlayerData, playerData);
         }
-        console.log(playerData);
         //get skyblock achievement data for player
         
       
@@ -91,7 +88,7 @@ module.exports = ((reqScheduler) => {
                 playerData.profiles[id] = await profile.getProfileData(playerData.profiles[id], playerData, priority) //placeholder, old: await getProfileData(query.uuid, profile, playerData, priority);
             }
         }
-        console.log(playerData.profiles)
+        
         //get current profile
         playerData.currentProfile = null;
         let lastUpdated = 0;

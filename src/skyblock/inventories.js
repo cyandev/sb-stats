@@ -24,7 +24,6 @@ module.exports = async (profileAPI,playerData) => {
             contents: await getInventoryJSON((await util.nbtToJson(profileAPI.members[playerData.uuid].backpack_contents[i].data)).i)
         });
     }
-    console.log(inventories)
 
     //put armor in wardrobe
     if (inventories.find(x=>x.name=="inv_armor") && inventories.find(x=>x.name=="wardrobe_contents")) {
@@ -86,20 +85,22 @@ async function getInventoryJSON(contents) {
                     })
                 }
 
-                //add dungeon tag / stars
+                //add tags and dungeon starts
                 if (out.lore && out.lore.length > 0 && out.lore[out.lore.length - 1].includes("DUNGEON")) {
                     out.tags.push("DUNGEON");
                     out.stars = (out.name.split("✪").length - 1);
                 }
                 if (out.lore && out.lore.length > 0) {
                     if (out.lore[out.lore.length - 1].includes("BOW")) {
-                    out.tags.push("BOW");
-                    out.tags.push("WEAPON");
-                    out.enchantments = item.tag.ExtraAttributes.enchantments;
+                        out.tags.push("BOW");
+                        out.tags.push("WEAPON");
+                        out.enchantments = item.tag.ExtraAttributes.enchantments;
                     } else if (out.lore[out.lore.length - 1].includes("SWORD")) {
-                    out.tags.push("SWORD");
-                    out.tags.push("WEAPON");
-                    out.enchantments = item.tag.ExtraAttributes.enchantments;
+                        out.tags.push("SWORD");
+                        out.tags.push("WEAPON");
+                        out.enchantments = item.tag.ExtraAttributes.enchantments;
+                    } else if (out.lore[out.lore.length - 1].includes("CESSORY")) {
+                        out.tags.push("TALISMAN");
                     }
                 }
 

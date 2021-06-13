@@ -1,0 +1,2 @@
+document.body.style.setProperty("--upx", 1 * Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100)
+window.addEventListener("resize", () => document.body.style.setProperty("--upx", 1 * Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100))

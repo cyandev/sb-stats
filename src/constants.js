@@ -1,5 +1,15 @@
 module.exports = {
   pets: { /* Adapted from leaphant/skyblock-stats, sky.lea.moe */
+    "RAT": {
+      skin: "http://textures.minecraft.net/texture/a8abb471db0ab78703011979dc8b40798a941f3a4dec3ec61cbeec2af8cffe8",
+      type: "combat",
+      baseStats: {},
+      perLevelStats: {
+        str: 0.5,
+        cd: 0.1,
+        hp: 1
+      }
+    },
     "MITHRIL_GOLEM": {
       skin: "http://textures.minecraft.net/texture/c1b2dfe8ed5dffc5b1687bc1c249c39de2d8a6c3d90305c95f6d1a1a330a0b1",
       type: "mining",
@@ -480,6 +490,10 @@ module.exports = {
     }
   },
   petItems: {
+    PET_ITEM_FLYING_PIG: {
+      name: "Flying Pig",
+      description: "§7§7Grants your pig pet the §7ability to fly while on your §7private island! You also don't §7need to hold a carrot on a stick §7to control your pig."
+    },
     PET_ITEM_TOY_JERRY: {
       name: "Jerry 3D Glasses",
       description: "§7§7Upgrades a Jerry pet from §7§6Legendary §7to §dMythic§7 and §7granting it a new perk!"

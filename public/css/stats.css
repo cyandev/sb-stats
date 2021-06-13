@@ -1,3 +1,6 @@
+body {
+  margin: 0;
+}
 :root {
   --dark-blue: #4f6280;
   --gray: #42464d;
@@ -88,10 +91,13 @@ body {
   background: var(--dark-gray);
   font-family: Quicksand;
   color: var(--white);
-  margin: max(3vw,6vh) 3vw 3vw 3vw;
+  padding: max(3vw,6vh) 3vw 3vw 3vw;
 }
 #content {
-  --width: 94vw;
+  justify-self: right;
+  margin: auto;
+  padding: 0 2vw;
+  width: 84vw;
   flex-wrap: wrap;
 }
 .section {
@@ -135,6 +141,7 @@ body {
 }
 #stats-text {
   font-size: 1.2vw;
+  text-align: center;
   width: 100%;
   padding-left: 1vw;
   padding-right: 1vw;
@@ -154,8 +161,8 @@ body {
   text-align: center;
 }
 #skills .skill {
-  width: 44vw;
-  min-width: 500px;
+  width: 40vw;
+  min-width: 400px;
   height: 3vw;
   border-radius: 0.5vw;
   background: var(--darkish-blue);
@@ -218,12 +225,12 @@ body {
 }
 #wardrobe .inv-view::-webkit-scrollbar {
   opacity: 0;
-  height: 1vw;
 }
 #wardrobe .inv-view::-webkit-scrollbar-button {
   display: none;
 }
 #wardrobe .inv-view::-webkit-scrollbar-thumb {
+  height: 1vw;
   border-radius: 0.5vw;
   background: var(--dark-white);
 }
@@ -280,7 +287,7 @@ body {
 }
 #slayer-grid {
   display: grid;
-  grid-gap: 2vw;
+  grid-gap: 1vw;
 }
 #slayer-grid .slayer {
   border: 0.1vw solid var(--dark-white);
@@ -305,8 +312,11 @@ body {
 }
 .slayer .slayer-kills > div {
   text-align: center;
-  font: 1.5vw/2vw "Quicksand";
+  font: 1.35vw/2vw "Quicksand";
   height: 2vw;
+}
+.slayer .slayer-kills .slayer-kills-label {
+  font: 1.25vw/2vw "Quicksand"
 }
 
 .slayer .slayer-kills .slayer-kills-header {
@@ -735,6 +745,7 @@ body {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  perspective: 12in;
 }
 .inv-view .item-cell .item-count {
   position: absolute;
@@ -762,32 +773,79 @@ body {
   background: var(--yellow);
 }
 .inv-view .item-cell .item-head {
-  position: relative;
-  --size: 2.7vw;
-  width: var(--size);
-  height: var(--size);
+  box-sizing: border-box;
   transform-style: preserve-3d;
-  transform: rotateY(45deg) rotateX(-15deg) rotateZ(-15deg)
+  --wu: 8;
+  --hu: 8;
+  --du: 8;
+  --offset-x: 0px;
+  --offset-y: 0px;
+  width: calc(var(--wu) * 1px);
+  height: calc(var(--hu) * 1px);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%) translateY(calc(3.25px * 2.8/8 * var(--upx))) scale3d(calc(var(--upx) * 2.8/8), calc(var(--upx) * 2.8/8), calc(var(--upx) * 2.8/8)) translateZ(5px) rotateX(90deg) rotateZ(-45deg) rotateX(-15deg) rotateY(-15deg);
+  --invert: 0;
 }
 .inv-view .item-cell .item-head > * {
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
   image-rendering: pixelated;
+  object-fit: none;
+  transform-origin: bottom center;
 }
-.inv-view .item-cell .item-head .face {
-  transform: translateZ(calc((var(--size) / 2)  - 0.5px));
+.inv-view .item-cell .item-head .front {
+  height: calc(var(--du) * 1px);
+  width: calc(var(--wu) * 1px);
+  bottom: 0;
+  left: 0;
+  transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg);
+  background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 8px);
+  object-position: calc(var(--offset-x) - 40px) calc(var(--offset-y) - 8px);
 }
 .inv-view .item-cell .item-head .back {
-  transform: translateZ(calc((var(--size) / -2)  + 0.5px));
+  height: calc(var(--du) * 1px);
+  width: calc(var(--wu) * 1px);
+  top: 0;
+  left: 0;
+  transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) rotateY(180deg) translateZ(calc(1px * var(--du)));
+  background-position: calc(var(--offset-x) - 24px) calc(var(--offset-y) - 8px);
+  object-position: calc(var(--offset-x) - 56px) calc(var(--offset-y) - 8px);
 }
-.inv-view .item-cell .item-head .side {
-  transform: rotateY(-90deg) translateZ(calc((var(--size) / 2)  - 0.5px));
+.inv-view .item-cell .item-head .left {
+  height: calc(var(--du) * 1px);
+  width: calc(var(--hu) * 1px);
+  bottom: 0;
+  left: 0;
+  transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) translateZ(calc(var(--hu) * -.5px)) rotateY(90deg) translateZ(calc((var(--wu) * 1px) - (var(--hu) * .5px)));
+  background-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 8px);
+  object-position: calc(var(--offset-x) - 48px) calc(var(--offset-y) - 8px);
+}
+.inv-view .item-cell .item-head .right {
+  height: calc(var(--du) * 1px);
+  width: calc(var(--hu) * 1px);
+  bottom: 0;
+  left: 0;
+  transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) translateZ(calc(var(--hu) * -.5px)) rotateY(-90deg) translateZ(calc(var(--hu) * .5px));  
+  background-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 8px);
+  object-position: calc(var(--offset-x) - 32px) calc(var(--offset-y) - 8px);
 }
 .inv-view .item-cell .item-head .top {
-  transform: rotateX(90deg) translateZ(calc((var(--size) / 2) - 0.5px));
+  width: calc(var(--wu) * 1px);
+  height: calc(var(--hu) * 1px);
+  transform: translateZ(calc(var(--du) * 1px));
+  top: 0;
+  left: 0;
+  background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 0px);
+  object-position: calc(var(--offset-x) - 40px) calc(var(--offset-y) - 0px);
+}
+.inv-view .item-cell .item-head .bottom {
+  width: calc(var(--wu) * 1px);
+  height: calc(var(--hu) * 1px);
+  top: 0;
+  left: 0;
+  background-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 0px);
+  object-position: calc(var(--offset-x) - 48px) calc(var(--offset-y) - 0px);
 }
 /* Item Hover */
 #item-hover {
@@ -802,7 +860,8 @@ body {
   border-radius: 1vw;
   font-size: 1.2vw;
   text-align: center;
-  transform: translate3d(0,0,0);
+  transform: translate3d(0,0,5vw);
+  transform-style: unset !important;
 }
 #item-hover-header {
   background: var(--gray);
@@ -839,4 +898,16 @@ body {
 #item-hover-lore::-webkit-scrollbar-thumb {
   border-radius: 0.5vw;
   background: var(--gray);
+}
+
+@media screen and (min-width: 1400px) {
+  #content {
+    width: 63vw;
+    position: absolute;
+    right: 0;
+  }
+  #skills .skill {
+    width: 28vw;
+    min-width: auto;
+  }
 }

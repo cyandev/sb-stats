@@ -19,7 +19,7 @@
     <img src="/img/items.webp" class="itemImg">
   </head>
   <body>
-    <!-- Header -->
+    <!-- nav -->
     <div id="header">
       <link href="/css/header.css" rel="stylesheet" type="text/css" />
       <a id="header-link" href="/">SB Stats</a>
@@ -35,13 +35,13 @@
       </div>
       <span id="header-version">v0.1</span>
       <script src="/js/header.js"></script>
+      <div id="item-hover">
+        <div id="item-hover-header"></div>
+        <div id="item-hover-lore"></div>
+      </div>
     </div>
-    <!-- End Header -->
+    <!-- end nav -->
     <div id="loading" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
-    <div id="item-hover">
-      <div id="item-hover-header"></div>
-      <div id="item-hover-lore"></div>
-    </div>
     <div id="content" style="display:none">
       <div id="stats" class="section">
         <div class="section-label full"><span id="playerName"></span> - <span id="profileName"></span></div>
@@ -70,78 +70,23 @@
         <div class="section-label">Slayer</div>
         <div id="slayer-grid"></div>
       </div>
-      <div id="combat" class="section">
-        <div class="section-label">Combat</div>
-        <div id="combat-stats-dmg-wrapper">
-          <div id="combat-stats">
-            <div id="stats-separate"></div>
-            <div id="stats-combined"></div>
-          </div>
-          <div id="pot-select">
-            <div class="pot">
-              In Dungeons <input type="checkbox" id="in-dungeons">
-            </div>
-            <div class="pot">
-              God Splash <input type="checkbox" id="godsplash-pot">
-            </div>
-            <div class="pot">
-              Dungeon <input type="number" id="dungeon-pot-num" min=1 max=4 value=4> Pot <input type="checkbox" id="dungeon-pot">
-            </div>
-            <div class="pot">
-              Cakes Active <input type="checkbox" id="cakes-active" checked>
-            </div>
-          </div>
-          <div id="combat-dmg">
-            <div id="zealot-dmg">
-              <span class="dmg-header">Zealot Damage:</span>
-              <span class="dmg-number" id="zealot-dmg-number"></span>
-            </div>
-            <div id="crypt-ghoul-dmg">
-              <span class="dmg-header">Crypt Ghoul Damage:</span>
-              <span class="dmg-number" id="crypt-ghoul-dmg-number"></span>
-            </div>
-            <div id="spider-dmg">
-              <span class="dmg-header">Spider Damage:</span>
-              <span class="dmg-number" id="spider-dmg-number"></span>
-            </div>
-          </div>
-        </div>
-        <div id="weapon-select" class="combat-section">
-          Weapon:
-        </div>
-        <div id="reforges">
-          <div id="optimize-header">
-            <div id="optimize-label">Talisman Optimizer (Experimental)</div>
-            <label id="optimize-switch">
-              <input type="checkbox">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div id="optimize-output">
-            <div id="old">
-              <div class="dps"></div>
-              <div class="dmg"></div>
-              <div id="old-stats"></div>
-            </div>
-            <div id="changes"></div>
-            <div id="new">
-              <div class="dps"></div>
-              <div class="dmg"></div>
-              <div id="new-stats"></div>
-            </div>
-        </div>
-      </div>
-    </div>
     <div id="minions" class="section">
       <div class="section-label">Minions</div>
       <div id="minion-extra"></div>
       <div id="minion-table"></div>
       <div id="minion-upgrades"></div>
     </div>
-    <div id="sb-stats" class="section">
-      <div class="section-label full">Stats</div>
-    </div>
-    <script src="/js/optimizer.js"></script>
-    <script src="/js/stats.js"></script>
+    <script src="/js/stats/constants.js"></script>
+    <script src="/js/stats/util.js"></script>
+    <script src="/js/stats/3d-css.js"></script>
+    <script src="/js/stats/hover.js"></script>
+    <script src="/js/stats/skills.js"></script>
+    <script src="/js/stats/inventories.js"></script>
+    <script src="/js/stats/pets.js"></script>
+    <script src="/js/stats/slayer.js"></script>
+    <script src="/js/stats/combat.js"></script>
+    <script src="/js/stats/minions.js"></script>
+    <script src="/js/stats/optimizer.js"></script>
+    <script src="/js/stats/index.js"></script>
   </body>
 </html>

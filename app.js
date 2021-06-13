@@ -4,6 +4,8 @@ const express = require("express");
 
 const port = process.env.PORT || 8080;
 const app = express();
+let axios = require("axios");
+let zlib = require("zlib");
 
 //json body and url encoded body parsing
 app.use(express.json());
@@ -28,112 +30,18 @@ let auctions = require("./src/skyblock/auctions.js")(reqScheduler);
 
 //player data
 let players = require("./src/skyblock/player.js")(reqScheduler);
-(async () => {console.log(await players.getPlayerData({name:"awes0meGuy360"}))})(); //TEST, PLEASE REMOVE
-
-var loadingUuids = [];
-async function getGuildData(guildname,userRequested,priority=0) {
-
-  console.log(`fetching guild ${guildname}...`);
-  let guildData = {incomplete: false};
-  
-  if (!userRequested) {
-    let previous = guildsCollection.find({name: guildname});
-    if (previous) {
-      guildData.lastRequested = previous.lastRequested || Date.now();
-    } else {
-      guildData.lastRequested = Date.now()
-    }
-  } else {
-    guildData.lastRequested = Date.now()
-  }
-    // playersCollection.updateMany({
-  //   uuid: {
-  //     $in: guildApi.guild.members.map(x => x.uuid)
-  //   },
-  //   lastUpdated: {
-  //     $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
-  //   }
-  // }, {
-  //   $set: {lastRequested: Date.now()}
-  // });
-
-  let guildApi = (await reqScheduler.get(`https://api.hypixel.net/guild?key=${process.env.API_KEY}&name=${guildname}`, priority)).data;
-  if (!guildApi.success) return false;
-  //get name, tag, and tagcolor
-  guildData._id = guildApi.guild._id;
-  guildData.name = guildApi.guild.name;
-  guildData.players = guildApi.guild.members.length;
-  guildData.tag = {
-    text: guildApi.guild.tag,
-    color: guildApi.guild.tagColor
-  };
-  guildData.members=[],
-  console.log("got guild api")
-  let playersDataCursor = playersCollection.find({
-    uuid: {
-      $in: guildApi.guild.members.map(x => x.uuid)
-    },
-    lastUpdated: {
-      $gt: Date.now() - 1000 * 60 * 60 * 24 //less than 24hrs old
-    }
-  }); //find all the players currently in DB
-  while (await playersDataCursor.hasNext()) {
-    console.log('fetching next guild player...')
-    let playerData = await playersDataCursor.next();
-    try {
-      var profile =JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[playerData.currentProfile],"base64")).toString());
-      guildData.members.push({
-        name: playerData.name,
-        uuid: playerData.uuid,
-        slayer: profile ? profile.slayerXp : 0,
-        catacombs: profile ? (profile.skills.find(x => x.name == "catacombs") ? profile.skills.find(x => x.name == "catacombs").levelProgress: 0) : 0,
-        averageSkill: profile ? Number(profile.averageSkillProgress) : 0,
-        weight: profile ? profile.weight.total.all : 0,
-      })
-    } catch (e) {console.log(e)};
-  };
-  console.log("done with that shit")
-  let foundUuids = guildData.members.map(x => x.uuid);
-  let missingUuids = guildApi.guild.members.map(x => x.uuid).filter(x => !foundUuids.includes(x));
-  console.log(`missing ${missingUuids.length} players`)
-  if (missingUuids.length > 0) guildData.incomplete = true;
-
-  missingUuids.forEach((uuid) => {
-    if (!loadingUuids.includes(uuid)) {
-      getPlayerData(null, true, 1, uuid).then(() => {
-        loadingUuids.splice(loadingUuids.indexOf(uuid),1);
-      });
-      loadingUuids.push(uuid);
-    }
-  });
-
-  guildData.members.sort((a,b) => b.weight - a.weight);
-
-  guildData.averageSkillLevel = Number((guildData.members.reduce((t,x) => t+x.averageSkill, 0) / guildData.members.length).toFixed(2));
-  guildData.averageSlayer = Number((guildData.members.reduce((t,x) => t+x.slayer, 0) / guildData.members.length).toFixed(2));
-  guildData.averageWeight = Number((guildData.members.reduce((t,x) => t+x.weight, 0) / guildData.members.length).toFixed(2));
-  guildData.averageCatacombs = Number((guildData.members.reduce((t,x) => t+x.catacombs, 0) / guildData.members.length).toFixed(2));
-  console.log("updating guild data in db");
-  await guildsCollection.replaceOne({_id: guildData._id}, guildData, {upsert: true})
-  
-  return guildData;
-}
-
-async function calculateGuilds() {
-  return await guildsCollection.find({}).sort({averageWeight: -1}).limit(50).toArray()
-}
 
 //link preview ejs description maker
 async function makeEjsData(isImportant,player,profile) {
   try {
   let mojangData = (await axios.get("https://api.mojang.com/users/profiles/minecraft/" + player)).data
   player = mojangData.name;
-  let playerData = await playersCollection.findOne({nameLower: player.toLowerCase()});
+  let playerData = await (await db.getPlayers()).findOne({nameLower: player.toLowerCase()});
   let profileData;
 
-  if (!playerData || playerData.lastUpdated < Date.now() - 1000 * 60 * 15) {
+  if (!playerData) {
     if (isImportant) { //if its coming from a user agent that displays description
-      playerData = await getPlayerData(player, true);
+      playerData = await players.getPlayerData({name: player});
       if (profile) {
         for (let profileid in playerData.profiles) {
           if (playerData.profiles[profileid].cute_name == profile) profileData = playerData.profiles[profileid];
@@ -152,8 +60,6 @@ async function makeEjsData(isImportant,player,profile) {
     }
     if (!profileData) profileData = JSON.parse(zlib.inflateSync(Buffer.from(playerData.profiles[playerData.currentProfile],"base64")).toString())
   }
-  
-  
   
   let description = "";
   //add weight to description
@@ -202,7 +108,7 @@ async function makeEjsData(isImportant,player,profile) {
 
 /* Data API Endpoints */
 app.get("/api/data/:player", async (req,res) => { 
-  let playerData = await getPlayerData(req.params.player, true);
+  let playerData = await players.getPlayerData({name: req.params.player, userRequested: true}, 0);
   res.json(playerData);
 });
 
@@ -220,14 +126,6 @@ app.get("/api/exists/:player", async (req,res) => {
   }
 });
 
-app.get("/api/guild/:guildname",async (req,res) => {
-  res.json(await getGuildData(req.params.guildname, true));
-});
-
-app.get("/api/gtop", async (req,res) => {
-  res.json(await calculateGuilds());
-})
-
 app.get("/api/dbinfo", async (req,res) => {
   let players = await playersCollection.find({}).toArray();
   res.json({
@@ -237,37 +135,17 @@ app.get("/api/dbinfo", async (req,res) => {
   })
 })
 
-app.get("/api/bazaar", (req,res) => {
-  res.json(bazaarData);
+app.get("/api/bazaar", async (req,res) => {
+  res.json(await bazaar.data());
 })
-app.get("/api/auction", (req,res) => {
-  res.json(auctionData);
-})
-
-/* Images API */
-app.get("/img/head", async (req,res) => {
-  let img = await util.getSkinFace("http://textures.minecraft.net/texture/" + req.query.skin, req.query.i);
-  res.writeHead(200, {
-     'Content-Type': 'image/png',
-     'Content-Length': img.length
-   });
-   res.end(img);
+app.get("/api/auction", async (req,res) => {
+  res.json(await auctions.data());
 })
 
-app.get("/img/item", async (req,res) => {
-  let color = JSON.parse(req.query.color).map(x => Number(x))
-  let img = await util.getColoredItem(req.query.item, color);
-  res.writeHead(200, {
-     'Content-Type': 'image/png',
-     'Content-Length': img.length
-   });
-  res.end(img);
-})
 
 /* Normal Routes */
 app.get("/stats/:player", async (req,res) => {
   res.render(__dirname + "/public/ejs/stats.ejs", await makeEjsData(req.get('User-Agent').includes("discordapp.com"), req.params.player));
-  console.log(req.get('User-Agent'))
 })
 app.get("/stats/:player/:profile", async (req,res) => {
   res.render(__dirname + "/public/ejs/stats.ejs", await makeEjsData(req.get('User-Agent').includes("discordapp.com"),req.params.player, req.params.profile));

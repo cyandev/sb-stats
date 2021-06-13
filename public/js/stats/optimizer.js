@@ -39,7 +39,7 @@ let REFORGES = {
     (stats, n) => { stats.str += 12 * n; stats.cd += 12 * n }, //strong
   ]
 }
-let REFORGES_NAMES = { //"bizarre","ominous","simple","pleasant","shiny","vivid","pretty","keen","unpleasant","superior","forceful","hurtful","strong","demonic","zealous","godly","itchy","strange","silky","bloody",
+var REFORGES_NAMES = { //"bizarre","ominous","simple","pleasant","shiny","vivid","pretty","keen","unpleasant","superior","forceful","hurtful","strong","demonic","zealous","godly","itchy","strange","silky","bloody",
   c: ["silky", "forceful", "bloody","shaded"],
   u: ["silky", "forceful", "strange", "bloody","shaded"],
   r: ["silky", "forceful", "bloody","shaded"],
@@ -47,7 +47,7 @@ let REFORGES_NAMES = { //"bizarre","ominous","simple","pleasant","shiny","vivid"
   l: ["strong","shaded"],
   m: ["strong"]
 }
-const RARITY_NAMES = {
+var RARITY_NAMES = {
   c: "common",
   u: "uncommon",
   r: "rare",
