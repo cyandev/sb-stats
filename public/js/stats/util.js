@@ -201,6 +201,25 @@ function makeInventoryViewer(contents,options={cols: 9, hasHotbar: true, cellSiz
         itemCell.querySelector(".item-icon").style.display = "none"; //hide the icon if there is a head
       } else if (item && item.icon) { //if theres a fancy icon
         itemCell.querySelector(".item-icon").style.backgroundImage = `url(${item.icon})`
+      } else if (item && item.leatherColor) { // if its leather
+        (async () => {
+          itemCell.querySelector(".item-icon").style.backgroundImage = "none";
+          itemCell.querySelector(".item-icon").style.backgroundSize = "cover";
+          switch (item.inventoryClass) {
+            case "icon-298_0":
+              itemCell.querySelector(".item-icon").style.backgroundImage = `url(${await colorItem("/img/item/leather_helmet.png","/img/item/leather_helmet_overlay.png",item.leatherColor)})`;
+              break;
+            case "icon-299_0":
+              itemCell.querySelector(".item-icon").style.backgroundImage = `url(${await colorItem("/img/item/leather_chestplate.png","/img/item/leather_chestplate_overlay.png",item.leatherColor)})`;
+              break;
+            case "icon-300_0":
+              itemCell.querySelector(".item-icon").style.backgroundImage = `url(${await colorItem("/img/item/leather_leggings.png","/img/item/leather_leggings_overlay.png",item.leatherColor)})`;
+              break;
+            case "icon-301_0":
+              itemCell.querySelector(".item-icon").style.backgroundImage = `url(${await colorItem("/img/item/leather_boots.png","/img/item/leather_boots_overlay.png",item.leatherColor)})`;
+              break;
+          }
+        })();
       } else if (item && item.inventoryClass) { //if the item isnt empty
         itemCell.querySelector(".item-icon").classList.add(item.inventoryClass);
       } else { //if there is no item
@@ -324,4 +343,33 @@ function makeStatsDisplay(label,stats) {
   }];
   statsDisplay.update();
   return statsDisplay;
+}
+
+function colorItem(base,overlay,color) {
+  return new Promise((res,rej) => {
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    let baseImg = new Image();
+    baseImg.src = base;
+    baseImg.onload = () => {
+      let {height, width} = baseImg;
+      canvas.height = height;
+      canvas.width = width;
+      ctx.drawImage(baseImg,0,0);
+      
+      let imageData = ctx.getImageData(0,0,width,height);
+      for (let i = 0; i < imageData.data.length; i += 4) {
+        imageData.data[i+0] = imageData.data[i+0] * color[0]/255; //red
+        imageData.data[i+1] = imageData.data[i+1] * color[1]/255; //green
+        imageData.data[i+2] = imageData.data[i+2] * color[2]/255; //blue
+      }
+      ctx.putImageData(imageData,0,0);
+      let overlayImage = new Image();
+      overlayImage.src = overlay;
+      overlayImage.onload = () => {
+        ctx.drawImage(overlayImage,0,0);
+        res(canvas.toDataURL());
+      }
+    }
+  })
 }

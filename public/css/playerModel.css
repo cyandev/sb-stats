@@ -1,0 +1,274 @@
+#playerModel * {
+    transform-style: preserve-3d;
+    box-sizing: border-box;
+}
+
+#playerModel .model-element {
+    position: absolute;
+    bottom: 0;
+    --scale: 1;
+}
+#playerModel .model-element.armor {
+    --scale: 1.01;
+}
+  
+
+/* part positioning */
+#playerModel .leg {
+    --wu: 4;
+    --hu: 4;
+    --du: 12;
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    left: 50%;
+    top: 50%;
+    --offset-x: 0px;
+    --offset-y: -16px
+}
+
+#playerModel #leg-right {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateX(-2px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 0;
+}
+#playerModel #leg-right.armor:not(.leggings) {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateX(-2px) scale3d(1.2,1.2,var(--scale));
+}
+
+#playerModel #leg-left {
+    transform: translate(-50%, -50%) translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateX(2px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 1;
+}
+#playerModel #leg-left.armor:not(.leggings) {
+    transform: translate(-50%, -50%) translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateX(2px) scale3d(1.2,1.2,var(--scale));
+}
+#playerModel #torso {
+    --wu: 8;
+    --hu: 4;
+    --du: 12;
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    left: 50%;
+    top: 50%;
+    --offset-x: -16px;
+    --offset-y: -16px;
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateZ(12px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 0;
+}
+#playerModel #torso.armor:not(.leggings) {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateZ(12px) scale3d(1.2,1.2,1.05);
+}
+#playerModel #head {
+    --wu: 8;
+    --hu: 8;
+    --du: 8;
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    left: 50%;
+    top: 50%;
+    --offset-x: 0px;
+    --offset-y: 0px;
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateZ(24px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 0;
+}
+#pet {
+    --wu: 8;
+    --hu: 8;
+    --du: 8;
+    --height: 22;
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    left: 50%;
+    top: 50%;
+    --offset-x: 0px;
+    --offset-y: 0px;
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translate3d(13px,4px,calc(var(--height) * 1px)) scale3d(.5,.5,.5);
+    --invert: 0;
+}
+#playerModel #head.armor {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translateZ(23.5px) scale3d(1.2,1.2,1.2);
+}
+
+#playerModel .arm {
+    --wu: 4;
+    --hu: 4;
+    --du: 12;
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    left: 50%;
+    top: 50%;
+    --offset-x: -40px;
+    --offset-y: -16px
+}
+
+#playerModel #arm-right {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translate3d(-6px,0,12px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 0;
+}
+#playerModel #arm-right.armor {
+    transform: translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translate3d(-6px,0,12px) scale3d(1.2,1.2,1.05);
+}
+
+#playerModel #arm-left {
+    transform: translate(-50%, -50%) translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translate3d(6px,0,12px) scale3d(var(--scale),var(--scale),var(--scale));
+    --invert: 1;
+}
+#playerModel #arm-left.armor {
+    transform: translate(-50%, -50%) translate(-50%, -50%) scale3d(var(--upxh),var(--upxh),var(--upxh)) translate3d(6px,0,12px) scale3d(1.2,1.2,1.05);
+}
+
+/* general face positioning */
+#playerModel .face {
+    position: absolute;
+    image-rendering: pixelated;
+    object-fit: none;
+    transform-origin: bottom center;
+    background: black;
+    user-select: none;
+}
+#playerModel .face.armor {
+    background: transparent; 
+    border: none;
+}
+
+#playerModel .front {
+    height: calc(var(--du) * 1px);
+    width: calc(var(--wu) * 1px);
+    bottom: 0;
+    left: 0;
+    transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg);
+}
+#playerModel .back {
+    height: calc(var(--du) * 1px);
+    width: calc(var(--wu) * 1px);
+    top: 0;
+    left: 0;
+    transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) rotateY(180deg) translateZ(calc(1px * var(--du)));
+}
+#playerModel .left {
+    height: calc(var(--du) * 1px);
+    width: calc(var(--hu) * 1px);
+    bottom: 0;
+    left: 0;
+    transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) translateZ(calc(var(--hu) * -.5px)) rotateY(90deg) translateZ(calc((var(--wu) * 1px) - (var(--hu) * .5px))); /*rotateX(-90deg) translateZ(calc(var(--hu) * -.5px)) rotateY(-90deg) translateZ(calc(var(--wu) * 1px - var(--hu) * .5px));*/
+}
+#playerModel .right {
+    height: calc(var(--du) * 1px);
+    width: calc(var(--hu) * 1px);
+    bottom: 0;
+    left: 0;
+    transform: scaleX(calc(1 - 2 * var(--invert))) rotateX(-90deg) translateZ(calc(var(--hu) * -.5px)) rotateY(-90deg) translateZ(calc(var(--hu) * .5px));  
+}
+#playerModel .top {
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    transform: translateZ(calc(var(--du) * 1px));
+    top: 0;
+    left: 0;
+}
+#playerModel .bottom {
+    width: calc(var(--wu) * 1px);
+    height: calc(var(--hu) * 1px);
+    top: 0;
+    left: 0;
+}
+
+/* textures */
+#playerModel .leg .front {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 20px);
+}
+#playerModel .leg .back {
+    object-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 20px);
+}
+#playerModel .leg .top {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y));
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 16px);
+}
+#playerModel .leg .bottom {
+    object-position: calc(var(--offset-x) - 8px) calc(var(--offset-y));
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 16px);
+}
+#playerModel .leg .right {
+    object-position: calc(var(--offset-x)) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x)) calc(var(--offset-y) - 20px);
+}
+#playerModel .leg .left {
+    object-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 20px);
+}
+
+#playerModel #torso .front {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 20px)
+}
+#playerModel #torso .back {
+    object-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 20px)
+}
+#playerModel #torso .top {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 0px);
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 16px);
+}
+#playerModel #torso .bottom {
+    object-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 0px);
+    background-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 16px);
+}
+#playerModel #torso .right {
+    object-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 20px);
+}
+#playerModel #torso .left {
+    object-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 20px);
+}
+
+#playerModel #head .front, #pet .front {
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 8px);
+    object-position: calc(var(--offset-x) - 40px) calc(var(--offset-y) - 8px);
+}
+#playerModel #head .back, #pet .back {
+    background-position: calc(var(--offset-x) - 24px) calc(var(--offset-y) - 8px);
+    object-position: calc(var(--offset-x) - 56px) calc(var(--offset-y) - 8px);
+}
+#playerModel #head .top, #pet .top {
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 0px);
+    object-position: calc(var(--offset-x) - 40px) calc(var(--offset-y) - 0px);
+}
+#playerModel #head .bottom, #pet .bottom {
+    background-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 0px);
+    object-position: calc(var(--offset-x) - 48px) calc(var(--offset-y) - 0px);
+}
+#playerModel #head .right, #pet .right {
+    background-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 8px);
+    object-position: calc(var(--offset-x) - 32px) calc(var(--offset-y) - 8px);
+}
+#playerModel #head .left , #pet .left{
+    background-position: calc(var(--offset-x) - 16px) calc(var(--offset-y) - 8px);
+    object-position: calc(var(--offset-x) - 48px) calc(var(--offset-y) - 8px);
+}
+
+#playerModel .arm .front {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 20px);
+}
+#playerModel .arm .back {
+    object-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 12px) calc(var(--offset-y) - 20px);
+}
+#playerModel .arm .top {
+    object-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 0px);
+    background-position: calc(var(--offset-x) - 4px) calc(var(--offset-y) - 16px);
+}
+#playerModel .arm .bottom {
+    object-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 0px);
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 16px);
+}
+#playerModel .arm .right {
+    object-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 0px) calc(var(--offset-y) - 20px);
+}
+#playerModel .arm .left {
+    object-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 4px);
+    background-position: calc(var(--offset-x) - 8px) calc(var(--offset-y) - 20px);
+}

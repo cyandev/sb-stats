@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars, no-undef */
+document.querySelector("#playerModel").style.display = "none";
 (async () => {
     let username = window.location.href.split("/")[4];
     let profile = window.location.href.split("/").length > 4 ? window.location.href.split("/")[5] : "default"
@@ -6,6 +7,13 @@
     if (!data) {
         window.location.href = window.location.origin + "?err=Invalid Player!";
         return;
+    }
+    let uuid = data.uuid;
+    for (let face of document.querySelector("#model-container").querySelectorAll("img.face.player")) {
+      face.src = `https://crafatar.com/skins/${uuid}`;
+    }
+    for (let face of document.querySelector("#model-container").querySelectorAll("#head img.face.player")) {
+      face.style.backgroundImage = `url("https://crafatar.com/skins/${uuid}")`
     }
     username = data.name;
     // REDO WITH "currentProfile" API
@@ -200,6 +208,7 @@
     //hide loading animation and show content
     document.querySelector("#loading").style.display = "none";
     document.querySelector("#content").style.display = "flex";
+    document.querySelector("#playerModel").style.display = "flex";
   })().catch((err) => {
     console.log(err.stack);
     //window.location = window.location.origin + "?err=" + err.stack

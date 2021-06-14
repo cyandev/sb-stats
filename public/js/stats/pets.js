@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars, no-undef */
 
 function loadPets(profileData) {
-    let petSelector = makeInventorySelector(profileData.pets, {cols: 9, hasHotbar: false, rarityColor:true});
+    let petSelector = makeInventorySelector(profileData.pets, {cols: 10, hasHotbar: false, rarityColor:true});
     console.log(petSelector)
     petSelector.style.gridAutoRows = "9.5vw"
     for (let cell of petSelector.querySelectorAll(".item-cell")) {
@@ -16,6 +16,9 @@ function loadPets(profileData) {
         cell.appendChild(levelNumber);
     }
     petSelector.checked = profileData.pets[0];
+    petSelector.onUpdate = () => {
+        updatePet();
+    }
     if (petSelector.children[0]) {
         petSelector.children[0].querySelector(".item-selector").checked = true;
     }
@@ -23,4 +26,5 @@ function loadPets(profileData) {
         petSelector.children[1].querySelector(".item-selector").checked = false;
     }
     document.querySelector("#pets").appendChild(petSelector);
+    updatePet();
 }

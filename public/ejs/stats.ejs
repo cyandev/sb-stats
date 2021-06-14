@@ -12,6 +12,7 @@
     
     <link rel='search' type='application/opensearchdescription+xml' title='SB Stats' href='/opensearch.xml' />
     <link href="/css/stats.css" rel="stylesheet" type="text/css" />
+    <link href="/css/playerModel.css" rel="stylesheet" type="text/css" />
     <link href="/css/inventory.css" rel="stylesheet" type="text/css" />
     <link href="https://fonts.googleapis.com/css?family=Quicksand&display=swap" rel="stylesheet">
     <link id="favicon" rel="shortcut icon" type="image/png" href="/img/favicon.png" />
@@ -42,6 +43,140 @@
     </div>
     <!-- end nav -->
     <div id="loading" class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
+    <div id="playerModel">
+      <div id="model-container">
+        <div id="model-base" class="model-element">
+          <div id="leg-right" class="leg model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false" class="left face player">
+            <img draggable="false" class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="leg-left" class="leg model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false"class="left face player">
+            <img draggable="false"class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="torso" class="model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false"class="left face player">
+            <img draggable="false"class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="head" class="model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false" class="left face player">
+            <img draggable="false" class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="arm-right" class="arm model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false"class="left face player">
+            <img draggable="false"class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="arm-left" class="arm model-element">
+            <img draggable="false" class="front face player">
+            <img draggable="false" class="back face player">
+            <img draggable="false"class="left face player">
+            <img draggable="false"class="right face player">
+            <img draggable="false" class="bottom face player">
+            <img draggable="false" class="top face player">
+          </div>
+          <div id="leg-right" class="leg model-element armor">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false" class="left face armor" src="/img/transparent.png">
+            <img draggable="false" class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="leg-left" class="leg model-element armor" src="/img/transparent.png">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="leg-right" class="leg model-element armor leggings">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false" class="left face armor" src="/img/transparent.png">
+            <img draggable="false" class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="leg-left" class="leg model-element armor leggings" src="/img/transparent.png">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="torso" class="model-element armor" src="/img/transparent.png">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png"> 
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="torso" class="model-element armor leggings" src="/img/transparent.png">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png"> 
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="head" class="model-element armor">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false" class="left face armor" src="/img/transparent.png">
+            <img draggable="false" class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="arm-right" class="arm model-element armor" src="/img/transparent.png">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="arm-left" class="arm model-element armor">
+            <img draggable="false" class="front face armor" src="/img/transparent.png">
+            <img draggable="false" class="back face armor" src="/img/transparent.png">
+            <img draggable="false"class="left face armor" src="/img/transparent.png">
+            <img draggable="false"class="right face armor" src="/img/transparent.png">
+            <img draggable="false" class="bottom face armor" src="/img/transparent.png">
+            <img draggable="false" class="top face armor" src="/img/transparent.png">
+          </div>
+          <div id="pet" class="model-element">
+            <img draggable="false" class="front face">
+            <img draggable="false" class="back face">
+            <img draggable="false" class="left face">
+            <img draggable="false" class="right face">
+            <img draggable="false" class="bottom face">
+            <img draggable="false" class="top face">
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="content" style="display:none">
       <div id="stats" class="section">
         <div class="section-label full"><span id="playerName"></span> - <span id="profileName"></span></div>
@@ -64,6 +199,9 @@
       </div>
       <div id="pets" class="section">
         <div class="section-label">Pets</div>
+      </div>
+      <div id="combat" class="section">
+        <div class="section-label">Combat</div>
       </div>
       <div id="slayer" class="section">
         <div id="slayer-total"></div>

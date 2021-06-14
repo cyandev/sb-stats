@@ -206,31 +206,30 @@ body {
   text-align: center;
 }
 #armor {
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 2vw + 3.5vw);
   width: calc( var(--width) * 0.1 - 3vw);
   margin-right: 1vw;
   display: flex;
   align-items: center;
 }
 #wardrobe {
-  height: calc(( var(--width) * 0.1 - 3vw) * 4.2 + 2vw + 3.5vw);
   flex-grow: 1;
   display: flex;
 }
 #wardrobe .inv-view {
   width: 0;
+  padding-bottom: 5vw;
   flex-grow: 1;
   overflow-x: scroll;
   overflow-y: hidden;
 }
 #wardrobe .inv-view::-webkit-scrollbar {
   opacity: 0;
+  height: 1vw;
 }
 #wardrobe .inv-view::-webkit-scrollbar-button {
   display: none;
 }
 #wardrobe .inv-view::-webkit-scrollbar-thumb {
-  height: 1vw;
   border-radius: 0.5vw;
   background: var(--dark-white);
 }
@@ -273,6 +272,22 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+#pets > .inv-view {
+  height: 52vw;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-right: 1vw;
+}
+#pets > .inv-view::-webkit-scrollbar {
+  width: 1vw;
+}
+#pets > .inv-view::-webkit-scrollbar-button {
+  display: none;
+}
+#pets > .inv-view::-webkit-scrollbar-thumb {
+  border-radius: 0.5vw;
+  background: var(--white);
 }
 #slayer {
   width: 100%;
@@ -350,132 +365,6 @@ body {
   text-align: center;
   position: absolute;
   width: 100%;
-}
-#combat {
-  width: 100%;
-  height: auto;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-.combat-section {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  line-height: 3.5vw;
-  font-size: 2vw;
-}
-#weapon-select .inv-view {
-  max-height: 17.5vw;
-  overflow-y: auto;
-  padding-right: 1vw;
-  padding-bottom: 1vw;
-}
-#weapon-select .inv-view::-webkit-scrollbar {
-  width: 1vw;
-}
-#weapon-select .inv-view::-webkit-scrollbar-button {
-  display: none;
-}
-#weapon-select .inv-view::-webkit-scrollbar-thumb {
-  border-radius: 0.5vw;
-  background: var(--white);
-}
-#combat-stats-dmg-wrapper {
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-#combat-stats {
-  height:26vw;
-  width: 100%;
-  margin-bottom: 1vw;
-  border: 0.1vw solid var(--dark-white);
-  border-radius: 0.5vw;
-  display: flex;
-  justify-content: space-around;
-}
-#stats-separate {
-  display: flex;
-  width: 85%;
-  justify-content: space-around;
-  align-items: center;
-  flex-direction: column;
-  flex-wrap: wrap;
-}
-#stats-combined {
-  width: 15%;
-  height: auto;
-  border-left: 0.1vw solid var(--white);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-#pot-select {
-  display: flex;
-  justify-content: space-around;
-  color: white;
-  line-height: 2vw;
-  font-size: 1.5vw;
-  width: 100%;
-  margin-bottom: 1vw;
-  border: 0.1vw solid var(--white);
-  border-radius: 0.5vw;
-  padding: 1vw;
-}
-#pot-select .pot {
-  display: flex;
-  align-items: center;
-}
-#pot-select .pot input {
-  width: 2vw;
-  height: 2vw;
-  margin: 0 0.5vw;
-  border-radius: 0.2vw;
-}
-#pot-select .pot input[type=number] {
-  background: var(--dark-white);
-  color: black;
-  font-size: 1.5vw;
-  text-align: center;
-  border: none;
-}
-#pot-select .pot input[type=checkbox] {
-  background: var(--dark-white);
-}
-#pot-select .pot input[type=checkbox]:checked {
-  background: var(--yellow);
-}
-#combat-dmg {
-  border: 0.1vw solid var(--dark-white);
-  border-radius: 0.5vw;
-  height: 7vw;
-  width: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-#combat-dmg > div {
-  width: 33%;
-  height: 10vw;
-}
-#combat-dmg > div .dmg-header {
-  width: 100%;
-  height: 3vw;
-  line-height: 3vw;
-  font-size: 2vw;
-  display: block;
-  text-align: center;
-}
-#combat-dmg > div .dmg-number {
-  width: 100%;
-  height: 4vw;
-  font-size: 2vw;
-  line-height: 4vw;
-  text-align: center;
-  display: block;
 }
 
 #minions {
@@ -907,14 +796,53 @@ body {
   background: var(--gray);
 }
 
-@media screen and (min-width: 1400px) {
+#playerModel {
+  display: none;
+  overflow: hidden;
+  height: 0;
+}
+
+#model-container {
+  top: 0;
+  width: 45vh;
+  height: 60vh;
+  perspective: 12in;
+  --u: 1.5vh;
+  display: none;
+}
+
+#model-base {
+  background: gray;
+  width: calc(var(--u) * 16);
+  height: calc(var(--u) * 16);
+  border-radius: calc(var(--u) * 8);
+  position: absolute;
+  bottom: 0;
+  left: calc((100% - var(--u) * 16)/2);
+  transform: rotateY(10deg) rotateX(90deg) translate3d(calc(var(--u) * -3),0,calc(var(--u) * -5));
+  animation-name: spin;
+  animation-duration: 10s;
+  animation-iteration-count: infinite;
+}
+
+@media screen and (min-width: 1500px) {
   #content {
-    width: 63vw;
     position: absolute;
     right: 0;
+    transform-origin: top right;
+    transform: scale(0.8)
   }
-  #skills .skill {
-    width: 28vw;
-    min-width: auto;
+  #playerModel {
+    display: flex;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 29vw;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+  #model-container {
+    display: block;
   }
 }

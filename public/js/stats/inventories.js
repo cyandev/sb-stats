@@ -11,7 +11,6 @@ function loadInventories(profileData) {
             //set selected to an inventory of the armor
             let bootsIndex = Array.from(wardrobeSelector.children).indexOf(Array.from(wardrobeSelector.children).find(x => x.item == wardrobeSelector.checked));
             wardrobeSelector.checked = [wardrobeSelector.children[bootsIndex- 18 * 3].item, wardrobeSelector.children[bootsIndex- 18 * 2].item, wardrobeSelector.children[bootsIndex- 18 * 1].item, wardrobeSelector.children[bootsIndex].item];
-            console.log(wardrobeSelector.checked)
     
             //set armor display to show selected
             document.querySelector("#armor-inv").innerHTML = ""
@@ -20,8 +19,8 @@ function loadInventories(profileData) {
             //set the inv_armor to the newly selected set
             profileData.inventories.find((x) => x.name == "inv_armor").contents = wardrobeSelector.checked;
     
-            //remake armor stats
-            makeArmorStats();
+            //update armor view
+            updateArmor();
         }
         wardrobeSelector.style.gridAutoRows = "6vw";
         for (let i = 0; i < 18 * 4; i++) {
@@ -42,7 +41,8 @@ function loadInventories(profileData) {
         apiWarn.classList.add("api-warn")
         document.querySelector("#wardrobe").appendChild(apiWarn);
     }
-  
+    
+    updateArmor();
     //load inventories
     function showInventory(name) {
         for (let invView of document.querySelector("#inv-view-container").children) {
