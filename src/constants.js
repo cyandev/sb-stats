@@ -770,8 +770,10 @@ module.exports = {
       cd: [0,0,0,0,0,1,1,3,3,3]
     }
   },
-  minionNames: ["MITHRIL", "COBBLESTONE", "OBSIDIAN", "GLOWSTONE", "GRAVEL", "SAND", "CLAY", "ICE", "SNOW", "COAL", "IRON", "GOLD", "DIAMOND", "LAPIS", "REDSTONE", "EMERALD", "QUARTZ", "ENDER_STONE", "WHEAT", "MELON", "PUMPKIN", "CARROT", "POTATO", "MUSHROOM", "CACTUS", "COCOA", "SUGAR_CANE", "NETHER_WARTS", "FLOWER", "FISHING", "ZOMBIE", "REVENANT", "SKELETON", "CREEPER", "SPIDER", "TARANTULA", "CAVESPIDER", "BLAZE", "MAGMA_CUBE", "ENDERMAN", "GHAST", "SLIME", "COW", "PIG", "CHICKEN", "SHEEP", "RABBIT", "OAK", "SPRUCE", "BIRCH", "DARK_OAK", "ACACIA", "JUNGLE"],
+  minionNames: ["VOIDLING","MITHRIL", "COBBLESTONE", "OBSIDIAN", "GLOWSTONE", "GRAVEL", "SAND", "CLAY", "ICE", "SNOW", "COAL", "IRON", "GOLD", "DIAMOND", "LAPIS", "REDSTONE", "EMERALD", "QUARTZ", "ENDER_STONE", "WHEAT", "MELON", "PUMPKIN", "CARROT", "POTATO", "MUSHROOM", "CACTUS", "COCOA", "SUGAR_CANE", "NETHER_WARTS", "FLOWER", "FISHING", "ZOMBIE", "REVENANT", "SKELETON", "CREEPER", "SPIDER", "TARANTULA", "CAVESPIDER", "BLAZE", "MAGMA_CUBE", "ENDERMAN", "GHAST", "SLIME", "COW", "PIG", "CHICKEN", "SHEEP", "RABBIT", "OAK", "SPRUCE", "BIRCH", "DARK_OAK", "ACACIA", "JUNGLE"],
   minionCrafts: {
+    "VOIDLING": [null, {item: "NULL_SPHERE", quantity: 80}, null, null, null, null, null, null, null, null, null, null, null],
+
     "MITHRIL": [null, {item: "name_ORE", quantity: 80}, {item: "name_ORE", quantity: 160}, {item: "name_ORE", quantity: 320}, {item: "name_ORE", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 24}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}, {item: "REFINED_name", quantity: 8}],
 
     "COBBLESTONE": [null, {item: "name", quantity: 80}, {item: "name", quantity: 160}, {item: "name", quantity: 320}, {item: "name", quantity: 512}, {item: "ENCHANTED_name", quantity: 8}, {item: "ENCHANTED_name", quantity: 16}, {item: "ENCHANTED_name", quantity: 32}, {item: "ENCHANTED_name", quantity: 64}, {item: "ENCHANTED_name", quantity: 128}, {item: "ENCHANTED_name", quantity: 256}, {item: "ENCHANTED_name", quantity: 512}], 

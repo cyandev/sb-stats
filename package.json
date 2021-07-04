@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "start \"\" /d \"C:/Program Files/MongoDB/Server/4.4/bin\" mongod.exe --dbpath D:/mongodb & node app.js"
+    "start": "node app.js",
+    "dev": "START /B \"\" /d \"C:/Program Files/MongoDB/Server/4.4/bin\" mongod.exe --dbpath D:/mongodb & nodemon app.js --ignore public/"
   },
   "keywords": [],
   "author": "",

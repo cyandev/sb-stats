@@ -145,10 +145,10 @@ app.get("/api/auction", async (req,res) => {
 
 /* Normal Routes */
 app.get("/stats/:player", async (req,res) => {
-  res.render(__dirname + "/public/ejs/stats.ejs", await makeEjsData(req.get('User-Agent').includes("discordapp.com"), req.params.player));
+  res.render("stats", await makeEjsData(req.get('User-Agent').includes("discordapp.com"), req.params.player));
 })
 app.get("/stats/:player/:profile", async (req,res) => {
-  res.render(__dirname + "/public/ejs/stats.ejs", await makeEjsData(req.get('User-Agent').includes("discordapp.com"),req.params.player, req.params.profile));
+  res.render("stats", await makeEjsData(req.get('User-Agent').includes("discordapp.com"),req.params.player, req.params.profile));
 })
 
 app.get("/guild/:guildname", (req,res) => {
