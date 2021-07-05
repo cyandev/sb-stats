@@ -118,6 +118,7 @@ async function getInventoryJSON(contents) {
                     "True Defense": "td",
                     "Sea Creature Chance": "scc",
                     "Ferocity": "fer",
+                    "Ability Damage": "ad",
                     "Farming Fortune": "farmf",
                     "Mining Fortune": "minef",
                     "Foraging Fortune": "foragf"

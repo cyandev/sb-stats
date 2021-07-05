@@ -98,3 +98,36 @@ var rarityNum = {
   LEGENDARY: 4,
   MYTHIC: 5
 }
+var skillBonuses = { //rewards are defined at levels in which rewards change 
+  farming: {
+      1: {hp: 2, farmf: 4},
+      15: {hp: 3, farmf: 4},
+      20: {hp: 4, farmf: 4},
+      26: {hp: 5, farmf: 4},
+  },
+  mining: {
+      1: {def: 1, minef: 4},
+      15: {def: 2, minef: 4},
+  },
+  combat: {
+    1: {cc: 0.5}
+  },
+  foraging: {
+    1: {str: 1, foragf: 4},
+    15: {str: 2, foragf: 4}
+  },
+  fishing: {
+    1: {hp: 2},
+    15: {hp: 3},
+    20: {hp: 4},
+    26: {hp: 5},
+  },
+  enchanting: {
+    1: {int: 1, ad: 0.5},
+    15: {int: 2, ad: 0.5}
+  },
+  alchemy: {
+      1: {int: 1},
+      16: {int: 2},
+  },
+}
