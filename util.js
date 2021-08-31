@@ -269,7 +269,8 @@ function getWeight(profileData) {
       xpRemaining -= table[i];
       level = i;
     };
-    level += xpRemaining / table[level+1]; //add on progress
+    
+    if (level < table.length - 1) level += xpRemaining / table[level+1]; //add on progress
 
     let base = Math.pow(level, 4.5) * percentageModifier
 
@@ -281,7 +282,7 @@ function getWeight(profileData) {
     } else {
       let remaining = experience - 569809640
       let splitter = (4 * 569809640) / base
-
+      
       weight.dungeons[xpType] = {
         weight: Math.floor(base),
         overflow: Math.pow(remaining / splitter, 0.968),
